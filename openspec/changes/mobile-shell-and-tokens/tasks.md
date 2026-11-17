@@ -44,7 +44,7 @@
 
 ## Evidence
 
-- Local and fresh clone: `pnpm check` exit 0 (design tokens 8 tests, contracts 10, API 138, mobile 77 across 8 suites), including the production bundle export for iOS and Android and the check that the development gallery is absent from both bundles (the same check fails on a development bundle). CI (`check`, `api`, `mobile`, `audit`) green on PR 13.
+- Local and fresh clone: `pnpm check` exit 0 (design tokens 8 tests, contracts 10, API 138, mobile 78 across 8 suites), including the production bundle export for iOS and Android and the check that the development gallery is absent from both bundles (the same check fails on a development bundle). CI (`check`, `api`, `mobile`, `audit`) green on PR 13.
 - A throwaway PR with a deliberate mobile type error failed `check` and `mobile` and showed `mergeStateStatus: BLOCKED` once `mobile` was added to the required checks on `main`; it was closed unmerged.
 - Metro serves iOS and Android development bundles (HTTP 200, about 8 MB each) for the real app, both on this machine and in a fresh clone, and the Expo manifest reports the name and scheme. The Expo development server was started for the owner.
 - Mutation checks: a deliberate hooks-rule violation is caught by lint; a deliberate type error fails typecheck; a literal color would fail the token-usage test.
