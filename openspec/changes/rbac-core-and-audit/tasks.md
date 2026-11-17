@@ -36,8 +36,15 @@
 ## 7. Verification and docs
 
 - [x] 7.1 Add an end-to-end escalation test (Manager tries to make themselves Admin, to assign roles and to read audit) proving the role is unchanged, each attempt is denied and audited, and logs hold no secrets; extend the OpenAPI check to list the new routes with 403 envelope responses.
-- [ ] 7.2 Update `apps/api/README.md` (roles, permissions catalog, bootstrap and recovery runbook, audit immutability and the separate-database-role hardening note) and `.env.example` if needed; verify by following the README in a fresh clone, including bootstrapping an Admin.
-- [ ] 7.3 Run the full `pnpm check` and migration round trip from a fresh clone and confirm CI (`check`, `api`, `audit`) is green on the pull request; record the evidence.
+- [x] 7.2 Update `apps/api/README.md` (roles, permissions catalog, bootstrap and recovery runbook, audit immutability and the separate-database-role hardening note) and `.env.example` if needed; verify by following the README in a fresh clone, including bootstrapping an Admin.
+- [x] 7.3 Run the full `pnpm check` and migration round trip from a fresh clone and confirm CI (`check`, `api`, `audit`) is green on the pull request; record the evidence.
+
+## Evidence
+
+- Local and fresh clone: `pnpm check` exit 0 with 138 API tests (real PostgreSQL, including isolated databases for Admin-count and bootstrap tests), 10 contracts tests; `pnpm migrate:roundtrip` OK for 3 migrations. CI (`check`, `api`, `audit`) green on PR 11.
+- README walkthrough in a fresh clone: registered, verified email from `.dev-mail/`, `admin:bootstrap` made the account Admin, a second bootstrap was refused with exit 1, `/me/access` listed the Admin permissions, lookup by exact email worked, `PUT /staff/users/:id/role` assigned Manager, and `/staff/audit-events` showed `role.assign` (user) and `role.bootstrap` (system). The server log held neither emails, passwords nor tokens.
+- Mutation checks: removing the in-transaction actor check fails the new service-level test; removing the Admin row lock fails the simultaneous-demotion test. (An earlier version of the actor-check test passed under mutation, so it was rewritten to call the service directly.)
+- Not verified: behavior of the audit triggers under a separate restricted database role (deployment hardening), audit volume or retention, and any load. No capacity claims.
 
 ## Workflow follow-up
 
