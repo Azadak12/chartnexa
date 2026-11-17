@@ -1,0 +1,5 @@
+pre-commit:
+  commands:
+    secrets:
+      run: pnpm exec secretlint {staged_files}
+      stage_fixed: false
