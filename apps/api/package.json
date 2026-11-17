@@ -10,6 +10,7 @@
     "build": "pnpm generate && tsc -p tsconfig.build.json",
     "typecheck": "pnpm generate && tsc --noEmit",
     "test": "pnpm generate && vitest run",
+    "bench:argon2": "tsx scripts/bench-argon2.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",
     "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts"
@@ -31,6 +32,7 @@
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "fastify": "5.12.8",
+    "jose": "6.2.17",
     "pg": "8.23.1",
     "pino": "10.4.0",
     "reflect-metadata": "0.2.2",

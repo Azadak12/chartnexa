@@ -6,7 +6,7 @@ import { errorEnvelopeSchema } from "@chartnexa/api-contracts";
 export function buildOpenApiDocument(app: NestFastifyApplication): OpenAPIObject {
   const document = SwaggerModule.createDocument(
     app,
-    new DocumentBuilder().setTitle("ChartNexa API").setVersion("0.0.0").build(),
+    new DocumentBuilder().setTitle("ChartNexa API").setVersion("0.0.0").addBearerAuth().build(),
   );
   const envelope = z.toJSONSchema(errorEnvelopeSchema) as Record<string, unknown>;
   delete envelope["$schema"];

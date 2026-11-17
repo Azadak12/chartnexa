@@ -25,21 +25,26 @@ export default tseslint.config(
       ],
     },
   },
-  {
-    // Inside a module, never reach into a sibling module.
-    files: ["apps/api/src/modules/**/*.ts"],
+  // Inside a module, never reach into a sibling module's internals (only its index.js).
+  // Shared infrastructure outside modules/ (config, database, platform) is allowed.
+  ...[
+    { files: "apps/api/src/modules/*/*.ts", ups: 1 },
+    { files: "apps/api/src/modules/*/*/*.ts", ups: 2 },
+    { files: "apps/api/src/modules/*/*/*/*.ts", ups: 3 },
+  ].map(({ files, ups }) => ({
+    files: [files],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
             {
-              group: ["../../*/**", "!../../*/index.js"],
+              regex: `^(\\.\\./){${ups}}(?!\\.)[^/]+/(?!index\\.js$).+$`,
               message: "Modules may not import another module's internals; use its index.js.",
             },
           ],
         },
       ],
     },
-  },
+  })),
 );

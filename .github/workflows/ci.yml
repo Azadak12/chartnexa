@@ -76,7 +76,7 @@ jobs:
       - name: Export and check OpenAPI document
         run: |
           pnpm --filter @chartnexa/api openapi:export "$RUNNER_TEMP/openapi.json"
-          node -e 'const d=JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/openapi.json","utf8"));for(const p of ["/health/live","/health/ready"]){if(!d.paths[p])throw new Error("missing "+p)}if(!d.components.schemas.ErrorEnvelope)throw new Error("missing ErrorEnvelope")'
+          node -e 'const d=JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/openapi.json","utf8"));for(const p of ["/health/live","/health/ready","/auth/register","/auth/login","/auth/refresh","/auth/logout","/auth/password/forgot","/auth/password/reset","/me","/me/sessions"]){if(!d.paths[p])throw new Error("missing "+p)}if(!d.components.schemas.ErrorEnvelope)throw new Error("missing ErrorEnvelope")'
       - uses: actions/upload-artifact@v7
         with:
           name: openapi

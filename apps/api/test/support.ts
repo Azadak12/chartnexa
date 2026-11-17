@@ -4,7 +4,7 @@ import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { z } from "zod";
 import { createApp } from "../src/app.factory.js";
-import type { AppConfig } from "../src/config/config.js";
+import { loadConfig } from "../src/config/config.js";
 import { decodeCursor, pageParamsSchema } from "../src/pagination/cursor.js";
 import { ZodPipe } from "../src/platform/zod.pipe.js";
 
@@ -39,7 +39,8 @@ export interface TestApp {
 }
 
 export async function startApp(
-  overrides: Partial<AppConfig> & { DATABASE_URL: string },
+  overrides: Record<string, string | undefined> & { DATABASE_URL: string },
+  options: { asProduction?: boolean } = {},
 ): Promise<TestApp> {
   const chunks: string[] = [];
   const sink = new Writable({
@@ -48,14 +49,18 @@ export async function startApp(
       cb();
     },
   });
-  const config: AppConfig = {
+  const loaded = loadConfig({
     NODE_ENV: "test",
-    PORT: 0,
+    PORT: "3000",
     LOG_LEVEL: "info",
-    DATABASE_POOL_MAX: 2,
+    DATABASE_POOL_MAX: "2",
     CURSOR_SECRET,
+    ACCESS_TOKEN_SECRET: "test-access-secret-test-access-secret",
+    MAILER_DRIVER: "memory",
     ...overrides,
-  };
+  });
+  // Production config validation forbids test mailers, so tests flip the flag after loading.
+  const config = options.asProduction ? { ...loaded, NODE_ENV: "production" as const } : loaded;
   const app = await createApp(config, sink, [TestController]);
   return { app, logs: () => chunks.join("") };
 }

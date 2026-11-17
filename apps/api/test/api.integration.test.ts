@@ -124,7 +124,7 @@ describe("openapi", () => {
   });
 
   it("is not served in production", async () => {
-    const prod = await startApp({ DATABASE_URL: inject("dbUrl"), NODE_ENV: "production" });
+    const prod = await startApp({ DATABASE_URL: inject("dbUrl") }, { asProduction: true });
     try {
       expect((await prod.app.inject({ method: "GET", url: "/openapi.json" })).statusCode).toBe(404);
     } finally {

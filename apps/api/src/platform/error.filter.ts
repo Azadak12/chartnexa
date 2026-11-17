@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { ErrorEnvelope } from "@chartnexa/api-contracts";
+import { RateLimitedException } from "./rate-limited.exception.js";
 import { ValidationFailed } from "./zod.pipe.js";
 
 const CODES: Record<number, string> = {
@@ -69,6 +70,9 @@ export class ErrorFilter implements ExceptionFilter {
     const { status, body } = toEnvelope(exception, req.id);
     if (status >= 500) {
       req.log.error({ err: exception }, "unhandled error");
+    }
+    if (exception instanceof RateLimitedException) {
+      void reply.header("retry-after", String(exception.retryAfterSeconds));
     }
     void reply.status(status).header("content-type", "application/json").send(body);
   }
