@@ -36,7 +36,7 @@ export function ChangePasswordScreen() {
   );
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Change password
       </Text>

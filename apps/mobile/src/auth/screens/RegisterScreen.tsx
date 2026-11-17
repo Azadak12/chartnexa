@@ -37,7 +37,7 @@ export function RegisterScreen() {
 
   if (done) {
     return (
-      <Screen>
+      <Screen narrow>
         <Text variant="title" accessibilityRole="header">
           Check your email
         </Text>
@@ -52,7 +52,7 @@ export function RegisterScreen() {
   }
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Create account
       </Text>

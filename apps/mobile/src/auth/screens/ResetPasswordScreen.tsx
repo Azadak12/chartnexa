@@ -38,7 +38,7 @@ export function ResetPasswordScreen() {
   });
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Choose a new password
       </Text>
