@@ -10,6 +10,7 @@
     "build": "pnpm generate && tsc -p tsconfig.build.json",
     "typecheck": "pnpm generate && tsc --noEmit",
     "test": "pnpm generate && vitest run",
+    "admin:bootstrap": "tsx scripts/admin-bootstrap.ts",
     "bench:argon2": "tsx scripts/bench-argon2.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",

@@ -17,7 +17,7 @@ export interface Harness {
   mailer: MemoryMailer;
   db: PrismaService;
   call: (
-    method: "GET" | "POST" | "PATCH" | "DELETE",
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     url: string,
     opts?: { body?: unknown; token?: string; ip?: string; headers?: Record<string, string> },
   ) => Promise<LightMyRequestResponse>;
