@@ -4,6 +4,9 @@
 - Node 26 (see `.nvmrc`). Install with your version manager.
 - pnpm 12 via Corepack: `corepack enable pnpm`.
 
+## Database for tests
+API tests and `pnpm check` need a local PostgreSQL 16 (they create and drop scratch databases). On macOS: `brew install postgresql@16` and start it. See `apps/api/README.md`.
+
 ## Install and verify
 ```bash
 pnpm install --frozen-lockfile
