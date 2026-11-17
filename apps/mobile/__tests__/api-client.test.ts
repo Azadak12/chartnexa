@@ -1,5 +1,11 @@
 import { apiFetch, newRequestId } from "../src/api/client";
-import { AppError, fromResponse, messageFor, type AppErrorKind } from "../src/api/errors";
+import {
+  AppError,
+  fromResponse,
+  messageFor,
+  waitMessage,
+  type AppErrorKind,
+} from "../src/api/errors";
 import { shouldRetry } from "../src/state/query-client";
 import { sessionStore } from "../src/session/session-store";
 
@@ -139,16 +145,45 @@ describe("requests", () => {
     expect(init.headers["authorization"]).toBeUndefined();
   });
 
-  it("ends the session on 401 so the person is asked to sign in again", async () => {
+  it("does not end the session itself on 401 (callers that hold a token renew first)", async () => {
     sessionStore.set("signed-in");
     await failure(401, envelope("UNAUTHENTICATED"));
-    expect(sessionStore.get()).toBe("signed-out");
+    expect(sessionStore.get()).toBe("signed-in");
   });
 
   it("keeps the session on other failures", async () => {
     sessionStore.set("signed-in");
     await failure(403, envelope("FORBIDDEN"));
     expect(sessionStore.get()).toBe("signed-in");
+  });
+
+  it("sends a device label made of platform and OS version only", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, {}));
+    await apiFetch("/open");
+    const init = fetchMock.mock.calls[0]?.[1] as { headers: Record<string, string> };
+    expect(init.headers["x-device-label"]).toMatch(/^(iOS|Android|\w+)( [\w.]+)?$/);
+  });
+});
+
+describe("rate limit", () => {
+  it("turns Retry-After into a message with the wait", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(429, envelope("RATE_LIMITED"), { "retry-after": "42" }),
+    );
+    const e = (await apiFetch("/x").catch((x: unknown) => x)) as AppError;
+    expect(e.kind).toBe("rate_limited");
+    expect(e.retryAfterSeconds).toBe(42);
+    expect(e.message).toBe(waitMessage(42));
+    expect(e.message).toMatch(/42 seconds/);
+  });
+
+  it("uses minutes for long waits and a generic message without the header", async () => {
+    expect(waitMessage(600)).toMatch(/10 minutes/);
+    expect(waitMessage(1)).toMatch(/1 second\b/);
+    fetchMock.mockResolvedValueOnce(jsonResponse(429, envelope("RATE_LIMITED")));
+    const e = (await apiFetch("/x").catch((x: unknown) => x)) as AppError;
+    expect(e.retryAfterSeconds).toBeNull();
+    expect(e.message).toBe(messageFor("rate_limited"));
   });
 });
 

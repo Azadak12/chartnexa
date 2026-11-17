@@ -4,6 +4,7 @@ export { Button, type ButtonProps, type ButtonVariant } from "./Button";
 export { Card } from "./Card";
 export { IconButton, type IconName } from "./IconButton";
 export { OverlayProvider, useOverlays } from "./overlay";
+export { PasswordField } from "./PasswordField";
 export { Screen } from "./Screen";
 export { Skeleton } from "./Skeleton";
 export { Text, type TextTone } from "./Text";

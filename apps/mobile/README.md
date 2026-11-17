@@ -1,6 +1,6 @@
 # @chartnexa/mobile
 
-ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. This is the app **shell**: brand tokens, base components, navigation rules and screen states. There is no real sign-in or feature screen yet (`mobile-auth` and the course changes come next).
+ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. Includes the app **shell** (brand tokens, base components, navigation rules, screen states) and **account access**: sign in, create account, verify email, forgot and reset password, and a Profile area (name, password, sessions, sign out, delete account). There are no course screens yet.
 
 ## What was verified and what was not
 - **Verified in automated tests and CI:** component behavior and accessibility properties, navigation and return-to rules, back handling order, remembered list position, API error mapping, offline banner, font fallback, contrast of every approved color pair, production bundles for iOS and Android build under pnpm, and the development gallery is absent from production bundles.
@@ -63,3 +63,44 @@ src/fonts                Inter loading with system-font fallback
 | Airplane mode shows the offline banner, content stays | yes | yes |
 | Landscape layout is usable | yes | yes |
 | Tap targets feel at least as large as a thumb | yes | yes |
+| Sign in, kill the app from the task switcher, reopen: still signed in, no sign-in flash | yes | yes |
+| Sign in, delete the app, reinstall: asked to sign in (iOS Keychain can keep an old token, which the server rejects) | yes | yes |
+| Airplane mode: sign out works and says the server will be told later; sign in shows the offline message | yes | yes |
+| Two devices: end a session from device A, device B signs out at its next action with a clear message | yes | yes |
+| Password manager offers to fill and save on sign in and create account | yes | yes |
+| Show or hide password works with the screen reader announcing the new state | TalkBack | VoiceOver |
+| Open the emailed link: opens the app on Verify email or Reset password with the code filled in | yes | yes |
+
+## Try sign-in on your phone (against the API on your computer)
+1. Start PostgreSQL, then the API (from the repository root). Use your computer's address for `APP_LINK_BASE` so emailed links open in Expo Go:
+```bash
+createdb chartnexa_dev
+export DATABASE_URL="postgresql://$USER@localhost:5432/chartnexa_dev"
+export CURSOR_SECRET=$(openssl rand -hex 32) ACCESS_TOKEN_SECRET=$(openssl rand -hex 32)
+export MAILER_DRIVER=dev APP_LINK_BASE="exp://<your-computer-lan-ip>:8081/--/"
+pnpm --filter @chartnexa/api migrate:deploy
+pnpm --filter @chartnexa/api dev
+```
+2. Start the app with the API address for a phone (your computer's LAN address, not `localhost`):
+```bash
+cd apps/mobile
+EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
+```
+3. In the app: Create account. The API has no email provider yet, so the "email" is written to `apps/api/.dev-mail/` (a text file with the link). Open the link on the phone (or paste the code into the Verify email screen), then sign in.
+4. Emailed links use `chartnexa://verify-email?token=...` in development builds and `exp://<ip>:8081/--/verify-email?token=...` in Expo Go. The code can always be pasted by hand.
+
+## Where things are stored
+- **Refresh token and session id:** only in the device's secure storage (iOS Keychain, Android Keystore), under the key `chartnexa.session.v1`, set to "when unlocked, this device only".
+- **Access token:** only in memory; it is never written anywhere.
+- **Account details, sessions list:** only in the in-memory query cache, cleared at sign out.
+- **Nothing secret is logged.** Tests run every flow with the console watched and fail if a password, code or token appears.
+
+## How the session behaves
+- At launch the splash stays up while the app checks secure storage and renews the session; a signed-in person never sees the sign-in screen flash.
+- The server rotates the refresh token on every use and treats a reused one as theft, ending the whole session. The app therefore shares one renewal among all requests, saves the new refresh token before using the new access token, and never sends a used token again.
+- A 401 triggers one renewal and one retry. A rejected renewal signs the person out and returns them to the same screen after signing in again. Being offline or a server error never signs anyone out.
+- Sign out clears the device first; telling the server is best effort (offline, the server session ends on its own schedule and the screen says so).
+- Known limitation: if the app is killed in the instant between the server rotating the token and the phone saving the new one, the next launch presents a rotated token and the server ends the session; the person signs in again.
+
+## Contract tests against the real API
+`pnpm --filter @chartnexa/mobile test:contract` starts the real API on a throwaway PostgreSQL database and runs the app's auth layer against it over HTTP (needs a local PostgreSQL, like the API tests). `pnpm test` runs both the unit and contract tests. CI's `mobile` job has a PostgreSQL service for this.

@@ -21,6 +21,7 @@ export default function AppLayout() {
   const query = Object.fromEntries(Object.entries(params).filter(([k]) => !dynamic.has(k)));
   const here = buildReturnTo(pathname, query);
 
+  if (status === "restoring") return null;
   if (status === "signed-in") {
     lastSignedInHref.current = here;
     return <Stack screenOptions={{ headerShown: false }} />;

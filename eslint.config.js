@@ -25,6 +25,22 @@ export default tseslint.config(
     },
   },
   {
+    // CommonJS Node files that Jest loads (test server launcher and config).
+    files: ["apps/mobile/__contract__/*.js", "apps/mobile/jest.contract.config.js"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        module: "readonly",
+        process: "readonly",
+        console: "readonly",
+        __dirname: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+      },
+    },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
     // Node build scripts.
     files: ["apps/mobile/scripts/**/*.mjs"],
     languageOptions: { globals: { console: "readonly", process: "readonly" } },

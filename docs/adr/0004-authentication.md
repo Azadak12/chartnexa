@@ -22,3 +22,6 @@ First-party means we own reset-abuse, rate limiting and token-rotation correctne
 - Apple and Google sign-in deferred to a later change (neither is offered now, so Sign in with Apple is not required yet).
 - Email verification and reset use a mailer interface with a development-only sender; no real email provider is chosen yet.
 - Implemented by OpenSpec change `auth-accounts-sessions`: Argon2id via Node's built-in `crypto.argon2` (64 MiB, 2 passes, 1 lane, about 67 ms measured locally), 10-minute HS256 access tokens without roles or permissions, rotating hashed refresh tokens with reuse detection, Postgres-backed rate limits. Staff MFA remains a separate change.
+
+## Implementation note 2026-11-17 (`mobile-auth`)
+The app stores only the refresh token and session id in the device's secure storage and keeps the access token in memory. One shared renewal, new-token-saved-before-use and a "never send a used refresh token" guard keep the server's refresh-token theft detection from ending honest sessions; a 401 triggers one renewal and one retry. Found while building: a wrong confirmation password on delete and change-password returned 401, which a client rightly reads as "signed out"; the API now returns a 400 field error instead. A contract test runs the app's auth layer against the real API and PostgreSQL.

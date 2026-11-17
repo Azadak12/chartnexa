@@ -1,10 +1,20 @@
 import Constants from "expo-constants";
-import { fromResponse, isAppError, networkError, AppError, messageFor } from "./errors";
-import { sessionStore } from "../session/session-store";
+import { Platform } from "react-native";
+import {
+  fromResponse,
+  isAppError,
+  networkError,
+  AppError,
+  messageFor,
+  waitMessage,
+} from "./errors";
 
 export const REQUEST_TIMEOUT_MS = 15000;
 
 export function apiBaseUrl(): string {
+  // EXPO_PUBLIC_ values are inlined into the bundle at build time.
+  const fromEnv = process.env.EXPO_PUBLIC_API_BASE_URL;
+  if (fromEnv) return fromEnv;
   const configured = Constants.expoConfig?.extra?.["apiBaseUrl"];
   return typeof configured === "string" && configured.length > 0
     ? configured
@@ -20,6 +30,14 @@ export function newRequestId(): string {
   return `app-${Date.now().toString(16)}-${rand()}`;
 }
 
+/** Platform and OS version, for example "iOS 18.1". Never a hardware identifier. */
+export function deviceLabel(): string {
+  const os = Platform.OS === "ios" ? "iOS" : Platform.OS === "android" ? "Android" : Platform.OS;
+  return `${os} ${Platform.Version === undefined ? "" : String(Platform.Version)}`
+    .trim()
+    .slice(0, 80);
+}
+
 export interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -31,8 +49,8 @@ export interface ApiOptions {
 
 /**
  * Calls the API and returns parsed JSON. Failures are thrown as AppError with a plain-language
- * message; response text is never exposed. A 401 ends the session so the person is asked to sign
- * in again and returns to the same screen.
+ * message; response text is never exposed. It never ends the session itself: callers that use a
+ * token go through `authedFetch`, which renews the token once and decides.
  */
 export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const requestId = newRequestId();
@@ -47,6 +65,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
       headers: {
         accept: "application/json",
         "x-request-id": requestId,
+        "x-device-label": deviceLabel(),
         ...(options.body !== undefined ? { "content-type": "application/json" } : {}),
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
@@ -70,9 +89,13 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
 
   const error = fromResponse(response.status, body);
   const withId = error.requestId ?? response.headers.get("x-request-id") ?? requestId;
-  const final = new AppError(error.kind, error.message, error.status, withId, error.fields);
-  if (final.kind === "unauthorized") sessionStore.expire();
-  throw final;
+  const retryAfter = Number(response.headers.get("retry-after"));
+  const retryAfterSeconds = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null;
+  const message =
+    error.kind === "rate_limited" && retryAfterSeconds
+      ? waitMessage(retryAfterSeconds)
+      : error.message;
+  throw new AppError(error.kind, message, error.status, withId, error.fields, retryAfterSeconds);
 }
 
 export { isAppError, messageFor };

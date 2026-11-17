@@ -29,6 +29,7 @@ const OverlayContext = createContext<OverlayApi | null>(null);
 export function OverlayProvider({ children }: { children: ReactNode }) {
   const stack = useRef<Entry[]>([]);
   const nextId = useRef(1);
+  const subscription = useRef<{ remove: () => void } | null>(null);
 
   const dismissTop = useCallback((): boolean => {
     const top = stack.current[stack.current.length - 1];
@@ -37,19 +38,33 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     return true;
   }, []);
 
-  const register = useCallback((dismiss: () => void) => {
-    const entry = { id: nextId.current++, dismiss };
-    stack.current.push(entry);
-    return () => {
-      stack.current = stack.current.filter((e) => e.id !== entry.id);
-    };
-  }, []);
+  const register = useCallback(
+    (dismiss: () => void) => {
+      const entry = { id: nextId.current++, dismiss };
+      stack.current.push(entry);
+      // The listener exists only while an overlay is open. React Native runs the most recently
+      // added listener first, so an open overlay always outranks the router's own back handling.
+      if (!subscription.current) {
+        subscription.current = BackHandler.addEventListener("hardwareBackPress", dismissTop);
+      }
+      return () => {
+        stack.current = stack.current.filter((e) => e.id !== entry.id);
+        if (stack.current.length === 0) {
+          subscription.current?.remove();
+          subscription.current = null;
+        }
+      };
+    },
+    [dismissTop],
+  );
 
-  useEffect(() => {
-    // Returning true marks the event handled, so the router does not also go back.
-    const sub = BackHandler.addEventListener("hardwareBackPress", dismissTop);
-    return () => sub.remove();
-  }, [dismissTop]);
+  useEffect(
+    () => () => {
+      subscription.current?.remove();
+      subscription.current = null;
+    },
+    [],
+  );
 
   const api = useMemo(() => ({ register, dismissTop }), [register, dismissTop]);
   return <OverlayContext.Provider value={api}>{children}</OverlayContext.Provider>;

@@ -1,7 +1,9 @@
 import { act, fireEvent, renderRouter, screen } from "expo-router/testing-library";
 import { router, useNavigationContainerRef } from "expo-router";
 import { renderHook } from "@testing-library/react-native";
-import { apiFetch } from "../src/api/client";
+import { authedFetch } from "../src/auth/authed-fetch";
+import { sessionManager } from "../src/auth/session-manager";
+import { FakeApi } from "../test-utils/fake-api";
 import { clearScreenMemory } from "../src/navigation/screen-memory";
 import { sessionStore } from "../src/session/session-store";
 import { mockBackHandler } from "../test-utils/back-handler";
@@ -18,7 +20,7 @@ describe("protected area and sign-in return", () => {
     await renderRouter(app, { initialUrl: "/courses/42?tab=reviews" });
     expect(screen).toHavePathname("/sign-in");
     expect(screen).toHaveSearchParams({ returnTo: "/courses/42?tab=reviews" });
-    expect(screen.getByText("Sign in", { hidden: false } as never)).toBeTruthy();
+    expect(screen.getByRole("header", { name: "Sign in" })).toBeTruthy();
 
     await act(async () => sessionStore.set("signed-in"));
     expect(screen).toHavePathname("/courses/42");
@@ -153,24 +155,26 @@ describe("placeholder screens", () => {
 });
 
 describe("session ended by the API", () => {
-  it("shows sign-in after a 401 and returns to the same screen after signing in again", async () => {
-    sessionStore.set("signed-in");
-    (globalThis as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: () =>
-        Promise.resolve({ code: "UNAUTHENTICATED", message: "x", requestId: "req-12345678" }),
-      headers: { get: () => null },
-    });
+  it("shows sign-in after the server rejects the session and returns to the same screen after signing in again", async () => {
+    const api = new FakeApi();
+    api.install();
+    const pair = api.newSession();
+    await sessionManager.signIn(pair);
     await renderRouter(app, { initialUrl: "/courses/5" });
     expect(screen).toHavePathname("/courses/5");
 
+    // The session is revoked elsewhere; the next request finds out.
+    api.sessions.get(pair.sessionId)!.revoked = true;
+    api.expireAccessTokens();
     await act(async () => {
-      await apiFetch("/me").catch(() => undefined);
+      await authedFetch("/me").catch(() => undefined);
     });
     expect(screen).toHavePathname("/sign-in");
     expect(screen).toHaveSearchParams({ returnTo: "/courses/5" });
+    expect(screen.getByText(/Your session ended/)).toBeTruthy();
+
     await act(async () => sessionStore.set("signed-in"));
     expect(screen).toHavePathname("/courses/5");
+    sessionManager._resetForTests();
   });
 });

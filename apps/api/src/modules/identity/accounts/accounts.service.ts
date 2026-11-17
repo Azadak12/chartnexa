@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import type {
   ChangePasswordRequest,
   DeleteAccountRequest,
@@ -158,7 +158,12 @@ export class AccountsService {
   }
 
   /** Verifies the caller's current password, counting failures toward a per-user limit. */
-  private async requirePassword(userId: string, password: string, scope: string): Promise<void> {
+  private async requirePassword(
+    userId: string,
+    password: string,
+    scope: string,
+    field: string,
+  ): Promise<void> {
     const key = `${scope}:user:${userId}`;
     await this.limiter.assertBelow(
       key,
@@ -171,12 +176,14 @@ export class AccountsService {
       : false;
     if (!ok) {
       await this.limiter.hit(key, this.config.RL_LOGIN_WINDOW_SECONDS);
-      throw new UnauthorizedException("Incorrect password.");
+      // A wrong confirmation password is a field error (400), not a 401: a 401 would tell a
+      // client its session is invalid and make it sign the person out.
+      throw new ValidationFailed([{ field, message: "Incorrect password." }]);
     }
   }
 
   async deleteAccount(userId: string, input: DeleteAccountRequest, ctx: RequestCtx): Promise<void> {
-    await this.requirePassword(userId, input.password, "delete");
+    await this.requirePassword(userId, input.password, "delete", "password");
     await this.db.$transaction(async (tx) => {
       // Other modules may end roles or veto the deletion (for example the last Admin).
       await this.deletionHooks.runAll(tx, userId, ctx);
@@ -207,7 +214,7 @@ export class AccountsService {
     input: ChangePasswordRequest,
     ctx: RequestCtx,
   ): Promise<void> {
-    await this.requirePassword(userId, input.currentPassword, "change-password");
+    await this.requirePassword(userId, input.currentPassword, "change-password", "currentPassword");
     const user = await this.db.user.findUniqueOrThrow({ where: { id: userId } });
     this.policyOrThrow(input.newPassword, user.email, "newPassword");
     const passwordHash = await this.passwords.hash(input.newPassword);

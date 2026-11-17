@@ -6,14 +6,17 @@
   "scripts": {
     "start": "expo start",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "build": "expo export --platform ios --platform android --output-dir dist && node scripts/verify-bundle.mjs"
+    "test": "jest && jest --config jest.contract.config.js --forceExit",
+    "build": "expo export --platform ios --platform android --output-dir dist && node scripts/verify-bundle.mjs",
+    "test:contract": "jest --config jest.contract.config.js --forceExit",
+    "test:unit": "jest"
   },
   "dependencies": {
     "@chartnexa/api-contracts": "workspace:*",
     "@chartnexa/design-tokens": "workspace:*",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.1.1",
+    "@hookform/resolvers": "^7.0.6",
     "@react-native-community/netinfo": "12.0.1",
     "@tanstack/react-query": "^5.107.1",
     "expo": "^58.0.25",
@@ -21,12 +24,15 @@
     "expo-font": "~58.0.12",
     "expo-linking": "~58.0.17",
     "expo-router": "~58.0.31",
+    "expo-secure-store": "~58.0.3",
     "expo-splash-screen": "~58.0.14",
     "expo-status-bar": "~58.0.5",
     "react": "19.3.0",
+    "react-hook-form": "^7.92.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1",
-    "react-native-screens": "~4.30.1"
+    "react-native-screens": "~4.30.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.1.0",
