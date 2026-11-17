@@ -15,6 +15,7 @@ import { MAILER, type Mailer } from "../../mailer/index.js";
 import { RateLimiterService } from "../../rate-limit/index.js";
 import { logEvent, type RequestCtx } from "../http/request-context.js";
 import { checkPasswordPolicy, PasswordService } from "../password/password.service.js";
+import { AccountDeletionHooks } from "./deletion-hooks.js";
 import { SessionsService } from "../sessions/sessions.service.js";
 import { hashEmailForKey, hashToken, newOpaqueToken } from "../tokens/token-util.js";
 
@@ -37,6 +38,7 @@ export class AccountsService {
     @Inject(RateLimiterService) private readonly limiter: RateLimiterService,
     @Inject(MAILER) private readonly mailer: Mailer,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Inject(AccountDeletionHooks) private readonly deletionHooks: AccountDeletionHooks,
   ) {}
 
   private policyOrThrow(password: string, email: string | null, field = "password"): void {
@@ -175,8 +177,10 @@ export class AccountsService {
 
   async deleteAccount(userId: string, input: DeleteAccountRequest, ctx: RequestCtx): Promise<void> {
     await this.requirePassword(userId, input.password, "delete");
-    await this.db.$transaction([
-      this.db.user.update({
+    await this.db.$transaction(async (tx) => {
+      // Other modules may end roles or veto the deletion (for example the last Admin).
+      await this.deletionHooks.runAll(tx, userId, ctx);
+      await tx.user.update({
         where: { id: userId },
         data: {
           email: null,
@@ -187,13 +191,13 @@ export class AccountsService {
           deletedAt: new Date(),
           authzVersion: { increment: 1 },
         },
-      }),
-      this.db.session.updateMany({
+      });
+      await tx.session.updateMany({
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date(), revokedReason: "account_deleted" },
-      }),
-      this.db.oneTimeToken.deleteMany({ where: { userId } }),
-    ]);
+      });
+      await tx.oneTimeToken.deleteMany({ where: { userId } });
+    });
     logEvent(ctx, "auth.account.deleted", { userId });
   }
 

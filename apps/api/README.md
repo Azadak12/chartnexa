@@ -61,3 +61,19 @@ First-party email and password. Routes: `/auth/register|login|refresh|logout|log
 - **Database time:** connections force a UTC session timezone. Without it a non-UTC PostgreSQL server shifts JavaScript dates by hours (found in testing on a server set to Asia/Karachi).
 - **Logs:** security events (`auth.login.success|failure`, `auth.refresh.reuse_detected`, `auth.session.revoked`, `auth.password.reset|changed`, `auth.account.deleted`) carry request id, user id, session id and an outcome only.
 - Staff roles, MFA, social login and a real email provider are separate later changes.
+
+## Roles, permissions and audit (change `rbac-core-and-audit`)
+- **Roles:** every active account is a Student; an account may also hold one staff role (Instructor, Manager, Admin). Only Admins assign or revoke roles, always with a reason (3-200 characters). Nobody can change their own role, and the last active Admin can never be removed (concurrent changes are serialized with row locks). Staff roles need an active account with a verified email. Disabled or deleted accounts have no access, and deleting an account ends its role.
+- **Permissions:** the catalog and role defaults are in `modules/access/authorization/permissions.ts`; adding a permission without deciding which roles hold it fails to compile. Instructors and Students hold none by default (grants arrive in `instructor-permission-delegation`). Manager defaults are a proposal awaiting owner approval (decision register R03).
+- **Protect a route:** `@RequirePermission("course:update", { resource: (req) => ({ courseId: ... }) })` (from `modules/access`). It answers 401 when not signed in and 403 in the error envelope otherwise, reads the user's role from the database on every request (once per request), and never trusts token contents. Pass `auditDenied` for sensitive routes so denials are written to the audit trail.
+- **Endpoints:** `GET /me/access` (informational), `GET /staff/users/lookup?email=` (exact match only), `PUT /staff/users/:id/role`, `POST /staff/users/:id/role/revoke`, `GET /staff/audit-events` (Admin only, cursor-paginated, filters actorUserId, targetId, action, outcome, from, to).
+- **Audit:** `audit_events` is append-only. Database triggers reject UPDATE, DELETE and TRUNCATE; role changes write their record in the same transaction; denied attempts on role management and audit reading are recorded. Records hold ids, role names, reasons and request ids only. **Hardening for deployment:** triggers do not stop a database owner who drops them, so run the API under a database role that has only INSERT and SELECT on `audit_events` and keep migrations on a separate owner role. Retention policy is undecided (decision register Q10).
+
+### First Admin and recovery runbook
+Run by an operator who has the production `DATABASE_URL` (that access is the trust boundary). The account must already exist, be active and have a verified email.
+```bash
+pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
+```
+- Refuses (exit 1) if any active Admin exists. Prints only the account id; the audit record has actor kind `system` and reason `bootstrap`.
+- If the only Admin cannot sign in, add `--recovery`. It adds the named account as an Admin (it does not remove the locked-out one) and the audit record is marked `role.recovery`. Afterwards an Admin can revoke the unusable account through the API.
+- Run it the same way against a local database with `DATABASE_URL`, `CURSOR_SECRET` and `ACCESS_TOKEN_SECRET` set.

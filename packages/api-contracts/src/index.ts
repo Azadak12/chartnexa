@@ -27,3 +27,4 @@ export const DEFAULT_PAGE_SIZE = 25;
 export const isRole = (value: string): value is Role =>
   ["student", "instructor", "manager", "admin"].includes(value);
 export * from "./auth.js";
+export * from "./access.js";

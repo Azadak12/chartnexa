@@ -3,6 +3,7 @@ import type { AppConfig } from "./config/config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
+import { AccessModule } from "./modules/access/index.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { MailerModule } from "./modules/mailer/index.js";
 import { RateLimitModule } from "./modules/rate-limit/index.js";
@@ -18,6 +19,7 @@ export class AppModule {
         MailerModule,
         RateLimitModule,
         IdentityModule,
+        AccessModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

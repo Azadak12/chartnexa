@@ -140,3 +140,19 @@ Q01, Q05, Q13 are closed. Q02 remains open for the billing method only.
 | C20 | **Mailer interface with a development-only sender** for verification and reset emails. | A real email provider and sender domain remain open before launch. |
 
 Proposed defaults in `auth-accounts-sessions` (need owner approval, not yet confirmed): every self-registered account is a student; unverified accounts may sign in but a verified email is required before purchase; password 10 to 128 characters with no composition rules; access tokens 10 minutes, refresh tokens 30 days with a 90-day cap; account deletion erases personal data immediately and keeps only an anonymous id (retention policy pending legal review).
+
+---
+
+## Roles and audit: proposed defaults (change `rbac-core-and-audit`, 2026-11-17)
+
+All of the following are **Proposed and need owner approval (Q06)**; nothing here is Confirmed.
+
+| ID | Proposal |
+|---|---|
+| R01 | Every active account is a Student; at most one staff role (Instructor, Manager or Admin) per account. |
+| R02 | Only Admins assign or revoke staff roles, always with a reason; nobody can change their own role; the last active Admin can never be removed. |
+| R03 | Manager default permissions: users lookup, course create/update/publish, lesson upload, live scheduling, students and enrollments, operational reports, payment status only, review moderation, managing instructor permissions within a ceiling (set in a later change). Managers do not get role management, audit reading, or full payment data (resolves X05). |
+| R04 | Instructors and Students hold no permissions by default; instructor capabilities come only from explicit grants (C06). |
+| R05 | Staff roles require an active account with a verified email. |
+| R06 | Audit reading is Admin-only for now. Audit rows are append-only and keep only ids, role and permission names, reasons and request ids. Retention and legal erasure are undecided (Q10). |
+| R07 | First-Admin bootstrap (resolves Q14): an operator-run command with database access promotes an existing verified account when no Admin exists; a `--recovery` flag, always audited and marked, handles a locked-out sole Admin. |

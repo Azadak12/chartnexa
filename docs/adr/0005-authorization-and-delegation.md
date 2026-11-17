@@ -17,3 +17,6 @@ One central `can(actor, action, resource)` used by every protected read, write a
 
 ## Consequences
 Every module depends on the authorization service. Negative tests (escalation, mid-upload unassignment) are mandatory in `rbac-core-and-audit` and `instructor-permission-delegation`.
+
+## Implementation note 2026-11-17 (`rbac-core-and-audit`)
+Roles, the central `can()` check, the `@RequirePermission` guard and the append-only audit trail are implemented before grants. Role defaults live in a typed map in code; the delegation ceiling and per-instructor grants (data-driven, as above) follow in `instructor-permission-delegation`. Audit immutability is enforced by database triggers; running the application under a database role without trigger-drop rights is a deployment hardening step.

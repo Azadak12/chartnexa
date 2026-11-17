@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AccountDeletionHooks } from "./accounts/deletion-hooks.js";
 import { AccountsService } from "./accounts/accounts.service.js";
 import { AuthGuard } from "./auth.guard.js";
 import { AuthService } from "./auth.service.js";
@@ -17,7 +18,8 @@ import { AccessTokenService } from "./tokens/access-token.service.js";
     AccountsService,
     AuthService,
     AuthGuard,
+    AccountDeletionHooks,
   ],
-  exports: [AuthGuard, AccessTokenService],
+  exports: [AuthGuard, AccessTokenService, AccountDeletionHooks],
 })
 export class IdentityModule {}

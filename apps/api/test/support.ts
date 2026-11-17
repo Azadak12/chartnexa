@@ -5,6 +5,7 @@ import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { z } from "zod";
 import { createApp } from "../src/app.factory.js";
 import { loadConfig } from "../src/config/config.js";
+import { RequirePermission } from "../src/modules/access/index.js";
 import { decodeCursor, pageParamsSchema } from "../src/pagination/cursor.js";
 import { ZodPipe } from "../src/platform/zod.pipe.js";
 
@@ -22,6 +23,14 @@ export class TestController {
   @Get("boom")
   boom(): never {
     throw new Error("password=hunter2 at /srv/secret/path.ts");
+  }
+
+  @Get("needs-course-update")
+  @RequirePermission("course:update", {
+    resource: (req) => ({ courseId: (req.query as { courseId?: string }).courseId ?? "c" }),
+  })
+  needsCourseUpdate(): { ok: true } {
+    return { ok: true };
   }
 
   @Get("page")
