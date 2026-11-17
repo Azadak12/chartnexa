@@ -41,8 +41,16 @@
 
 - [x] 7.1 Add log-hygiene integration tests running the full auth flows with captured logs; verify no password, token, hash, reset link or email appears in structured logs and security events carry only request, user and session ids.
 - [x] 7.2 Update the OpenAPI document and verify CI's OpenAPI check lists every auth route, the error envelope on 401/429, and no token values in examples.
-- [ ] 7.3 Update `apps/api/README.md` (auth overview, config, rate limits, mailer, trusted proxy, tuning Argon2) and `.env.example`; verify by following the README in a fresh clone.
-- [ ] 7.4 Run the full `pnpm check` and migration round trip from a fresh clone and confirm CI (`check`, `api`, `audit`) is green on the pull request; record the evidence.
+- [x] 7.3 Update `apps/api/README.md` (auth overview, config, rate limits, mailer, trusted proxy, tuning Argon2) and `.env.example`; verify by following the README in a fresh clone.
+- [x] 7.4 Run the full `pnpm check` and migration round trip from a fresh clone and confirm CI (`check`, `api`, `audit`) is green on the pull request; record the evidence.
+
+## Evidence
+
+- Local: `pnpm check` exit 0 with 95 API tests (unit and real-PostgreSQL integration), 6 contracts tests; `pnpm migrate:roundtrip` OK for 2 migrations (every migration rolled back in reverse and re-applied); `pnpm bench:argon2` 63 ms per hash.
+- CI on PR 9: `check`, `api`, `audit` green on the first run.
+- Fresh clone of the branch: install from the lockfile, `pnpm check` exit 0 (95 API tests), round trip OK; then following the README: created a database, `migrate:deploy`, started the server, registered (202), found the verification email in `.dev-mail/` (git-ignored), logged in (expiresIn 600), `GET /me` returned the account, `GET /me` without a token returned 401, and the server log contained neither the email nor the password.
+- Defect found and fixed during apply: PostgreSQL on this machine uses the Asia/Karachi timezone, and the driver sends JavaScript dates as zone-less UTC text, so expiry times shifted by 5 hours and valid reset tokens looked expired. Connections now force `timezone=UTC`, with a regression test.
+- Not verified: behavior under a real email provider, production proxy settings, and load (no capacity claims are made).
 
 ## Workflow follow-up
 
