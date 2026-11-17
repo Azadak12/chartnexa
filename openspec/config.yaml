@@ -1,0 +1,21 @@
+schema: spec-driven
+
+context: |
+  ChartNexa Academy: trading education LMS (courses, not brokerage or signals). iOS+Android student app is confirmed.
+  Stack (React Native/Expo, NestJS, PostgreSQL/Prisma, optional Next.js staff web) is PROPOSED until an ADR is Accepted by the owner.
+  Distinguish Confirmed vs Proposed vs Pending in every artifact; never turn a pending item into a fact.
+  Never claim "production-ready" or capacity ("millions of users") without test evidence.
+  Payment implementation requires an approved app-store-compliant strategy; all purchase sources feed one backend entitlement ledger.
+  Permissions are enforced server-side on every read, write and file request.
+  Brand: white #FFFFFF, black #111111, blue #2563EB; do not make the whole app dark.
+  One OpenSpec change at a time; no secrets in the repo.
+
+rules:
+  proposal:
+    - State confirmation status of each requirement and list what is out of scope.
+  specs:
+    - Include happy path, negative authorization cases, and concurrency/idempotency scenarios where relevant.
+  design:
+    - Cover threat model, UX navigation/states, accessibility, observability, migration and rollback.
+  tasks:
+    - Each task states how it is verified; tests and docs land with the work that needs them.
