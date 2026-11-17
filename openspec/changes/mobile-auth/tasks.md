@@ -36,12 +36,20 @@
 
 - [x] 5.1 Add the `contract` Jest project that starts the built API on a scratch PostgreSQL database and exercises the auth layer and session manager over real HTTP; verify it passes locally for register, verify via the captured email token, sign in, refresh rotation, reuse safety, 401 renewal, password change revoking others, sessions list and end, deletion, and the rate-limit message.
 - [x] 5.2 Add a log-hygiene test that spies on every console method across all flows (success and failure) and asserts no password, code or token appears; verify it fails when a deliberate `console.log` of a token is added, then remove it.
-- [ ] 5.3 Add the PostgreSQL service and API build step to the `mobile` CI job; verify the job is green on the pull request and red when a deliberate break is introduced in the auth layer's request shape.
+- [x] 5.3 Add the PostgreSQL service and API build step to the `mobile` CI job; verify the job is green on the pull request and red when a deliberate break is introduced in the auth layer's request shape.
 
 ## 6. Documentation and verification
 
-- [ ] 6.1 Update `apps/mobile/README.md` (try it on a phone against the API on your computer, starting the API with `APP_LINK_BASE` for Expo Go, pasting codes, what is stored where) and extend the manual checklist (Keychain or Keystore persistence, reinstall behavior, killing the app mid-refresh, airplane mode sign out, two devices); add an ADR-0004 note; verify by following the README in a fresh clone through register, verify, sign in, restart and sign out against the real API.
-- [ ] 6.2 Run the full `pnpm check` from a fresh clone, confirm CI is green, and record the evidence including what could not be verified on this machine.
+- [x] 6.1 Update `apps/mobile/README.md` (try it on a phone against the API on your computer, starting the API with `APP_LINK_BASE` for Expo Go, pasting codes, what is stored where) and extend the manual checklist (Keychain or Keystore persistence, reinstall behavior, killing the app mid-refresh, airplane mode sign out, two devices); add an ADR-0004 note; verify by following the README in a fresh clone through register, verify, sign in, restart and sign out against the real API.
+- [x] 6.2 Run the full `pnpm check` from a fresh clone, confirm CI is green, and record the evidence including what could not be verified on this machine.
+
+## Evidence
+
+- Local and fresh clone: `pnpm check` exit 0 with 157 mobile unit tests, 17 mobile contract tests that run the app's auth layer against the real API and PostgreSQL, 138 API tests, and the production bundle check. CI (`check`, `api`, `mobile`, `audit`) green on PR 16, including the contract tests with a PostgreSQL service.
+- A throwaway PR that changed the register request shape failed the mobile contract tests and `check` and showed `mergeStateStatus: BLOCKED`; it was closed unmerged.
+- README flow in a fresh clone: created a database, migrated, started the API with `APP_LINK_BASE` for Expo Go, registered (202), found the emailed link in the expected `exp://<ip>:<port>/--/verify-email?token=...` format, started Metro with `EXPO_PUBLIC_API_BASE_URL`, and the iOS development bundle (HTTP 200) contained the configured API address.
+- Bugs found by the tests and fixed: the API returned 401 for a wrong confirmation password (now a 400 field error); the reconnect trigger could be swallowed by a failing renewal; the contract test's HTTP shim lacked Content-Length (test tooling only); overlay back handling could run after the router's.
+- Not verified (no Xcode, Android SDK or device on this machine): Keychain and Keystore persistence and reinstall behavior, killing the app mid-renewal, airplane-mode flows on a device, two real devices, password-manager prompts, opening emailed links on a phone, screen-reader behavior. These are on the manual checklist in `apps/mobile/README.md` and none is claimed as verified.
 
 ## Workflow follow-up
 
