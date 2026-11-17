@@ -45,3 +45,11 @@ New app and package changes only; no data or backend changes. Rollback removes `
 
 - Final app name, bundle identifier and publisher accounts (Q12), needed before any store build.
 - Whether landscape layouts beyond video need design work, decided with the player change.
+
+## Implementation notes (added during apply)
+
+- Expo Router's tab bar is native and not rendered by the test renderer, so tab presses are simulated with the same `JUMP_TO` navigation action; the tab bar itself is on the manual device checklist.
+- On session expiry the router state is already unwinding, so the guard remembers the last location seen while signed in and uses it as the `returnTo`; a signed-out deep link uses the current location. A first attempt using `useUnstableGlobalHref` returned a wrong location mid-expiry and was replaced.
+- The development gallery is bundled only when `__DEV__` is true; `scripts/verify-bundle.mjs` (part of `build`) fails if its marker appears in a production bundle, and was shown to fail on a development bundle.
+- `@parcel/watcher` (optional native file watcher) is explicitly denied as a build script; Metro and Jest use Node's watcher.
+- `react-test-renderer` 19, React Native Testing Library 14 (its API is asynchronous) and `jest-expo` 58 are used; NetInfo and the splash screen are mocked in `jest.setup.js`.

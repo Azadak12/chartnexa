@@ -37,10 +37,19 @@
 
 ## 6. CI, documentation and verification
 
-- [ ] 6.1 Add the `mobile` CI job (frozen install, typecheck, tests, `expo export` for iOS and Android); verify it is green on the pull request and red when a deliberate type error is added, and the dev-only gallery is absent from the exported production bundle.
-- [ ] 6.2 After the `mobile` job has passed once, add it to the required checks on `main`; verify a failing mobile job blocks the merge state.
-- [ ] 6.3 Write `apps/mobile/README.md` (run with Expo Go, API address for emulator and device, SDK version, structure, how to add a screen) with the manual device checklist (hardware back, iOS swipe-back, Dynamic Type and Android font size, VoiceOver, TalkBack, reduced motion, offline banner, landscape), and add notes to ADR-0001 and ADR-0010; verify by following the README in a fresh clone.
-- [ ] 6.4 Run the full `pnpm check` and bundle export from a fresh clone, confirm CI is green, and record the evidence including what could not be verified on this machine.
+- [x] 6.1 Add the `mobile` CI job (frozen install, typecheck, tests, `expo export` for iOS and Android); verify it is green on the pull request and red when a deliberate type error is added, and the dev-only gallery is absent from the exported production bundle.
+- [x] 6.2 After the `mobile` job has passed once, add it to the required checks on `main`; verify a failing mobile job blocks the merge state.
+- [x] 6.3 Write `apps/mobile/README.md` (run with Expo Go, API address for emulator and device, SDK version, structure, how to add a screen) with the manual device checklist (hardware back, iOS swipe-back, Dynamic Type and Android font size, VoiceOver, TalkBack, reduced motion, offline banner, landscape), and add notes to ADR-0001 and ADR-0010; verify by following the README in a fresh clone.
+- [x] 6.4 Run the full `pnpm check` and bundle export from a fresh clone, confirm CI is green, and record the evidence including what could not be verified on this machine.
+
+## Evidence
+
+- Local and fresh clone: `pnpm check` exit 0 (design tokens 8 tests, contracts 10, API 138, mobile 77 across 8 suites), including the production bundle export for iOS and Android and the check that the development gallery is absent from both bundles (the same check fails on a development bundle). CI (`check`, `api`, `mobile`, `audit`) green on PR 13.
+- A throwaway PR with a deliberate mobile type error failed `check` and `mobile` and showed `mergeStateStatus: BLOCKED` once `mobile` was added to the required checks on `main`; it was closed unmerged.
+- Metro serves iOS and Android development bundles (HTTP 200, about 8 MB each) for the real app, both on this machine and in a fresh clone, and the Expo manifest reports the name and scheme. The Expo development server was started for the owner.
+- Mutation checks: a deliberate hooks-rule violation is caught by lint; a deliberate type error fails typecheck; a literal color would fail the token-usage test.
+- **Not verified (no Xcode or Android SDK on this machine, no physical device used):** physical back button and iOS swipe-back, Dynamic Type and Android font size, VoiceOver and TalkBack, real rendering, the native tab bar (tests simulate a tab press with the same action), and haptics. These are on the manual checklist in `apps/mobile/README.md`; none is claimed as verified.
+- Test noise: expo-router logs a "linking configured in multiple places" warning when a test renders the router twice in one file. It is harmless and does not affect results.
 
 ## Workflow follow-up
 
