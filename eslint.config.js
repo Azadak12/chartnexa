@@ -1,12 +1,40 @@
 import js from "@eslint/js";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/node_modules/**", "**/.turbo/**", "**/generated/**", "openspec/**"],
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/.turbo/**",
+      "**/generated/**",
+      "**/.expo/**",
+      "openspec/**",
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    // React rules for the mobile app: hooks must be used correctly.
+    files: ["apps/mobile/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    rules: {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+    },
+  },
+  {
+    // Node build scripts.
+    files: ["apps/mobile/scripts/**/*.mjs"],
+    languageOptions: { globals: { console: "readonly", process: "readonly" } },
+  },
+  {
+    // The Jest setup file uses Jest globals.
+    files: ["apps/mobile/jest.setup.js"],
+    languageOptions: { globals: { jest: "readonly", require: "readonly" } },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
   {
     // Module boundaries: other code may import a domain module only through its index.
     files: ["apps/api/src/**/*.ts"],
