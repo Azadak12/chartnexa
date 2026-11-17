@@ -72,6 +72,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Migration round trip (up, no-op, down, up)
         run: pnpm --filter @chartnexa/api migrate:roundtrip
+      - run: pnpm build
       - name: Export and check OpenAPI document
         run: |
           pnpm --filter @chartnexa/api openapi:export "$RUNNER_TEMP/openapi.json"

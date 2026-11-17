@@ -12,7 +12,7 @@
     "test": "pnpm generate && vitest run",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",
-    "openapi:export": "tsx scripts/export-openapi.ts"
+    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts"
   },
   "devDependencies": {
     "@nestjs/testing": "12.4.2",
