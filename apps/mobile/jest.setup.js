@@ -40,3 +40,29 @@ jest.mock(
 );
 // Fonts are asset-backed and native; navigation tests do not need to wait for them.
 jest.mock("./src/fonts/use-app-fonts", () => ({ useAppFonts: () => true, FONT_TIMEOUT_MS: 3000 }));
+
+// Secure storage is native; tests use an in-memory stand-in they can inspect and make fail.
+jest.mock("expo-secure-store", () => {
+  const store = new Map();
+  let failWrites = false;
+  return {
+    __esModule: true,
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: "WHEN_UNLOCKED_THIS_DEVICE_ONLY",
+    setItemAsync: jest.fn(async (key, value) => {
+      if (failWrites) throw new Error("write failed");
+      store.set(key, value);
+    }),
+    getItemAsync: jest.fn(async (key) => (store.has(key) ? store.get(key) : null)),
+    deleteItemAsync: jest.fn(async (key) => {
+      store.delete(key);
+    }),
+    __dump: () => Object.fromEntries(store),
+    __reset: () => {
+      store.clear();
+      failWrites = false;
+    },
+    __failWrites: (v) => {
+      failWrites = v;
+    },
+  };
+});

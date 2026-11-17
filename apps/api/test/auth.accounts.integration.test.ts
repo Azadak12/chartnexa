@@ -194,7 +194,9 @@ describe("account deletion", () => {
       token: s.accessToken,
       body: { password: "not the password" },
     });
-    expect(res.statusCode).toBe(401);
+    // A wrong confirmation password is a field error, never a 401 (clients treat 401 as "signed out").
+    expect(res.statusCode).toBe(400);
+    expect(errorEnvelopeSchema.parse(res.json()).fields?.[0]?.field).toBe("password");
     expect((await h.call("GET", "/me", { token: s.accessToken })).statusCode).toBe(200);
   });
 

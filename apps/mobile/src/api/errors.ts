@@ -21,6 +21,8 @@ export class AppError extends Error {
     /** Reference for support; shown in small print. */
     public readonly requestId: string | null,
     public readonly fields: FieldError[] = [],
+    /** Seconds to wait when the server asked the app to slow down (HTTP Retry-After). */
+    public readonly retryAfterSeconds: number | null = null,
   ) {
     super(message);
     this.name = "AppError";
@@ -55,6 +57,13 @@ const BY_CODE: Record<string, AppErrorKind> = {
 
 export function messageFor(kind: AppErrorKind): string {
   return MESSAGES[kind];
+}
+
+/** "Too many attempts" with how long to wait, in the unit a person understands. */
+export function waitMessage(seconds: number): string {
+  const s = Math.max(1, Math.ceil(seconds));
+  const wait = s < 90 ? `${s} second${s === 1 ? "" : "s"}` : `${Math.ceil(s / 60)} minutes`;
+  return `Too many attempts. Please wait about ${wait} and try again.`;
 }
 
 /**

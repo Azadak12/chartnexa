@@ -147,7 +147,7 @@ describe("change password", () => {
       });
     const codes: number[] = [];
     for (let i = 0; i < 6; i++) codes.push((await attempt("definitely wrong")).statusCode);
-    expect(codes).toEqual([401, 401, 401, 401, 401, 429]);
+    expect(codes).toEqual([400, 400, 400, 400, 400, 429]);
     expect((await attempt(s.password)).statusCode).toBe(429);
     expect((await h.login(s.email, s.password)).statusCode).toBe(200);
   });

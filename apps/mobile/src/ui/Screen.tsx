@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OfflineBanner } from "../state/OfflineBanner";
 import { colors, spacing } from "../theme";
@@ -9,10 +9,12 @@ export interface ScreenProps {
   /** Wrap content in a scroll view (default true). */
   scroll?: boolean;
   padded?: boolean;
+  /** Lift content above the on-screen keyboard (forms). */
+  keyboard?: boolean;
 }
 
 /** White page with safe-area handling. The app is light by default (docs/04). */
-export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
+export function Screen({ children, scroll = true, padded = true, keyboard = false }: ScreenProps) {
   const content = (
     <>
       <OfflineBanner />
@@ -20,14 +22,24 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
     </>
   );
   const body = padded ? <View style={styles.padded}>{content}</View> : content;
+  const inner = scroll ? (
+    <ScrollView contentContainerStyle={styles.grow} keyboardShouldPersistTaps="handled">
+      {body}
+    </ScrollView>
+  ) : (
+    body
+  );
   return (
     <SafeAreaView style={styles.root} edges={["top", "left", "right"]} testID="screen">
-      {scroll ? (
-        <ScrollView contentContainerStyle={styles.grow} keyboardShouldPersistTaps="handled">
-          {body}
-        </ScrollView>
+      {keyboard ? (
+        <KeyboardAvoidingView
+          style={styles.root}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          {inner}
+        </KeyboardAvoidingView>
       ) : (
-        body
+        inner
       )}
     </SafeAreaView>
   );
