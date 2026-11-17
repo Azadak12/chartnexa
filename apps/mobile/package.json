@@ -1,0 +1,55 @@
+{
+  "name": "@chartnexa/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "build": "expo export --platform ios --platform android --output-dir dist && node scripts/verify-bundle.mjs"
+  },
+  "dependencies": {
+    "@chartnexa/api-contracts": "workspace:*",
+    "@chartnexa/design-tokens": "workspace:*",
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-community/netinfo": "12.0.1",
+    "@tanstack/react-query": "^5.107.1",
+    "expo": "^58.0.25",
+    "expo-constants": "~58.0.16",
+    "expo-font": "~58.0.12",
+    "expo-linking": "~58.0.17",
+    "expo-router": "~58.0.31",
+    "expo-splash-screen": "~58.0.14",
+    "expo-status-bar": "~58.0.5",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-screens": "~4.30.1"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "30.0.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "~19.3.0",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.14",
+    "react-test-renderer": "19.3.0",
+    "typescript": "~6.0.3"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "testMatch": [
+      "<rootDir>/__tests__/**/*.test.ts",
+      "<rootDir>/__tests__/**/*.test.tsx"
+    ]
+  }
+}

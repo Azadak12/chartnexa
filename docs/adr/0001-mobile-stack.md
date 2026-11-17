@@ -17,3 +17,6 @@ React Native + Expo + TypeScript, Expo Router, TanStack Query for server state, 
 
 ## Consequences
 One TypeScript codebase across mobile, API contracts and optional staff web. Native modules require build pipelines from the start. Expo SDK upgrade cadence must be tracked.
+
+## Implementation note 2026-11-17 (`mobile-shell-and-tokens`)
+Expo SDK 58 (React Native 0.88, React 19, Expo Router) works with the pnpm isolated layout and Node 26: `expo export` builds iOS and Android Hermes bundles with no extra Metro or linker settings, so the hoisted-linker fallback is not needed. Styling decision: React Native `StyleSheet` driven by the shared tokens, not NativeWind. Expo Go is enough until a native module (store billing) is added; EAS development builds start then. No simulator or emulator was available on the build machine, so device behavior is covered by a manual checklist in `apps/mobile/README.md`, not by claims.

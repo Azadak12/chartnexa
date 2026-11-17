@@ -7,4 +7,5 @@ allowBuilds:
   "@prisma/engines": true
   esbuild: true
   "@scarf/scarf": false
+  "@parcel/watcher": false
 engineStrict: true

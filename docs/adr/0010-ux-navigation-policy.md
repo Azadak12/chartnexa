@@ -27,3 +27,6 @@ Popups for everything (breaks long tasks); full screens for everything (breaks c
 
 ## Consequences
 Navigation shell change (`mobile-shell-and-tokens`) must implement and test back-stack and returnTo behavior first.
+
+## Implementation note 2026-11-17 (`mobile-shell-and-tokens`)
+Implemented in `apps/mobile`: protected routes with a validated `returnTo`, an overlay stack so back closes the topmost sheet or dialog first, remembered list position and filters (in memory, cleared on sign-out), tabs that keep their own stacks, a friendly not-found screen, and one set of loading, empty, error, offline and unauthorized states. Behavior that needs a real device (hardware back, iOS swipe-back, Dynamic Type, screen readers) is on the manual checklist in `apps/mobile/README.md`.
