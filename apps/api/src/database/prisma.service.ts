@@ -3,12 +3,22 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { CONFIG, type AppConfig } from "../config/config.js";
 
+/**
+ * Forces a UTC session timezone. The driver sends JavaScript dates as zone-less UTC text,
+ * which PostgreSQL would otherwise read in the server's own zone and shift by hours.
+ */
+function withUtcTimezone(url: string): string {
+  const u = new URL(url);
+  u.searchParams.set("options", "-c timezone=UTC");
+  return u.toString();
+}
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleDestroy {
   constructor(@Inject(CONFIG) config: AppConfig) {
     super({
       adapter: new PrismaPg({
-        connectionString: config.DATABASE_URL,
+        connectionString: withUtcTimezone(config.DATABASE_URL),
         max: config.DATABASE_POOL_MAX,
       }),
     });

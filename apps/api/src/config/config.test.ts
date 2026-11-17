@@ -4,6 +4,7 @@ import { ConfigError, loadConfig } from "./config.js";
 const valid = {
   DATABASE_URL: "postgresql://localhost:5432/db",
   CURSOR_SECRET: "x".repeat(32),
+  ACCESS_TOKEN_SECRET: "y".repeat(32),
 };
 
 describe("loadConfig", () => {
@@ -40,5 +41,36 @@ describe("loadConfig", () => {
 
   it("rejects a short cursor secret", () => {
     expect(() => loadConfig({ ...valid, CURSOR_SECRET: "short" })).toThrow(/CURSOR_SECRET/);
+  });
+
+  it("requires a long access token secret and never echoes it", () => {
+    const short = "short-secret-value";
+    try {
+      loadConfig({ ...valid, ACCESS_TOKEN_SECRET: short });
+      expect.unreachable();
+    } catch (e) {
+      const msg = (e as Error).message;
+      expect(msg).toContain("ACCESS_TOKEN_SECRET");
+      expect(msg).not.toContain(short);
+    }
+    expect(() => loadConfig({ ...valid, ACCESS_TOKEN_SECRET: undefined })).toThrow(
+      /ACCESS_TOKEN_SECRET: is required/,
+    );
+  });
+
+  it("rejects dev and memory mail senders in production, naming the setting", () => {
+    for (const driver of ["dev", "memory"]) {
+      expect(() => loadConfig({ ...valid, NODE_ENV: "production", MAILER_DRIVER: driver })).toThrow(
+        /MAILER_DRIVER/,
+      );
+    }
+    expect(
+      loadConfig({ ...valid, NODE_ENV: "development", MAILER_DRIVER: "dev" }).MAILER_DRIVER,
+    ).toBe("dev");
+  });
+
+  it("parses TRUST_PROXY as a boolean defaulting to false", () => {
+    expect(loadConfig(valid).TRUST_PROXY).toBe(false);
+    expect(loadConfig({ ...valid, TRUST_PROXY: "true" }).TRUST_PROXY).toBe(true);
   });
 });

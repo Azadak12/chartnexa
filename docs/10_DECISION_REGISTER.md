@@ -128,3 +128,15 @@ Q01, Q05, Q13 are closed. Q02 remains open for the billing method only.
 - The earlier offer to research current Apple/Google rules is parked until then.
 - Demo checkout must be clearly labeled as a demo/test purchase in the UI and must never charge real cards. Test keys only, per CLAUDE.md.
 - N04 (French/Quebec, tax) is also deferred to pre-launch.
+
+---
+
+## Owner decisions recorded 2026-11-17 (authentication)
+
+| ID | Decision | Effect |
+|---|---|---|
+| C18 | **First-party authentication** (email and password in our own API). | ADR-0004 Accepted. |
+| C19 | **Apple and Google sign-in later**, not in the first auth change. | Sign in with Apple is only required once a third-party login is offered. |
+| C20 | **Mailer interface with a development-only sender** for verification and reset emails. | A real email provider and sender domain remain open before launch. |
+
+Proposed defaults in `auth-accounts-sessions` (need owner approval, not yet confirmed): every self-registered account is a student; unverified accounts may sign in but a verified email is required before purchase; password 10 to 128 characters with no composition rules; access tokens 10 minutes, refresh tokens 30 days with a 90-day cap; account deletion erases personal data immediately and keeps only an anonymous id (retention policy pending legal review).

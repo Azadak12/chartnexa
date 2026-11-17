@@ -9,6 +9,8 @@ const config = loadConfig({
   LOG_LEVEL: "silent",
   DATABASE_URL: "postgresql://localhost:5432/openapi_export",
   CURSOR_SECRET: "export-only-secret-export-only-secret",
+  ACCESS_TOKEN_SECRET: "export-only-access-secret-export-only",
+  MAILER_DRIVER: "memory",
 });
 const app = await createApp(config);
 writeFileSync(

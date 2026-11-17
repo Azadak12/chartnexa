@@ -14,3 +14,80 @@ model SchemaBaseline {
 
   @@map("schema_baseline")
 }
+
+enum UserStatus {
+  active
+  disabled
+  deleted
+}
+
+enum OneTimeTokenType {
+  email_verification
+  password_reset
+}
+
+model User {
+  id              String     @id @default(uuid()) @db.Uuid
+  email           String?
+  emailNormalized String?    @unique @map("email_normalized")
+  passwordHash    String?    @map("password_hash")
+  displayName     String?    @map("display_name")
+  status          UserStatus @default(active)
+  emailVerifiedAt DateTime?  @map("email_verified_at") @db.Timestamptz(6)
+  authzVersion    Int        @default(0) @map("authz_version")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  sessions Session[]
+  tokens   OneTimeToken[]
+
+  @@map("users")
+}
+
+model Session {
+  id                  String    @id @default(uuid()) @db.Uuid
+  userId              String    @map("user_id") @db.Uuid
+  refreshHash         String    @map("refresh_hash")
+  previousRefreshHash String?   @map("previous_refresh_hash")
+  rotatedAt           DateTime? @map("rotated_at") @db.Timestamptz(6)
+  deviceLabel         String?   @map("device_label")
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt          DateTime  @default(now()) @map("last_used_at") @db.Timestamptz(6)
+  expiresAt           DateTime  @map("expires_at") @db.Timestamptz(6)
+  absoluteExpiresAt   DateTime  @map("absolute_expires_at") @db.Timestamptz(6)
+  revokedAt           DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedReason       String?   @map("revoked_reason")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([refreshHash])
+  @@index([previousRefreshHash])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model OneTimeToken {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      OneTimeTokenType
+  tokenHash String           @unique @map("token_hash")
+  expiresAt DateTime         @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime?        @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("one_time_tokens")
+}
+
+model RateLimit {
+  key         String
+  windowStart DateTime @map("window_start") @db.Timestamptz(6)
+  count       Int
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+  @@map("rate_limits")
+}
