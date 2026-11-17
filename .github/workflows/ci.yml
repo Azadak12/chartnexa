@@ -12,10 +12,26 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Throwaway CI database with trust auth; no credentials involved.
+  TEST_DATABASE_ADMIN_URL: postgresql://postgres@localhost:5432/postgres
+
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -30,6 +46,41 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm secrets
+
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Migration round trip (up, no-op, down, up)
+        run: pnpm --filter @chartnexa/api migrate:roundtrip
+      - run: pnpm build
+      - name: Export and check OpenAPI document
+        run: |
+          pnpm --filter @chartnexa/api openapi:export "$RUNNER_TEMP/openapi.json"
+          node -e 'const d=JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/openapi.json","utf8"));for(const p of ["/health/live","/health/ready"]){if(!d.paths[p])throw new Error("missing "+p)}if(!d.components.schemas.ErrorEnvelope)throw new Error("missing ErrorEnvelope")'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: openapi
+          path: ${{ runner.temp }}/openapi.json
 
   audit:
     runs-on: ubuntu-latest

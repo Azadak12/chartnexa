@@ -31,7 +31,8 @@
 
 ## Monorepo layout (established by change `bootstrap-monorepo-ci`)
 ```
-apps/                      # empty; mobile and api arrive in later changes
+apps/api                   # NestJS API skeleton (change api-foundation)
+apps/                      # mobile arrives in mobile-shell-and-tokens
 packages/api-contracts
 packages/design-tokens
 packages/shared-types

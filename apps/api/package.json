@@ -1,0 +1,40 @@
+{
+  "name": "@chartnexa/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "prisma generate",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "pnpm generate && tsc -p tsconfig.build.json",
+    "typecheck": "pnpm generate && tsc --noEmit",
+    "test": "pnpm generate && vitest run",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",
+    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "12.4.2",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "prisma": "7.10.1",
+    "tsx": "^4.23.15",
+    "vitest": "^4.1.12"
+  },
+  "dependencies": {
+    "@chartnexa/api-contracts": "workspace:*",
+    "@nestjs/common": "12.4.2",
+    "@nestjs/core": "12.4.2",
+    "@nestjs/platform-fastify": "12.4.2",
+    "@nestjs/swagger": "12.1.2",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "fastify": "5.12.8",
+    "pg": "8.23.1",
+    "pino": "10.4.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.7"
+  }
+}
