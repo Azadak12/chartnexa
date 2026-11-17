@@ -19,7 +19,7 @@ function parsePair(body: unknown): TokenPair {
 export const authHttp = {
   /** The server answers the same way whether or not the email already exists. */
   async register(body: RegisterRequest): Promise<void> {
-    await apiFetch("/auth/register", { method: "POST", body });
+    await apiFetch("/auth/register", { method: "POST", body: { mail: body.email, password: body.password } });
   },
 
   async login(body: LoginRequest): Promise<TokenPair> {
