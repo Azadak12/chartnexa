@@ -24,13 +24,19 @@
 
 ## 5. Continuous integration
 
-- [ ] 5.1 Add `.github/workflows/ci.yml` running frozen install, lint, typecheck, test, build, audit and secret scan with caching; verify the workflow file passes a syntax lint (for example actionlint) and every step command succeeds locally.
-- [ ] 5.2 Once the owner provides a remote, push, confirm a pull request with a deliberate failure shows red CI and cannot merge under branch protection, then confirm a clean one shows green; record the evidence. (Owner-dependent: blocked until a remote exists.)
+- [x] 5.1 Add `.github/workflows/ci.yml` running frozen install, lint, typecheck, test, build, audit and secret scan with caching; verify the workflow file passes a syntax lint (for example actionlint) and every step command succeeds locally.
+- [x] 5.2 Once the owner provides a remote, push, confirm a pull request with a deliberate failure shows red CI and cannot merge under branch protection, then confirm a clean one shows green; record the evidence. (Owner-dependent: blocked until a remote exists.)
 
 ## 6. Documentation and verification
 
 - [x] 6.1 Write `CONTRIBUTING.md` with install, check, add-a-package and secret rules; verify by following it verbatim in a fresh clone in a temporary directory.
 - [x] 6.2 Run the full `check` from a fresh clone and record the output; update `docs/05_TECH_STACK_AND_ARCHITECTURE.md` monorepo sketch to match the final layout.
+
+## Evidence
+
+- 5.1: actionlint could not be installed locally; GitHub parsed and ran the workflow successfully (PR 1, run 44044373475), and every step command also passed locally and in a fresh clone.
+- 5.2: PR 1 showed green (check and audit pass). A throwaway PR 2 with a deliberate type error showed red CI. After the repository was made public (owner choice) and `main` protection added (required checks `check` and `audit`, strict), throwaway PR 3 with a deliberate type error showed `check` FAILURE and `mergeStateStatus: BLOCKED`. I did not attempt the merge itself, so blocking is evidenced by GitHub's merge state, not by a refused merge. Both throwaway PRs were closed unmerged.
+- Branch protection does not require pull requests or reviews and does not apply to admins (`enforce_admins: false`), so the repository owner can still push or bypass.
 
 ## Workflow follow-up
 
