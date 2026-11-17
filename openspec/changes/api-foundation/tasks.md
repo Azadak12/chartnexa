@@ -27,10 +27,17 @@
 
 ## 5. CI and documentation
 
-- [ ] 5.1 Add an `api` CI job with a `postgres:16` service running migrations, the rollback test and API tests; verify it is green on a pull request and red when a migration is deliberately broken.
-- [ ] 5.2 After the `api` job has passed once, add it to the required checks on `main`; verify a failing `api` job blocks merge state.
-- [ ] 5.3 Update `CONTRIBUTING.md`, `apps/api/README.md` (run, test, migrate, roll back, add a module) and the layout in `docs/05_TECH_STACK_AND_ARCHITECTURE.md`; verify by following the docs in a fresh clone.
-- [ ] 5.4 Run the full `pnpm check` and API suite from a fresh clone and record the output; verify startup with a missing required variable exits nonzero without printing secrets.
+- [x] 5.1 Add an `api` CI job with a `postgres:16` service running migrations, the rollback test and API tests; verify it is green on a pull request and red when a migration is deliberately broken.
+- [x] 5.2 After the `api` job has passed once, add it to the required checks on `main`; verify a failing `api` job blocks merge state.
+- [x] 5.3 Update `CONTRIBUTING.md`, `apps/api/README.md` (run, test, migrate, roll back, add a module) and the layout in `docs/05_TECH_STACK_AND_ARCHITECTURE.md`; verify by following the docs in a fresh clone.
+- [x] 5.4 Run the full `pnpm check` and API suite from a fresh clone and record the output; verify startup with a missing required variable exits nonzero without printing secrets.
+
+## Evidence
+
+- 5.1: PR 6 CI is green for `check`, `api` and `audit`. A throwaway PR with a deliberately broken migration (`CREATE TABEL`) failed both `api` and `check` and showed `mergeStateStatus: BLOCKED`; it was closed unmerged. The first CI run exposed two real defects (turbo not passing the test database variable; Prisma client and contracts not built before OpenAPI export), both fixed.
+- 5.2: `api` was added to the required checks on `main` (now `check`, `audit`, `api`, strict) after it passed once. The blocked state above is under that protection. Merging was not attempted.
+- 5.3/5.4: fresh clone of the branch: `pnpm install --frozen-lockfile`, `pnpm check` exit 0 (26 API tests, 2 contracts tests, plus design-tokens and shared-types), `pnpm migrate:roundtrip` OK, and starting without DATABASE_URL and CURSOR_SECRET exits 1 naming both variables without any secret value. No scratch databases left behind.
+- Local test runs use the Homebrew PostgreSQL 16 on the developer machine; CI uses a `postgres:16` service container with trust auth.
 
 ## Workflow follow-up
 
