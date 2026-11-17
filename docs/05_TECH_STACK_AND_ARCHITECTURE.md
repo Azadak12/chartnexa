@@ -29,16 +29,15 @@
 - Which live provider, media storage/CDN, hosting region, privacy policy and supported languages?
 - What are initial/concurrent user targets and budget?
 
-## Monorepo sketch (proposed)
+## Monorepo layout (established by change `bootstrap-monorepo-ci`)
 ```
-apps/mobile
-apps/admin-web  # conditional
-apps/api
+apps/                      # empty; mobile and api arrive in later changes
 packages/api-contracts
 packages/design-tokens
 packages/shared-types
 docs/
 openspec/
+.github/workflows/ci.yml
 CLAUDE.md
 ```
-Use a workspace manager with lockfiles and CI checks; no direct mobile access to database, secrets or internal-only administrative endpoints.
+pnpm workspaces + Turborepo, Node 26 (`.nvmrc`), strict TypeScript, ESLint, Prettier, Vitest, secretlint. `apps/admin-web` is deferred (owner decision C12: all roles use mobile). No direct mobile access to database, secrets or internal-only administrative endpoints.
