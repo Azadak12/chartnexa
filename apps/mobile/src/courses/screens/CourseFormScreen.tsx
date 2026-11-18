@@ -21,6 +21,7 @@ import { StateView } from "../../state/StateView";
 import { spacing } from "../../theme";
 import { Banner, Button, Chip, Screen, Text, useSubmitOnce } from "../../ui";
 import { ConfirmDialog } from "../../auth/ConfirmDialog";
+import { categoryApi } from "../../categories/category-api";
 import {
   canCreateCourses,
   canAuthorLessons,
@@ -155,6 +156,8 @@ function Form({
   });
   const [level, setLevel] = useState<CourseLevel>(course?.level ?? "beginner");
   const [tone, setTone] = useState<CourseTone>(course?.coverTone ?? "blue");
+  const [categoryId, setCategoryId] = useState<string | null>(course?.categoryId ?? null);
+  const categories = useQuery({ queryKey: ["categories"], queryFn: categoryApi.list });
   const [version, setVersion] = useState(course?.version ?? 1);
   const [status, setStatus] = useState<StaffCourse["status"] | null>(course?.status ?? null);
   const [message, setMessage] = useState<string | null>(null);
@@ -162,9 +165,16 @@ function Form({
   const [info, setInfo] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<"publish" | "unpublish" | null>(null);
   const publishRef = useRef(null);
-  const initial = useRef({ level: course?.level ?? "beginner", tone: course?.coverTone ?? "blue" });
+  const initial = useRef({
+    level: course?.level ?? "beginner",
+    tone: course?.coverTone ?? "blue",
+    categoryId: course?.categoryId ?? null,
+  });
   const dirty =
-    formState.isDirty || level !== initial.current.level || tone !== initial.current.tone;
+    formState.isDirty ||
+    level !== initial.current.level ||
+    tone !== initial.current.tone ||
+    categoryId !== initial.current.categoryId;
 
   useEffect(() => {
     if (!course) return;
@@ -190,6 +200,7 @@ function Form({
       level,
       priceCents: price.cents,
       coverTone: tone,
+      categoryId,
     };
     try {
       if (course) {
@@ -200,7 +211,11 @@ function Form({
           description: saved.description,
           priceText: centsToDollarText(saved.priceCents),
         });
-        initial.current = { level: saved.level, tone: saved.coverTone };
+        initial.current = {
+          level: saved.level,
+          tone: saved.coverTone,
+          categoryId: saved.categoryId,
+        };
         setInfo("Saved.");
         await refreshLists();
       } else {
@@ -324,6 +339,28 @@ function Form({
             />
           ))}
         </View>
+      </View>
+      <View style={{ gap: spacing.sm }} testID="category-picker">
+        <Text variant="bodyStrong">Category</Text>
+        {categories.status === "error" ? (
+          <Text tone="muted">Categories could not be loaded. You can set one later.</Text>
+        ) : (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+            <Chip
+              label="No category"
+              selected={categoryId === null}
+              onPress={() => setCategoryId(null)}
+            />
+            {(categories.data ?? []).map((c) => (
+              <Chip
+                key={c.id}
+                label={c.name}
+                selected={categoryId === c.id}
+                onPress={() => setCategoryId(c.id)}
+              />
+            ))}
+          </View>
+        )}
       </View>
       <FormField
         control={control}

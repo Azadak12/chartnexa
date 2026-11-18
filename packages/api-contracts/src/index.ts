@@ -29,3 +29,4 @@ export * from "./entitlements.js";
 export * from "./progress.js";
 export * from "./mfa.js";
 export * from "./reviews.js";
+export * from "./categories.js";

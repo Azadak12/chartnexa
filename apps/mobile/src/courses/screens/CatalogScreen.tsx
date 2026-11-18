@@ -10,12 +10,14 @@ import { useRestorableScroll, useScreenMemoryState } from "../../navigation/scre
 import { StateView } from "../../state/StateView";
 import { spacing } from "../../theme";
 import { Chip, Screen, Skeleton, Text, TextField } from "../../ui";
+import { categoryApi } from "../../categories/category-api";
 import { courseApi } from "../course-api";
 import { CourseCard, LEVEL_LABEL } from "../CourseCard";
 
 interface Filters {
   q: string;
   level: CourseLevel | null;
+  category?: string | null;
 }
 
 const SEARCH_DELAY_MS = 300;
@@ -26,7 +28,12 @@ export function CatalogScreen() {
   const [filters, setFilters] = useScreenMemoryState<Filters>("catalog:filters", {
     q: "",
     level: null,
+    category: null,
   });
+  const category = filters.category ?? null;
+  // Categories are optional: if they fail to load, the catalog still works without the filter.
+  const categories = useQuery({ queryKey: ["categories"], queryFn: categoryApi.list });
+  const withCourses = (categories.data ?? []).filter((c) => c.courseCount > 0 || c.id === category);
   const [text, setText] = useState(filters.q);
   const scroll = useRestorableScroll("catalog:list");
   const me = useQuery({ queryKey: ["me"], queryFn: accountApi.me });
@@ -42,18 +49,19 @@ export function CatalogScreen() {
   }, [text]);
 
   const query = useInfiniteQuery({
-    queryKey: ["catalog", filters.q, filters.level],
+    queryKey: ["catalog", filters.q, filters.level, category],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) =>
       courseApi.list({
         ...(filters.q ? { q: filters.q } : {}),
         ...(filters.level ? { level: filters.level } : {}),
+        ...(category ? { category } : {}),
         ...(pageParam ? { cursor: pageParam } : {}),
       }),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];
-  const filtered = filters.q !== "" || filters.level !== null;
+  const filtered = filters.q !== "" || filters.level !== null || category !== null;
 
   const header = (
     <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
@@ -85,6 +93,26 @@ export function CatalogScreen() {
           />
         ))}
       </View>
+      {withCourses.length > 0 ? (
+        <View
+          style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}
+          testID="category-filter"
+        >
+          <Chip
+            label="All topics"
+            selected={category === null}
+            onPress={() => setFilters({ ...filters, category: null })}
+          />
+          {withCourses.map((c) => (
+            <Chip
+              key={c.id}
+              label={c.name}
+              selected={category === c.id}
+              onPress={() => setFilters({ ...filters, category: c.id })}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 
@@ -107,7 +135,7 @@ export function CatalogScreen() {
         title={filtered ? "No courses match" : "No courses yet"}
         message={
           filtered
-            ? "Try a different search or level."
+            ? "Try a different search, level or topic."
             : "Courses will appear here once they are published."
         }
         {...(filtered
@@ -115,7 +143,7 @@ export function CatalogScreen() {
               actionLabel: "Clear search and filters",
               onAction: () => {
                 setText("");
-                setFilters({ q: "", level: null });
+                setFilters({ q: "", level: null, category: null });
               },
             }
           : {})}

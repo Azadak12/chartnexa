@@ -27,6 +27,7 @@ export const createCourseRequestSchema = z.strictObject({
   level: courseLevelSchema,
   priceCents,
   coverTone: courseToneSchema.default("blue"),
+  categoryId: z.uuid({ error: "Choose a category from the list" }).nullable().default(null),
 });
 
 /** `expectedVersion` is the version the editor started from; a newer course refuses the edit. */
@@ -38,6 +39,8 @@ export const updateCourseRequestSchema = z
     level: courseLevelSchema.optional(),
     priceCents: priceCents.optional(),
     coverTone: courseToneSchema.optional(),
+    /** null removes the category. */
+    categoryId: z.uuid({ error: "Choose a category from the list" }).nullable().optional(),
   })
   .refine((v) => Object.keys(v).some((k) => k !== "expectedVersion"), {
     message: "Provide at least one field to change",
@@ -54,6 +57,8 @@ export const publicCourseSchema = z.object({
   currency: z.literal("USD"),
   coverTone: courseToneSchema,
   publishedAt: z.string(),
+  /** Look the name up in GET /categories. */
+  categoryId: z.string().nullable().default(null),
 });
 
 /** The course page: the public course plus how many lessons it has. */
@@ -90,6 +95,7 @@ export const staffCourseSchema = publicCourseSchema.omit({ publishedAt: true }).
 export const catalogQuerySchema = z.strictObject({
   q: z.string().trim().min(1).max(100).optional(),
   level: courseLevelSchema.optional(),
+  category: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   cursor: z.string().max(512).optional(),
 });

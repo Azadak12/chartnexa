@@ -166,6 +166,7 @@ describe("creating a course", () => {
       level: "advanced",
       priceCents: 4950,
       coverTone: "black",
+      categoryId: null,
     });
     expect(screen).toHavePathname("/manage");
   });

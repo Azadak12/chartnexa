@@ -3,6 +3,7 @@ import type { AppConfig } from "./config/config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
+import { CategoriesModule } from "./modules/categories/index.js";
 import { CoursesModule } from "./modules/courses/index.js";
 import { EntitlementsModule } from "./modules/entitlements/index.js";
 import { LessonsModule } from "./modules/lessons/index.js";
@@ -29,6 +30,7 @@ export class AppModule {
         MfaModule,
         EntitlementsModule,
         CoursesModule,
+        CategoriesModule,
         LessonsModule,
         ProgressModule,
         ReviewsModule,

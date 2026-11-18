@@ -6,7 +6,13 @@ import { isAppError, messageFor } from "../../api/errors";
 import { StateView } from "../../state/StateView";
 import { colors, neutrals, radii, spacing } from "../../theme";
 import { Button, Chip, Screen, Text } from "../../ui";
-import { canCreateCourses, canManageCourses, fetchAccess, staffCourseApi } from "../course-api";
+import {
+  canCreateCourses,
+  canManageCategories,
+  canManageCourses,
+  fetchAccess,
+  staffCourseApi,
+} from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { formatPrice } from "../money";
 
@@ -70,6 +76,13 @@ export function StaffCoursesScreen() {
       </Text>
       {canCreateCourses(access.data) ? (
         <Button label="New course" onPress={() => router.push("/manage/new")} />
+      ) : null}
+      {canManageCategories(access.data) ? (
+        <Button
+          label="Categories"
+          variant="secondary"
+          onPress={() => router.push("/manage/categories")}
+        />
       ) : null}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
         {(["all", "draft", "published"] as const).map((s) => (

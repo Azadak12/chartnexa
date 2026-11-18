@@ -36,6 +36,7 @@ export function toStaff(r: Row): StaffCourse {
     priceCents: r.priceCents,
     currency: "USD",
     coverTone: r.coverTone,
+    categoryId: r.categoryId,
     status: r.status,
     version: r.version,
     publishedAt: r.publishedAt ? iso(r.publishedAt) : null,
@@ -62,6 +63,7 @@ export function toPublic(r: Row): PublicCourse {
     currency: "USD",
     coverTone: r.coverTone,
     publishedAt: iso(r.publishedAt as Date),
+    categoryId: r.categoryId,
   };
 }
 
@@ -102,6 +104,7 @@ export class CoursesService {
   ): Promise<StaffCourse> {
     const data = createCourseRequestSchema.parse(input);
     return this.db.$transaction(async (tx) => {
+      await this.assertCategory(tx, data.categoryId);
       const row = await tx.course.create({ data: { ...data, createdBy: actorId } });
       await this.audit.record(tx, {
         actorKind: "user",
@@ -115,6 +118,7 @@ export class CoursesService {
           level: row.level,
           priceCents: row.priceCents,
           status: row.status,
+          categoryId: row.categoryId,
         },
         requestId,
       });
@@ -144,7 +148,17 @@ export class CoursesService {
       const changes: Prisma.CourseUpdateManyMutationInput = {};
       const before: Record<string, unknown> = {};
       const after: Record<string, unknown> = {};
-      for (const key of ["title", "description", "level", "priceCents", "coverTone"] as const) {
+      if (fields.categoryId !== undefined && fields.categoryId !== current.categoryId) {
+        await this.assertCategory(tx, fields.categoryId);
+      }
+      for (const key of [
+        "title",
+        "description",
+        "level",
+        "priceCents",
+        "coverTone",
+        "categoryId",
+      ] as const) {
         const next = fields[key];
         if (next !== undefined && next !== current[key]) {
           (changes as Record<string, unknown>)[key] = next;
@@ -174,6 +188,22 @@ export class CoursesService {
       });
       return toStaff(await tx.course.findUniqueOrThrow({ where: { id } }));
     });
+  }
+
+  /**
+   * The category must exist. Its row is locked (KEY SHARE) until the transaction ends, so a
+   * simultaneous delete cannot remove it between this check and the course write.
+   */
+  private async assertCategory(tx: Tx, categoryId: string | null | undefined): Promise<void> {
+    if (!categoryId) return;
+    const rows = await tx.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM categories WHERE id = ${categoryId}::uuid FOR KEY SHARE`;
+    if (rows.length === 0) {
+      throw new ValidationFailed([
+        { field: "categoryId", message: "Choose a category from the list" },
+      ]);
+    }
   }
 
   /** A draft must be complete before students can see it. */
@@ -278,6 +308,7 @@ export class CoursesService {
   async listPublished(q: {
     q?: string | undefined;
     level?: string | undefined;
+    category?: string | undefined;
     limit?: number | undefined;
     cursor?: string | undefined;
   }): Promise<Page<PublicCourseSummary>> {
@@ -291,6 +322,10 @@ export class CoursesService {
     if (q.level) {
       params.push(q.level);
       where.push(`level = $${params.length}::"CourseLevel"`);
+    }
+    if (q.category) {
+      params.push(q.category);
+      where.push(`category_id = $${params.length}::uuid`);
     }
     if (q.cursor) {
       const [ts, id] = decodeCursor(q.cursor, this.config.CURSOR_SECRET);
@@ -342,6 +377,7 @@ export class CoursesService {
       currency: "USD",
       coverTone: row.coverTone,
       publishedAt: row.publishedAt ? iso(row.publishedAt) : null,
+      categoryId: row.categoryId,
       lessonCount: Number(counts?.total ?? 0),
       previewCount: Number(counts?.previews ?? 0),
       enrolled: owner,

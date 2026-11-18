@@ -219,3 +219,9 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 |---|---|---|
 | Q30 | Add distributed tracing with an SDK (OpenTelemetry) and a hosted backend? | Not yet. Trace ids from `traceparent` are logged now; add the SDK when a second service or a queue exists. |
 | Q31 | Which error-tracking service (for example Sentry) for the API and the app, and who owns the account? | Pending: needs an account, a data-processing review (no personal data may be sent) and cost approval. The API reports through `ErrorReporter`, so adding one is a single implementation. |
+
+## Course categories (change `course-categories`, 2026-11-18)
+
+| ID | Decision (built; the owner may change it) |
+|---|---|
+| R34 | One optional category per course; names 2 to 40 characters, unique ignoring case, at most 50; Admins and Managers manage them (`categories:manage`); a category with any course cannot be deleted. Built under the owner's standing instruction to make routine decisions autonomously. |

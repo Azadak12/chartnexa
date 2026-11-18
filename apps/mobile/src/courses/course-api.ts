@@ -110,6 +110,10 @@ export const canManageInstructors = (a: AccessResponse | undefined): boolean =>
 export const canModerateReviews = (a: AccessResponse | undefined): boolean =>
   has(a, "reviews:moderate");
 
+/** Admins and Managers hold this by default. */
+export const canManageCategories = (a: AccessResponse | undefined): boolean =>
+  has(a, "categories:manage");
+
 export const isAdmin = (a: AccessResponse | undefined): boolean => !!a && a.roles.includes("admin");
 
 /** Lesson authoring: the role permission, or a lesson grant on that course. */

@@ -183,6 +183,9 @@ model Course {
   /// Stored totals, changed in the same transaction as every review (CHECKs are in the migration).
   ratingCount Int          @default(0) @map("rating_count")
   ratingSum   Int          @default(0) @map("rating_sum")
+  /// Optional; a category in use cannot be deleted (RESTRICT).
+  categoryId  String?      @map("category_id") @db.Uuid
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   reviews     Review[]
 
   @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
@@ -415,4 +418,18 @@ model ReviewAppeal {
 
   @@unique([reviewId, hiddenAt])
   @@map("review_appeals")
+}
+
+/// An academy-wide course category. Names are unique ignoring case (index in the migration).
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  /// Bumped on every rename; renames must present the version they started from.
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  courses Course[]
+
+  @@map("categories")
 }

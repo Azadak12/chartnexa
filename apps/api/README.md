@@ -149,3 +149,8 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Metrics:** `GET /metrics` in Prometheus text: `http_requests_total` and `http_request_duration_seconds` by method, route pattern and status class (unknown paths count as `unmatched`), `app_errors_total` by class, memory, uptime and event-loop delay. Open in development and test; in production it answers 404 unless `METRICS_TOKEN` is set, then needs `Authorization: Bearer <token>`. Values are per instance and reset on restart.
 - **Alerts and runbook:** `ops/observability/alerts.rules.json` (JSON, which Prometheus reads as YAML) and `ops/observability/RUNBOOK.md`. Thresholds are starting points; no load test has been run and the rules have not been loaded into a running Prometheus.
 - **Not yet:** a tracing SDK (Q30), hosted error tracking (Q31), dashboards, log shipping, background-job metrics (no background jobs exist yet).
+
+## Course categories (change `course-categories`)
+- **Public:** `GET /categories` (name order, `courseCount` counts published courses) and `GET /courses?category=<id>`. Course responses carry `categoryId`.
+- **Staff (`categories:manage`, Admin and Manager):** `GET /staff/categories` (with `totalCourseCount`), `POST /staff/categories` `{ name }`, `PATCH /staff/categories/:id` `{ expectedVersion, name }`, `DELETE /staff/categories/:id` (409 while any course uses it; repeating it answers `deleted: false`). Names are 2 to 40 characters, unique ignoring case, at most 50 categories (R34).
+- **Courses:** `categoryId` on `POST /staff/courses` and `PATCH /staff/courses/:id` (`null` removes it); an unknown id is a field error.
