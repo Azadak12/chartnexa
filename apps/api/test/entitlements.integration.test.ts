@@ -104,7 +104,7 @@ describe("granting access", () => {
         grantReason: REASON,
         revokedAt: null,
       });
-      expect(res.body).not.toContain(student.email);
+      expect(res.body.toLowerCase()).not.toContain(student.email.toLowerCase());
       const rows = await auditRows(h, { targetId: body.entitlement.id });
       expect(rows).toHaveLength(1);
       expect(rows[0]).toMatchObject({
@@ -113,7 +113,7 @@ describe("granting access", () => {
         outcome: "success",
         reason: REASON,
       });
-      expect(JSON.stringify(rows[0])).not.toContain(student.email);
+      expect(JSON.stringify(rows[0]).toLowerCase()).not.toContain(student.email.toLowerCase());
     }
   });
 
@@ -411,7 +411,7 @@ describe("My Courses", () => {
     );
     expect(page.items.every((i) => i.onSale)).toBe(true);
     expect(res.body).not.toContain(someoneElse.id);
-    expect(res.body).not.toContain(me.email);
+    expect(res.body.toLowerCase()).not.toContain(me.email.toLowerCase());
   });
 
   it("is empty for a person with none, needs a sign-in, and pages", async () => {

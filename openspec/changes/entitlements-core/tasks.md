@@ -17,6 +17,6 @@
 ## 3. Integration and closing
 
 - [x] 3.1 Add contract tests against the real API: staff grants, student reads a locked lesson and sees the course in My Courses, staff revoke, the same token loses access on its next request, Instructor and Student refused on staff routes.
-- [ ] 3.2 Run mutation checks on the permission, the entitlement check in lesson reads, the unique index and the optional-auth guard; record results.
-- [ ] 3.3 Update READMEs and the manual device checklist, record R15 to R17 once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
+- [x] 3.2 Run mutation checks on the permission, the entitlement check in lesson reads, the unique index and the optional-auth guard; record results.
+- [x] 3.3 Update READMEs and the manual device checklist, record R15 to R17 once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
 - [ ] 3.4 Run the full checks and `openspec validate entitlements-core`; after review and merge, archive with `openspec archive`.
