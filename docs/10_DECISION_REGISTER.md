@@ -188,3 +188,15 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | R27 | A revoked owner's existing review stays visible; they can no longer write, edit or delete. Approved 2026-11-18. |
 | R28 | Reviews are built and tested now but must not be released to real students before `reviews-moderation` exists, because staff cannot yet remove an abusive review. Approved 2026-11-18. |
 
+
+## Review moderation: pending owner decisions (change `reviews-moderation`, 2026-11-18)
+
+| ID | Question | Proposed answer |
+|---|---|---|
+| Q23 | Who may report a review? | Any signed-in person except the author, 20 reports a day. |
+| Q24 | Reasons for reporting and hiding? | Spam or advertising; abusive or harassing; personal information; not about this course; other (note of 10+ characters). No rating-related reason. |
+| Q25 | What does the author see about a hiding? | The reason and the note the moderator wrote. |
+| Q26 | How do appeals work? | One per hiding; a different moderator decides; an Admin can decide any. |
+| Q27 | Hide automatically after N reports? | Never. |
+| Q28 | Can staff delete a review? | No, only hide (reversible). The author can still delete their own. |
+| Q29 | May the author edit a hidden review? | Yes; it stays hidden and moderators see the current text. |
