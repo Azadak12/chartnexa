@@ -97,7 +97,7 @@ export function VerifyEmailScreen() {
   }
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Verify your email
       </Text>

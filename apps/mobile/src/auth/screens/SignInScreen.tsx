@@ -58,7 +58,7 @@ export function SignInScreen() {
   });
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Sign in
       </Text>

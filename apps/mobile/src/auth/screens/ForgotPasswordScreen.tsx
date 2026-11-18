@@ -25,7 +25,7 @@ export function ForgotPasswordScreen() {
 
   if (done) {
     return (
-      <Screen>
+      <Screen narrow>
         <Text variant="title" accessibilityRole="header">
           Check your email
         </Text>
@@ -49,7 +49,7 @@ export function ForgotPasswordScreen() {
   }
 
   return (
-    <Screen keyboard>
+    <Screen keyboard narrow>
       <Text variant="title" accessibilityRole="header">
         Forgot password
       </Text>
