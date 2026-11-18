@@ -7,6 +7,7 @@ import {
   type StaffLesson,
   type StaffLessonList,
 } from "@chartnexa/api-contracts";
+import { PrismaService } from "../src/database/prisma.service.js";
 import { AuditService } from "../src/modules/access/index.js";
 import { CoursesService } from "../src/modules/courses/index.js";
 import { auditRows, person, type Person } from "./access-helpers.js";
@@ -327,6 +328,50 @@ describe("editing lessons", () => {
     ]);
     expect(results.map((r) => r.statusCode).sort()).toEqual([200, 409]);
     expect((await h.db.lesson.findUniqueOrThrow({ where: { id: l.id } })).version).toBe(2);
+  });
+
+  it("refuses the write when someone else's edit lands between reading and writing", async () => {
+    const c = await mkCourse();
+    const l = await addOk(c.id);
+    const db = h.t.app.get(PrismaService);
+    const realTransaction = db.$transaction.bind(db) as (...a: unknown[]) => Promise<unknown>;
+    // Right after the service reads the lesson, a competing edit commits from another connection.
+    const spy = vi.spyOn(db, "$transaction").mockImplementationOnce(((fn: (tx: never) => unknown) =>
+      realTransaction(async (tx: Record<string, unknown>) =>
+        fn(
+          new Proxy(tx, {
+            get(target, prop) {
+              if (prop !== "lesson") return target[prop as string];
+              const lessons = target["lesson"] as Record<string, (...a: unknown[]) => unknown>;
+              return new Proxy(lessons, {
+                get(t, method) {
+                  if (method !== "findFirst") return (t[method as string] as () => unknown).bind(t);
+                  return async (...args: unknown[]) => {
+                    const row = await t["findFirst"]!(...args);
+                    await h.db.lesson.update({
+                      where: { id: l.id },
+                      data: { title: "Competing edit", version: { increment: 1 } },
+                    });
+                    return row;
+                  };
+                },
+              });
+            },
+          }) as never,
+        ),
+      )) as never);
+    try {
+      const res = await staff(admin, "PATCH", `/staff/courses/${c.id}/lessons/${l.id}`, {
+        expectedVersion: 1,
+        title: "Late edit",
+      });
+      expect(res.statusCode).toBe(409);
+    } finally {
+      spy.mockRestore();
+    }
+    const row = await h.db.lesson.findUniqueOrThrow({ where: { id: l.id } });
+    expect([row.title, row.version]).toEqual(["Competing edit", 2]);
+    expect(await auditRows(h, { targetId: l.id, action: "lesson.update" })).toHaveLength(0);
   });
 
   it("answers 404 for an edit of a lesson that was deleted meanwhile", async () => {

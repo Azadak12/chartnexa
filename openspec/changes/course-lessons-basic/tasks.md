@@ -11,15 +11,15 @@
 
 ## 2. App: students
 
-- [ ] 2.1 Add the Lessons section to the course page and the preview reader route with loading, empty, error-retry, offline, locked sheet and "no longer available" states, preserved scroll; verify component tests per state and per scenario in `mobile-course-lessons`, plus accessibility checks (labels, text-based preview mark, large font).
+- [x] 2.1 Add the Lessons section to the course page and the preview reader route with loading, empty, error-retry, offline, locked sheet and "no longer available" states, preserved scroll; verify component tests per state and per scenario in `mobile-course-lessons`, plus accessibility checks (labels, text-based preview mark, large font).
 
 ## 3. App: staff
 
-- [ ] 3.1 Add the staff lessons list with move up and down (optimistic with rollback and announcements), delete dialog, and the full-screen add and edit form with typed-text preservation, field errors and conflict handling; verify component tests for add, edit, validation, conflict, delete confirm and cancel, move, no-access state, and retry without duplicate.
+- [x] 3.1 Add the staff lessons list with move up and down (optimistic with rollback and announcements), delete dialog, and the full-screen add and edit form with typed-text preservation, field errors and conflict handling; verify component tests for add, edit, validation, conflict, delete confirm and cancel, move, no-access state, and retry without duplicate.
 
 ## 4. Integration and closing
 
-- [ ] 4.1 Add contract tests against the real API: staff flow (create course, add, edit, reorder, delete, publish, student outline and preview, locked refusal); after PR 22 merges, add an Instructor-with-grant flow and an ungranted-Instructor refusal and rerun the full suite.
-- [ ] 4.2 Run mutation checks on the permission, locked-body and order-lock logic (remove each, confirm a test fails); verify by recording the results.
-- [ ] 4.3 Update `apps/mobile/README.md` (lessons now exist; manual device checklist for screen reader, keyboard and font scaling), record R11 to R14 in the decision register once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
+- [x] 4.1 Add contract tests against the real API: staff flow (create course, add, edit, reorder, delete, publish, student outline and preview, locked refusal); includes an Instructor-with-grant flow, an ungranted-Instructor refusal and a revoked-grant refusal (PR 22 is merged).
+- [x] 4.2 Run mutation checks on the permission, locked-body and order-lock logic (remove each, confirm a test fails); verify by recording the results.
+- [x] 4.3 Update `apps/mobile/README.md` (lessons now exist; manual device checklist for screen reader, keyboard and font scaling), record R11 to R14 in the decision register once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
 - [ ] 4.4 Run `pnpm check` and `openspec validate course-lessons-basic`; after review and merge, archive with `openspec archive`.
