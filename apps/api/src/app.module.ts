@@ -9,6 +9,7 @@ import { LessonsModule } from "./modules/lessons/index.js";
 import { AccessModule } from "./modules/access/index.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { MailerModule } from "./modules/mailer/index.js";
+import { ProgressModule } from "./modules/progress/index.js";
 import { RateLimitModule } from "./modules/rate-limit/index.js";
 
 @Module({})
@@ -26,6 +27,7 @@ export class AppModule {
         EntitlementsModule,
         CoursesModule,
         LessonsModule,
+        ProgressModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

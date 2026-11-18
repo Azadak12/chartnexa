@@ -68,6 +68,7 @@ describe("responses", () => {
         "id",
         "level",
         "onSale",
+        "progress",
         "priceCents",
         "summary",
         "title",

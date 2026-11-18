@@ -404,6 +404,7 @@ describe("My Courses", () => {
         "id",
         "level",
         "onSale",
+        "progress",
         "priceCents",
         "summary",
         "title",

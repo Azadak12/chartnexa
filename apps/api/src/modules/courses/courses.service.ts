@@ -10,6 +10,7 @@ import type {
 } from "@chartnexa/api-contracts";
 import { createCourseRequestSchema, DEFAULT_PAGE_SIZE } from "@chartnexa/api-contracts";
 import { CONFIG, type AppConfig } from "../../config/config.js";
+import { loadCourseCounts, loadNextLessonId } from "../../database/course-progress.js";
 import { PrismaService } from "../../database/prisma.service.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { buildPage, decodeCursor } from "../../pagination/cursor.js";
@@ -315,6 +316,14 @@ export class CoursesService {
       SELECT count(*) AS total, count(*) FILTER (WHERE is_preview) AS previews
       FROM lessons WHERE course_id = ${id}::uuid`;
     const onSale = row.status === "published";
+    // Progress is the owner's own data: nobody else gets it, and a stranger costs no extra query.
+    const [mine, next] =
+      owner && viewerId !== undefined
+        ? await Promise.all([
+            loadCourseCounts(this.db, viewerId, [id]),
+            loadNextLessonId(this.db, viewerId, id),
+          ])
+        : [null, null];
     return {
       id: row.id,
       title: row.title,
@@ -328,6 +337,8 @@ export class CoursesService {
       previewCount: Number(counts?.previews ?? 0),
       enrolled: owner,
       onSale,
+      progress: owner ? (mine?.get(id) ?? { completed: 0, total: 0 }) : null,
+      nextLessonId: next,
     };
   }
 

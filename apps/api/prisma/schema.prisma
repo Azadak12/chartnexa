@@ -44,6 +44,7 @@ model User {
   roles    UserRole[]
   grants   InstructorGrant[]
   entitlements Entitlement[]
+  completions  LessonCompletion[]
 
   @@map("users")
 }
@@ -226,7 +227,9 @@ model Lesson {
 
   course Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   keys   LessonCreateKey[]
+  completions LessonCompletion[]
 
+  @@unique([id, courseId], map: "lessons_id_course_id_key")
   @@map("lessons")
 }
 
@@ -266,4 +269,20 @@ model Entitlement {
   course Course @relation(fields: [courseId], references: [id])
 
   @@map("entitlements")
+}
+
+/// A person has finished a lesson (a manual mark for text lessons). Created or deleted, never
+/// changed. The composite foreign key proves the lesson belongs to the course; it cascades.
+model LessonCompletion {
+  userId      String   @map("user_id") @db.Uuid
+  lessonId    String   @map("lesson_id") @db.Uuid
+  courseId    String   @map("course_id") @db.Uuid
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade)
+
+  @@id([userId, lessonId])
+  @@index([userId, courseId])
+  @@map("lesson_completions")
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MAX_PAGE_SIZE } from "./pagination.js";
+import { courseProgressSchema } from "./progress.js";
 
 export const COURSE_LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export const COURSE_TONES = ["blue", "black", "tint"] as const;
@@ -64,6 +65,10 @@ export const publicCourseDetailSchema = publicCourseSchema.extend({
   enrolled: z.boolean().default(false),
   /** False only when an owner opens a course that has since been unpublished. */
   onSale: z.boolean().default(true),
+  /** Only for an owner: lessons complete out of lessons now. Null for everyone else. */
+  progress: courseProgressSchema.nullable().default(null),
+  /** Only for an owner: the first lesson not yet complete, or null. */
+  nextLessonId: z.string().nullable().default(null),
 });
 
 export const publicCourseSummarySchema = publicCourseSchema.omit({ description: true }).extend({

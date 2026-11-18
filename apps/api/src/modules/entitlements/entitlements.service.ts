@@ -8,6 +8,7 @@ import {
   type Page,
 } from "@chartnexa/api-contracts";
 import { CONFIG, type AppConfig } from "../../config/config.js";
+import { loadCourseCounts } from "../../database/course-progress.js";
 import { PrismaService } from "../../database/prisma.service.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { buildPage, decodeCursor } from "../../pagination/cursor.js";
@@ -233,6 +234,12 @@ export class EntitlementsService {
       (r) => [iso(r.createdAt), r.id],
       this.config.CURSOR_SECRET,
     );
+    // One query for the whole page, so the cost does not grow with the number of courses.
+    const counts = await loadCourseCounts(
+      this.db,
+      userId,
+      page.items.map((r) => r.course.id),
+    );
     return {
       items: page.items.map((r) => ({
         id: r.course.id,
@@ -247,6 +254,7 @@ export class EntitlementsService {
         coverTone: r.course.coverTone,
         onSale: r.course.status === "published",
         enrolledAt: iso(r.createdAt),
+        progress: counts.get(r.course.id) ?? { completed: 0, total: 0 },
       })),
       nextCursor: page.nextCursor,
     };

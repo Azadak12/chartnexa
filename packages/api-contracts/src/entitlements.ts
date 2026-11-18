@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { MAX_PAGE_SIZE } from "./pagination.js";
 import { courseLevelSchema, courseToneSchema } from "./courses.js";
+import { courseProgressSchema } from "./progress.js";
 
 export const ENTITLEMENT_SOURCES = ["admin_grant"] as const;
 export const ENTITLEMENT_STATUSES = ["active", "revoked"] as const;
@@ -59,6 +60,8 @@ export const myCourseSchema = z.object({
   onSale: z.boolean(),
   /** When access began. */
   enrolledAt: z.string(),
+  /** Lessons complete out of lessons in the course now. */
+  progress: courseProgressSchema.default({ completed: 0, total: 0 }),
 });
 
 export const entitlementPageQuerySchema = z.strictObject({
