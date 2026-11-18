@@ -28,7 +28,14 @@ import type { FastifyRequest } from "fastify";
 import { ApiErrors, ApiZodBody } from "../../platform/openapi-helpers.js";
 import { ZodPipe } from "../../platform/zod.pipe.js";
 import { RequirePermission } from "../access/index.js";
-import { Ctx, CurrentUser, type AuthContext, type RequestCtx } from "../identity/index.js";
+import {
+  Ctx,
+  CurrentUser,
+  MaybeUser,
+  OptionalAuthentication,
+  type AuthContext,
+  type RequestCtx,
+} from "../identity/index.js";
 import { LessonsService } from "./lessons.service.js";
 
 const idPipe = () => new ZodPipe(z.uuid());
@@ -43,25 +50,32 @@ export class PublicLessonsController {
   constructor(@Inject(LessonsService) private readonly lessons: LessonsService) {}
 
   @Get()
+  @OptionalAuthentication()
   @ApiOperation({
     summary:
       "Lesson outline of a published course (anyone): titles, order, preview flags, no text.",
   })
   @ApiErrors(400, 404)
-  outline(@Param("courseId", idPipe()) courseId: string): Promise<LessonOutline> {
-    return this.lessons.outline(courseId);
+  outline(
+    @Param("courseId", idPipe()) courseId: string,
+    @MaybeUser() viewer: AuthContext | undefined,
+  ): Promise<LessonOutline> {
+    return this.lessons.outline(courseId, viewer?.userId);
   }
 
   @Get(":lessonId")
+  @OptionalAuthentication()
   @ApiOperation({
-    summary: "Read a free-preview lesson (anyone). Other lessons answer 403 ENROLLMENT_REQUIRED.",
+    summary:
+      "Read a lesson (anyone for free previews; owners for all). Others answer 403 ENROLLMENT_REQUIRED.",
   })
   @ApiErrors(400, 403, 404)
   read(
     @Param("courseId", idPipe()) courseId: string,
     @Param("lessonId", idPipe()) lessonId: string,
+    @MaybeUser() viewer: AuthContext | undefined,
   ): Promise<PublicLesson> {
-    return this.lessons.readPublic(courseId, lessonId);
+    return this.lessons.readPublic(courseId, lessonId, viewer?.userId);
   }
 }
 

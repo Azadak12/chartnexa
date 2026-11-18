@@ -55,3 +55,9 @@ export function logEvent(
 ): void {
   ctx.log.info({ event, ...fields }, event);
 }
+
+/** The caller on a route marked `@OptionalAuthentication()`; undefined when signed out. */
+export const MaybeUser = createParamDecorator(
+  (_data: unknown, host: ExecutionContext): AuthContext | undefined =>
+    host.switchToHttp().getRequest<AuthedRequest>().auth,
+);

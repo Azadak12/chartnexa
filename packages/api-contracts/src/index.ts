@@ -25,3 +25,4 @@ export * from "./access.js";
 export * from "./courses.js";
 export * from "./grants.js";
 export * from "./lessons.js";
+export * from "./entitlements.js";

@@ -19,6 +19,7 @@ import { PrismaService } from "../../database/prisma.service.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { AuditService } from "../access/index.js";
 import { CoursesService } from "../courses/index.js";
+import { EntitlementsService } from "../entitlements/index.js";
 
 type Row = Prisma.LessonGetPayload<object>;
 type Tx = Prisma.TransactionClient;
@@ -52,6 +53,7 @@ export class LessonsService {
     @Inject(PrismaService) private readonly db: PrismaService,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(CoursesService) private readonly courses: CoursesService,
+    @Inject(EntitlementsService) private readonly entitlements: EntitlementsService,
   ) {}
 
   // --- staff ---------------------------------------------------------------------------------
@@ -258,8 +260,21 @@ export class LessonsService {
 
   // --- public --------------------------------------------------------------------------------
 
-  async outline(courseId: string): Promise<LessonOutline> {
-    await this.courses.assertPublished(courseId);
+  /** Published courses are open to everyone; an unpublished one only to its owners. */
+  private async assertVisible(courseId: string, viewerId?: string): Promise<boolean> {
+    try {
+      await this.courses.assertPublished(courseId);
+    } catch (e) {
+      if (e instanceof NotFoundException && viewerId !== undefined) {
+        if (await this.entitlements.hasActive(viewerId, courseId)) return true;
+      }
+      throw e;
+    }
+    return false;
+  }
+
+  async outline(courseId: string, viewerId?: string): Promise<LessonOutline> {
+    await this.assertVisible(courseId, viewerId);
     const rows = await this.db.lesson.findMany({
       where: { courseId },
       orderBy: { position: "asc" },
@@ -268,22 +283,27 @@ export class LessonsService {
     return { items: rows };
   }
 
-  /** Only free-preview lessons have a readable body until entitlements exist. */
-  async readPublic(courseId: string, lessonId: string): Promise<PublicLesson> {
-    await this.courses.assertPublished(courseId);
+  /** Free previews are open to everyone; every other lesson needs an active entitlement. */
+  async readPublic(courseId: string, lessonId: string, viewerId?: string): Promise<PublicLesson> {
+    const ownerOfUnpublished = await this.assertVisible(courseId, viewerId);
     const row = await this.db.lesson.findFirst({ where: { id: lessonId, courseId } });
     if (!row) throw new NotFoundException("Lesson not found.");
     if (!row.isPreview) {
-      throw new ForbiddenException({
-        message: LOCKED_MESSAGE,
-        code: LESSON_ERROR_CODES.enrollmentRequired,
-      });
+      const owner =
+        ownerOfUnpublished ||
+        (viewerId !== undefined && (await this.entitlements.hasActive(viewerId, courseId)));
+      if (!owner) {
+        throw new ForbiddenException({
+          message: LOCKED_MESSAGE,
+          code: LESSON_ERROR_CODES.enrollmentRequired,
+        });
+      }
     }
     return {
       id: row.id,
       title: row.title,
       position: row.position,
-      isPreview: true,
+      isPreview: row.isPreview,
       body: row.body,
     };
   }

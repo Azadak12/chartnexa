@@ -1,10 +1,16 @@
 // Public surface of the identity module. Other modules import only from here.
 export { IdentityModule } from "./identity.module.js";
-export { Authenticated, AuthGuard } from "./auth.guard.js";
+export {
+  Authenticated,
+  AuthGuard,
+  OptionalAuthentication,
+  OptionalAuthGuard,
+} from "./auth.guard.js";
 export {
   Ctx,
   CurrentUser,
   logEvent,
+  MaybeUser,
   type AuthContext,
   type AuthedRequest,
   type RequestCtx,
