@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
-import { canManageCourses, fetchAccess } from "../../courses/course-api";
+import { canManageCourses, canManageInstructors, fetchAccess } from "../../courses/course-api";
 import { applyServerErrors, nameSchema } from "../../forms/form-helpers";
 import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
@@ -116,6 +116,13 @@ export function ProfileScreen() {
             </View>
             {canManageCourses(access.data) ? (
               <Button label="Manage courses" onPress={() => router.push("/manage")} />
+            ) : null}
+            {canManageInstructors(access.data) ? (
+              <Button
+                label="Instructor permissions"
+                variant="secondary"
+                onPress={() => router.push("/profile/instructors")}
+              />
             ) : null}
             <Button
               label="Change password"

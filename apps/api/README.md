@@ -80,9 +80,16 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 
 ## Courses (change `course-catalog-basics`)
 - **Public:** `GET /courses` (published only; `q` searches titles case-insensitively as plain text, `level` filters, newest published first, cursor paging, page size capped at 100) and `GET /courses/:id` (published only; drafts and unknown ids both answer 404). No sign-in needed; responses carry no staff-only fields.
-- **Staff:** `POST /staff/courses` (`course:create`), `GET /staff/courses` and `GET /staff/courses/:id` (`course:update`), `PATCH /staff/courses/:id` (`course:update`, must send `expectedVersion`), `POST /staff/courses/:id/publish` and `/unpublish` (`course:publish`). Admins and Managers hold these permissions by default; Instructors need grants (a later change).
+- **Staff:** `POST /staff/courses` (`course:create`), `GET /staff/courses` and `GET /staff/courses/:id` (`course:update`), `PATCH /staff/courses/:id` (`course:update`, must send `expectedVersion`), `POST /staff/courses/:id/publish` and `/unpublish` (`course:publish`). Admins and Managers hold these permissions by default; Instructors get them only through grants (below). For an Instructor, the list shows only courses they hold an update grant on, and any other course id answers 403 (same body whether it exists or not).
 - **Safety:** an edit based on an older version answers 409 (the update is a compare-and-swap on the version, so of two simultaneous edits exactly one wins). Publishing needs a title and a description. Price is whole US cents from 0 to 1,000,000 (also enforced by database constraints). Every create, update, publish and unpublish is audited.
 - **First course for a phone test:** make an existing, verified account an Admin, sign in with it in the app, open Profile, then Manage courses.
 ```bash
 pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 ```
+
+## Instructor permissions (change `instructor-permission-delegation`)
+- An Instructor starts with nothing. An Admin or Manager gives individual permissions: create course (whole academy), and update course, publish course, upload lessons, schedule live, read students, read reports (each for one named course). Other permissions can never be granted (also enforced by a database CHECK).
+- **Endpoints (`instructor_permissions:manage`, Admin and Manager):** `GET /staff/instructors/:id/permissions` (grants plus what you may grant), `POST /staff/instructors/:id/grants` (`{ permission, courseId?, reason }`; repeating it changes nothing and answers `created: false`), `POST /staff/instructors/:id/grants/:grantId/revoke` (`{ reason }`). Reasons are 3 to 200 characters. Everything is audited, including denied attempts. Appoint the Instructor first with `PUT /staff/users/:id/role`.
+- **Manager ceiling (proposal R08):** Managers may grant everything grantable except `course:publish`; the list is `MANAGER_CEILING` in `modules/access/grants/grants.service.ts`.
+- **Automatic grants (proposal R09):** an Instructor with the create grant who makes a course gets update, lessons, live, students and reports on it, never publish. Audited as `grant.owner_auto`.
+- **Ending (proposal R10):** removing or replacing the Instructor role, or deleting the account, ends every grant in the same transaction. Grants of a disabled account or of anyone who is not an active Instructor never take effect. `GET /me/access` reports your own grants (`courseGrants`); the server re-checks on every request.

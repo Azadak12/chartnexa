@@ -10,6 +10,7 @@ import type { RoleChangeResponse, UserLookupResponse } from "@chartnexa/api-cont
 import type { Prisma } from "../../../generated/prisma/client.js";
 import { PrismaService } from "../../../database/prisma.service.js";
 import { AuditService } from "../audit/audit.service.js";
+import { GrantsService } from "../grants/grants.service.js";
 import { FORBIDDEN_MESSAGE } from "../authorization/authorization.service.js";
 import type { StaffRole } from "../authorization/permissions.js";
 
@@ -31,6 +32,7 @@ export class RolesService {
   constructor(
     @Inject(PrismaService) private readonly db: PrismaService,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(GrantsService) private readonly grants: GrantsService,
   ) {}
 
   /**
@@ -103,6 +105,10 @@ export class RolesService {
         return { kind: "denied", reason: "last_admin" };
       }
       const now = new Date();
+      const grantsEnded =
+        current?.role === "instructor"
+          ? await this.grants.endAllForUser(tx, targetId, actor.userId, "role_ended")
+          : 0;
       if (current) {
         await tx.userRole.update({
           where: { id: current.id },
@@ -122,7 +128,7 @@ export class RolesService {
         outcome: "success",
         reason,
         before: { role: current?.role ?? null },
-        after: { role },
+        after: { role, grantsEnded },
         requestId: actor.requestId ?? null,
       });
       return { kind: "ok", staffRole: role, changed: true };
@@ -149,6 +155,10 @@ export class RolesService {
       if (current.role === "admin" && (await this.countActiveAdmins(tx)) <= 1) {
         return { kind: "denied", reason: "last_admin" };
       }
+      const grantsEnded =
+        current.role === "instructor"
+          ? await this.grants.endAllForUser(tx, targetId, actor.userId, "role_ended")
+          : 0;
       await tx.userRole.update({
         where: { id: current.id },
         data: { revokedAt: new Date(), revokedBy: actor.userId, revokeReason: reason },
@@ -163,7 +173,7 @@ export class RolesService {
         outcome: "success",
         reason,
         before: { role: current.role },
-        after: { role: null },
+        after: { role: null, grantsEnded },
         requestId: actor.requestId ?? null,
       });
       return { kind: "ok", staffRole: null, changed: true };
@@ -204,6 +214,9 @@ export class RolesService {
         };
       }
       const reason = options.recovery ? "recovery" : "bootstrap";
+      if (current?.role === "instructor") {
+        await this.grants.endAllForUser(tx, user.id, null, "role_ended");
+      }
       if (current) {
         await tx.userRole.update({
           where: { id: current.id },
@@ -236,6 +249,10 @@ export class RolesService {
     if (current.role === "admin" && (await this.countActiveAdmins(tx)) <= 1) {
       throw new ConflictException(LAST_ADMIN_MESSAGE);
     }
+    const grantsEnded =
+      current.role === "instructor"
+        ? await this.grants.endAllForUser(tx, userId, userId, "account_deleted")
+        : 0;
     await tx.userRole.update({
       where: { id: current.id },
       data: { revokedAt: new Date(), revokedBy: userId, revokeReason: "account_deleted" },
@@ -249,7 +266,7 @@ export class RolesService {
       outcome: "success",
       reason: "account_deleted",
       before: { role: current.role },
-      after: { role: null },
+      after: { role: null, grantsEnded },
       requestId: requestId ?? null,
     });
   }

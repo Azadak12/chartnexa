@@ -21,7 +21,13 @@ import { StateView } from "../../state/StateView";
 import { spacing } from "../../theme";
 import { Banner, Button, Chip, Screen, Text, useSubmitOnce } from "../../ui";
 import { ConfirmDialog } from "../../auth/ConfirmDialog";
-import { canManageCourses, fetchAccess, staffCourseApi } from "../course-api";
+import {
+  canCreateCourses,
+  canManageCourses,
+  canPublishCourse,
+  fetchAccess,
+  staffCourseApi,
+} from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { centsToDollarText, parseDollars } from "../money";
 
@@ -43,6 +49,9 @@ const formSchema = z.object({
     if (!r.ok) ctx.addIssue({ code: "custom", message: r.message });
   }),
 });
+
+const NO_ACCESS_MESSAGE =
+  "You no longer have access to this course. What you typed is still here; go back to leave.";
 
 /** Server field names to the form's field names. */
 const FIELD_MAP: Record<string, string> = { priceCents: "priceText" };
@@ -95,13 +104,15 @@ export function CourseFormScreen() {
       </Screen>
     );
   }
-  if (!canManageCourses(access.data)) {
+  if (!canManageCourses(access.data) || (!editing && !canCreateCourses(access.data))) {
     return (
       <Screen>
         <StateView
           state="empty"
           title="You do not have access"
-          message="Only staff can manage courses."
+          message={
+            editing ? "Only staff can manage courses." : "You need permission to create courses."
+          }
           actionLabel="Back"
           onAction={() => router.replace("/home")}
         />
@@ -112,12 +123,21 @@ export function CourseFormScreen() {
     <Form
       key={existing.data?.id ?? "new"}
       course={editing ? existing.data : undefined}
+      canPublish={editing && canPublishCourse(access.data, String(id))}
       onSaved={() => qc.invalidateQueries({ queryKey: ["staff-courses"] })}
     />
   );
 }
 
-function Form({ course, onSaved }: { course: StaffCourse | undefined; onSaved: () => unknown }) {
+function Form({
+  course,
+  canPublish,
+  onSaved,
+}: {
+  course: StaffCourse | undefined;
+  canPublish: boolean;
+  onSaved: () => unknown;
+}) {
   const router = useRouter();
   const qc = useQueryClient();
   const { control, handleSubmit, setError, reset, formState } = useZodForm(formSchema, {
@@ -185,6 +205,11 @@ function Form({ course, onSaved }: { course: StaffCourse | undefined; onSaved: (
         setStale(true);
         return;
       }
+      if (isAppError(e) && e.kind === "forbidden") {
+        setMessage(NO_ACCESS_MESSAGE);
+        void qc.invalidateQueries({ queryKey: ["access"] });
+        return;
+      }
       const mapped = isAppError(e) ? withFormFields(e) : e;
       if (!applyServerErrors(mapped, setError, ["title", "description", "priceText"]))
         setMessage(isAppError(e) ? e.message : messageFor("unknown"));
@@ -228,6 +253,12 @@ function Form({ course, onSaved }: { course: StaffCourse | undefined; onSaved: (
         applyServerErrors(withFormFields(e), setError, ["title", "description", "priceText"]);
         setConfirm(null);
         setMessage("Fix the highlighted fields, save, then publish.");
+        return;
+      }
+      if (isAppError(e) && e.kind === "forbidden") {
+        setConfirm(null);
+        setMessage(NO_ACCESS_MESSAGE);
+        void qc.invalidateQueries({ queryKey: ["access"] });
         return;
       }
       throw e;
@@ -305,7 +336,7 @@ function Form({ course, onSaved }: { course: StaffCourse | undefined; onSaved: (
         loading={pending}
         onPress={() => void handleSubmit((v) => run(v))()}
       />
-      {course && status ? (
+      {course && status && canPublish ? (
         <View ref={publishRef} collapsable={false} style={{ gap: spacing.sm }}>
           {dirty ? (
             <Text variant="caption" tone="muted">

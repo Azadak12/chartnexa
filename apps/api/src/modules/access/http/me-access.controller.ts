@@ -18,6 +18,16 @@ export class MeAccessController {
   @ApiErrors(401)
   async access(@CurrentUser() user: AuthContext): Promise<AccessResponse> {
     const a = await this.authz.access(user.userId);
-    return { roles: a.roles, permissions: [...a.permissions].sort() };
+    const byCourse = new Map<string, string[]>();
+    for (const g of a.grants)
+      byCourse.set(g.courseId, [...(byCourse.get(g.courseId) ?? []), g.permission]);
+    return {
+      roles: a.roles,
+      permissions: [...a.permissions].sort(),
+      courseGrants: [...byCourse].map(([courseId, permissions]) => ({
+        courseId,
+        permissions: permissions.sort(),
+      })),
+    };
   }
 }

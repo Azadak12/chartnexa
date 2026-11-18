@@ -42,6 +42,7 @@ model User {
   sessions Session[]
   tokens   OneTimeToken[]
   roles    UserRole[]
+  grants   InstructorGrant[]
 
   @@map("users")
 }
@@ -172,6 +173,34 @@ model Course {
   publishedAt DateTime?    @map("published_at") @db.Timestamptz(6)
 
   @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
+  grants InstructorGrant[]
+
   @@index([updatedAt(sort: Desc), id(sort: Desc)])
   @@map("courses")
+}
+
+/// One permission held by one Instructor, for one course (course_id set) or the whole academy
+/// (create-course only). Ended rows stay as history. Partial unique index and CHECKs are in the
+/// migration: one active grant per (user, permission, course); permission limited to the
+/// grantable set; course_id null exactly when permission is course:create.
+model InstructorGrant {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  permission   String
+  courseId     String?   @map("course_id") @db.Uuid
+  /// manual (an Admin or Manager) or owner_auto (made when an Instructor creates a course).
+  source       String    @default("manual")
+  grantedBy    String?   @map("granted_by") @db.Uuid
+  reason       String
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy    String?   @map("revoked_by") @db.Uuid
+  revokeReason String?   @map("revoke_reason")
+
+  user   User    @relation(fields: [userId], references: [id])
+  course Course? @relation(fields: [courseId], references: [id])
+
+  @@index([userId, revokedAt])
+  @@index([courseId])
+  @@map("instructor_grants")
 }
