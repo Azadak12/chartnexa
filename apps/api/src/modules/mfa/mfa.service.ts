@@ -10,6 +10,7 @@ import type { MfaChallenge, MfaSetupStartResponse, MfaStatus } from "@chartnexa/
 import { CONFIG, type AppConfig } from "../../config/config.js";
 import { PrismaService } from "../../database/prisma.service.js";
 import type { Prisma } from "../../generated/prisma/client.js";
+import { ValidationFailed } from "../../platform/zod.pipe.js";
 import { AuditService } from "../access/index.js";
 import {
   hashToken,
@@ -38,6 +39,7 @@ const failed = () =>
 class Replay extends Error {}
 
 const STAFF_ROLES = ["admin", "manager"] as const;
+const CODE_NOT_ACCEPTED = "That code did not work. Use a fresh code from your authenticator app.";
 
 export interface VerifiedSecondStep {
   userId: string;
@@ -379,11 +381,14 @@ export class MfaService implements MfaGate {
         )
       : null;
     const step = secret ? matchStep(secret, rawCode.replace(/\s+/g, ""), Date.now()) : null;
-    if (!passwordOk || step === null) {
+    // Field errors with a 400, like changing a password: a 401 would tell the app the session ended.
+    const refuse = async (field: "password" | "code", message: string): Promise<never> => {
       await this.limiter.hit(`mfa:user:${userId}`, this.config.RL_MFA_WINDOW_SECONDS);
-      logEvent(ctx, "auth.mfa.regenerate_failure", { userId, outcome: "refused" });
-      throw new UnauthorizedException("The password or code did not work.");
-    }
+      logEvent(ctx, "auth.mfa.regenerate_failure", { userId, outcome: field });
+      throw new ValidationFailed([{ field, message }]);
+    };
+    if (!passwordOk) return refuse("password", "Incorrect password.");
+    if (step === null) return refuse("code", CODE_NOT_ACCEPTED);
     const codes = this.newCodes();
     try {
       await this.db.$transaction(async (tx) => {
@@ -400,9 +405,7 @@ export class MfaService implements MfaGate {
         });
       });
     } catch (e) {
-      if (e instanceof Replay) {
-        throw new UnauthorizedException("The password or code did not work.");
-      }
+      if (e instanceof Replay) return refuse("code", CODE_NOT_ACCEPTED);
       throw e;
     }
     return codes.shown;

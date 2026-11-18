@@ -16,7 +16,6 @@ import { sessionStore } from "../src/session/session-store";
 import {
   GOOD_PASSWORD,
   loginAny,
-  loginPair,
   makeAdmin,
   realFetch,
   uniqueEmail,

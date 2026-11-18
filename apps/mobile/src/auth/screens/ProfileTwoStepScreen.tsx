@@ -26,9 +26,10 @@ export function ProfileTwoStepScreen() {
       setCode("");
       void qc.invalidateQueries({ queryKey: ["mfa"] });
     } catch (e) {
+      // The server names what was wrong (password or code) with a 400, so the session stays.
       setError(
-        isAppError(e) && e.kind === "unauthorized"
-          ? "The password or code did not work. Use a fresh code from your authenticator app."
+        isAppError(e) && e.kind === "validation" && e.fields.length > 0
+          ? e.fields.map((f) => f.message).join(" ")
           : isAppError(e)
             ? e.message
             : messageFor("unknown"),

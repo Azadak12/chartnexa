@@ -462,45 +462,29 @@ describe("recovery codes", () => {
     const p = await staff("manager");
     const out = await enrollThroughApi(p);
     const ok = codeForStep(out.secret, nowStep() + 1);
-    expect(
-      (
-        await post(
-          "/me/mfa/recovery-codes",
-          { password: "wrong-password-value", code: ok },
-          out.accessToken,
-        )
-      ).statusCode,
-    ).toBe(401);
-    expect(
-      (
-        await post(
-          "/me/mfa/recovery-codes",
-          { password: p.password, code: "000000" },
-          out.accessToken,
-        )
-      ).statusCode,
-    ).toBe(401);
-    expect(
-      (await post("/me/mfa/recovery-codes", { password: p.password, code: ok }, out.accessToken))
-        .statusCode,
-    ).toBe(200);
-    expect(
-      (await post("/me/mfa/recovery-codes", { password: p.password, code: ok }, out.accessToken))
-        .statusCode,
-    ).toBe(401);
+    const regen = (body: { password: string; code: string }, token?: string) =>
+      post("/me/mfa/recovery-codes", body, token);
+    // Wrong input is a 400 with the field named, never a 401, so the app does not think the session ended.
+    const wrongPassword = await regen(
+      { password: "wrong-password-value", code: ok },
+      out.accessToken,
+    );
+    expect(wrongPassword.statusCode).toBe(400);
+    expect((wrongPassword.json() as { fields: { field: string }[] }).fields[0]?.field).toBe(
+      "password",
+    );
+    const wrongCode = await regen({ password: p.password, code: "000000" }, out.accessToken);
+    expect(wrongCode.statusCode).toBe(400);
+    expect((wrongCode.json() as { fields: { field: string }[] }).fields[0]?.field).toBe("code");
+    expect((await regen({ password: p.password, code: ok }, out.accessToken)).statusCode).toBe(200);
+    expect((await regen({ password: p.password, code: ok }, out.accessToken)).statusCode).toBe(400);
+    // The session survives all of that.
+    expect((await h.call("GET", "/me", { token: out.accessToken })).statusCode).toBe(200);
     const student = await person(h);
     expect(
-      (
-        await post(
-          "/me/mfa/recovery-codes",
-          { password: student.password, code: "123456" },
-          student.accessToken,
-        )
-      ).statusCode,
-    ).toBe(401);
-    expect(
-      (await post("/me/mfa/recovery-codes", { password: p.password, code: ok })).statusCode,
-    ).toBe(401);
+      (await regen({ password: student.password, code: "123456" }, student.accessToken)).statusCode,
+    ).toBe(400);
+    expect((await regen({ password: p.password, code: ok })).statusCode).toBe(401);
   });
 });
 

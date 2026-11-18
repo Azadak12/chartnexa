@@ -381,13 +381,22 @@ describe("Profile", () => {
 
   it("explains a refused request, clears the code, and keeps the password", async () => {
     mfa.status.mockResolvedValue({ required: true, enabled: true, recoveryCodesRemaining: 3 });
-    mfa.regenerate.mockRejectedValue(appError("unauthorized"));
+    mfa.regenerate.mockRejectedValue(
+      appError("validation", {
+        fields: [
+          {
+            field: "code",
+            message: "That code did not work. Use a fresh code from your authenticator app.",
+          },
+        ],
+      }),
+    );
     await renderRouter(app, { initialUrl: "/profile/two-step" });
     await screen.findByTestId("mfa-state");
     await type("Password", "wrong password value");
     await type("Authenticator code", "123456");
     await press("Get new recovery codes");
-    expect(await screen.findByText(/password or code did not work/)).toBeTruthy();
+    expect(await screen.findByText(/That code did not work\. Use a fresh code/)).toBeTruthy();
     expect(screen.getByLabelText("Authenticator code").props.value).toBe("");
     expect(screen.getByLabelText("Password").props.value).toBe("wrong password value");
   });

@@ -156,6 +156,21 @@ interface Enrolled {
 }
 const enrolled = new Map<string, Enrolled>();
 
+/** The tokens of a second-step sign-in, without the recovery-code count. */
+function signInPair(r: {
+  accessToken: string;
+  refreshToken: string;
+  sessionId: string;
+  expiresIn: number;
+}): TokenPair {
+  return {
+    accessToken: r.accessToken,
+    refreshToken: r.refreshToken,
+    sessionId: r.sessionId,
+    expiresIn: r.expiresIn,
+  };
+}
+
 /** Signs in a person who does not need a second step, and fails loudly if one is asked for. */
 export async function loginPair(body: { email: string; password: string }): Promise<TokenPair> {
   const result = await authHttp.login(body);
@@ -187,11 +202,9 @@ export async function loginAny(email: string, password: string): Promise<TokenPa
   if (!known) throw new Error(`No second step recorded for ${email}`);
   const recovery = known.recoveryCodes.shift();
   if (recovery) {
-    const { recoveryCodesRemaining: _remaining, ...pair } = await authHttp.verifyMfa({
-      challengeToken: result.challengeToken,
-      code: recovery,
-    });
-    return pair;
+    return signInPair(
+      await authHttp.verifyMfa({ challengeToken: result.challengeToken, code: recovery }),
+    );
   }
   // No recovery codes left: use the next authenticator step, waiting if it is not valid yet.
   const step = Math.max(currentStep(), known.lastStep + 1);
@@ -199,9 +212,10 @@ export async function loginAny(email: string, password: string): Promise<TokenPa
     await new Promise((r) => setTimeout(r, (step - 1) * 30_000 - Date.now() + 200));
   }
   known.lastStep = step;
-  const { recoveryCodesRemaining: _remaining, ...pair } = await authHttp.verifyMfa({
-    challengeToken: result.challengeToken,
-    code: totpCode(known.secret, step),
-  });
-  return pair;
+  return signInPair(
+    await authHttp.verifyMfa({
+      challengeToken: result.challengeToken,
+      code: totpCode(known.secret, step),
+    }),
+  );
 }
