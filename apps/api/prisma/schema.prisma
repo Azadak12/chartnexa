@@ -48,7 +48,10 @@ model User {
   mfaCredential MfaCredential?
   mfaRecoveryCodes MfaRecoveryCode[]
   mfaChallenges MfaChallenge[]
-  reviews Review[]
+  reviews        Review[]       @relation("ReviewAuthor")
+  hiddenReviews  Review[]       @relation("ReviewHider")
+  reviewReports  ReviewReport[] @relation("ReviewReporter")
+  decidedAppeals ReviewAppeal[] @relation("ReviewAppealDecider")
 
   @@map("users")
 }
@@ -358,10 +361,58 @@ model Review {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  /// Moderation: all set together, or all empty (CHECK in the migration). A hidden review keeps
+  /// its text and is left out of public lists and the rating totals.
+  hiddenAt     DateTime? @map("hidden_at") @db.Timestamptz(6)
+  hiddenById   String?   @map("hidden_by") @db.Uuid
+  hiddenReason String?   @map("hidden_reason")
+  hiddenNote   String?   @map("hidden_note")
+
+  user     User           @relation("ReviewAuthor", fields: [userId], references: [id])
+  hiddenBy User?          @relation("ReviewHider", fields: [hiddenById], references: [id], onDelete: SetNull)
+  course   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  reports  ReviewReport[]
+  appeals  ReviewAppeal[]
 
   @@unique([userId, courseId])
   @@index([courseId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("reviews")
+}
+
+/// A person's report of a review. One open report per person and review (partial unique index in
+/// the migration); a moderator's action resolves the open reports.
+model ReviewReport {
+  id         String    @id @default(uuid()) @db.Uuid
+  reviewId   String    @map("review_id") @db.Uuid
+  reporterId String    @map("reporter_id") @db.Uuid
+  reason     String
+  note       String    @default("")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter User   @relation("ReviewReporter", fields: [reporterId], references: [id])
+
+  @@index([reviewId])
+  @@index([reporterId])
+  @@map("review_reports")
+}
+
+/// An author's appeal of one hiding (identified by the review and the time it was hidden).
+model ReviewAppeal {
+  id          String    @id @default(uuid()) @db.Uuid
+  reviewId    String    @map("review_id") @db.Uuid
+  hiddenAt    DateTime  @map("hidden_at") @db.Timestamptz(6)
+  message     String
+  status      String    @default("open")
+  decidedById String?   @map("decided_by") @db.Uuid
+  decidedNote String?   @map("decided_note")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  decidedAt   DateTime? @map("decided_at") @db.Timestamptz(6)
+
+  review    Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  decidedBy User?  @relation("ReviewAppealDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@unique([reviewId, hiddenAt])
+  @@map("review_appeals")
 }

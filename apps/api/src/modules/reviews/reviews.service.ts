@@ -3,6 +3,7 @@ import {
   DEFAULT_PAGE_SIZE,
   LESSON_ERROR_CODES,
   REVIEW_PAGE_SIZE,
+  type ModerationState,
   type MyReviewResponse,
   type Page,
   type Review,
@@ -15,6 +16,7 @@ import { buildPage, decodeCursor } from "../../pagination/cursor.js";
 import { CoursesService } from "../courses/index.js";
 import { EntitlementsService } from "../entitlements/index.js";
 import { RateLimiterService } from "../rate-limit/index.js";
+import { adjustTotals } from "./totals.js";
 
 type Tx = Prisma.TransactionClient;
 type Row = Prisma.ReviewGetPayload<{ include: { user: { select: { displayName: true } } } }>;
@@ -33,6 +35,28 @@ export function toReview(r: Row, viewerId: string | undefined): Review {
     updatedAt: iso(r.updatedAt),
     reviewerName: r.user.displayName?.trim() || FALLBACK_NAME,
     mine: viewerId !== undefined && r.userId === viewerId,
+  };
+}
+
+/** What the author sees about their own hidden review: the reason, the note, and the appeal. */
+export function toModeration(
+  r: Prisma.ReviewGetPayload<{ include: { appeals: true } }>,
+): ModerationState | null {
+  if (!r.hiddenAt || !r.hiddenReason) return null;
+  const appeal = r.appeals.find((a) => a.hiddenAt.getTime() === r.hiddenAt!.getTime()) ?? null;
+  return {
+    state: "hidden",
+    reason: r.hiddenReason as ModerationState["reason"],
+    note: r.hiddenNote ?? "",
+    hiddenAt: iso(r.hiddenAt),
+    canAppeal: appeal === null,
+    appeal: appeal && {
+      status: appeal.status as NonNullable<ModerationState["appeal"]>["status"],
+      message: appeal.message,
+      decidedNote: appeal.decidedNote,
+      createdAt: iso(appeal.createdAt),
+      decidedAt: appeal.decidedAt ? iso(appeal.decidedAt) : null,
+    },
   };
 }
 
@@ -75,10 +99,21 @@ export class ReviewsService {
     });
   }
 
+  /** One place for totals changes, so tests can make it fail in the middle of a write. */
+  private async adjust(tx: Tx, courseId: string, count: number, sum: number): Promise<void> {
+    await adjustTotals(tx, courseId, count, sum);
+  }
+
   async getMine(userId: string, courseId: string): Promise<MyReviewResponse> {
     await this.requireOwner(userId, courseId);
-    const row = await this.load(this.db, userId, courseId);
-    return { review: row ? toReview(row, userId) : null };
+    const row = await this.db.review.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+      include: { user: { select: { displayName: true } }, appeals: true },
+    });
+    return {
+      review: row ? toReview(row, userId) : null,
+      moderation: row ? toModeration(row) : null,
+    };
   }
 
   /**
@@ -99,7 +134,8 @@ export class ReviewsService {
       }
       if (before) {
         await tx.review.update({ where: { id: before.id }, data: { rating, body } });
-        await this.adjust(tx, courseId, 0, rating - before.rating);
+        // A hidden review is not in the totals, so editing it must not move them.
+        if (!before.hiddenAt) await this.adjust(tx, courseId, 0, rating - before.rating);
       } else {
         await tx.review.create({ data: { userId, courseId, rating, body } });
         await this.adjust(tx, courseId, 1, rating);
@@ -119,14 +155,9 @@ export class ReviewsService {
       });
       if (!before) return { deleted: false };
       await tx.review.delete({ where: { id: before.id } });
-      await this.adjust(tx, courseId, -1, -before.rating);
+      if (!before.hiddenAt) await this.adjust(tx, courseId, -1, -before.rating);
       return { deleted: true };
     });
-  }
-
-  private async adjust(tx: Tx, courseId: string, count: number, sum: number): Promise<void> {
-    await tx.$executeRaw`UPDATE courses SET rating_count = rating_count + ${count}, rating_sum = rating_sum + ${sum}
-      WHERE id = ${courseId}::uuid`;
   }
 
   // --- public --------------------------------------------------------------------------------
@@ -150,7 +181,7 @@ export class ReviewsService {
   ): Promise<Page<Review>> {
     await this.assertVisible(courseId, viewerId);
     const limit = q.limit ?? REVIEW_PAGE_SIZE ?? DEFAULT_PAGE_SIZE;
-    const where: string[] = [`course_id = $1::uuid`];
+    const where: string[] = [`course_id = $1::uuid`, `hidden_at IS NULL`];
     const params: unknown[] = [courseId];
     if (q.cursor) {
       const [ts, id] = decodeCursor(q.cursor, this.config.CURSOR_SECRET);
@@ -184,16 +215,18 @@ export class ReviewsService {
 
   /** Inside the account-deletion transaction: the person's reviews go and the totals follow. */
   async deleteForAccount(tx: Tx, userId: string): Promise<void> {
+    await tx.reviewReport.deleteMany({ where: { reporterId: userId } });
     const mine = await tx.review.findMany({
       where: { userId },
-      select: { id: true, courseId: true, rating: true },
+      select: { id: true, courseId: true, rating: true, hiddenAt: true },
       orderBy: { courseId: "asc" },
     });
     if (mine.length === 0) return;
     // Courses are locked in one fixed order so two deletions can never wait on each other.
     const courseIds = [...new Set(mine.map((r) => r.courseId))];
     await tx.$queryRaw`SELECT id FROM courses WHERE id = ANY(${courseIds}::uuid[]) ORDER BY id FOR UPDATE`;
-    for (const r of mine) await this.adjust(tx, r.courseId, -1, -r.rating);
+    // Hidden reviews are not in the totals, so only visible ones are subtracted.
+    for (const r of mine) if (!r.hiddenAt) await this.adjust(tx, r.courseId, -1, -r.rating);
     await tx.review.deleteMany({ where: { userId } });
   }
 }

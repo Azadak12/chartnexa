@@ -39,6 +39,8 @@ const schema = z.object({
   RL_REGISTER_WINDOW_SECONDS: z.coerce.number().int().min(1).default(3600),
   RL_REVIEW_USER_MAX: z.coerce.number().int().min(1).default(30),
   RL_REVIEW_WINDOW_SECONDS: z.coerce.number().int().min(1).default(3600),
+  RL_REVIEW_REPORT_MAX: z.coerce.number().int().min(1).default(20),
+  RL_REVIEW_REPORT_WINDOW_SECONDS: z.coerce.number().int().min(1).default(86400),
   RL_GENERIC_IP_MAX: z.coerce.number().int().min(1).default(60),
   RL_GENERIC_WINDOW_SECONDS: z.coerce.number().int().min(1).default(900),
 });

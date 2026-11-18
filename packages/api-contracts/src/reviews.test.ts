@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { publicCourseDetailSchema, publicCourseSummarySchema } from "./courses.js";
 import {
+  appealReviewRequestSchema,
   courseRatingSchema,
+  decideAppealRequestSchema,
+  hideReviewRequestSchema,
+  REVIEW_REASONS,
+  reportReviewRequestSchema,
+  restoreReviewRequestSchema,
   myReviewResponseSchema,
   REVIEW_BODY_MAX,
   reviewSchema,
@@ -112,5 +118,63 @@ describe("what anyone may see", () => {
       previewCount: 0,
     });
     expect(detail.rating).toEqual({ count: 0, average: null });
+  });
+});
+
+describe("moderation requests", () => {
+  it("offers no reason about the rating", () => {
+    expect([...REVIEW_REASONS].join(" ")).not.toMatch(/rating|star|low|negative|disagree/i);
+  });
+
+  it("accepts every listed reason and rejects anything else", () => {
+    for (const reason of REVIEW_REASONS) {
+      expect(reportReviewRequestSchema.safeParse({ reason }).success).toBe(true);
+    }
+    for (const reason of ["low_rating", "", undefined, 3, "SPAM"]) {
+      const r = reportReviewRequestSchema.safeParse({ reason });
+      expect(r.success).toBe(false);
+    }
+  });
+
+  it("limits and cleans notes", () => {
+    expect(
+      reportReviewRequestSchema.safeParse({ reason: "spam", note: "x".repeat(301) }).success,
+    ).toBe(false);
+    expect(reportReviewRequestSchema.parse({ reason: "spam", note: "  hi " }).note).toBe("hi");
+    expect(reportReviewRequestSchema.safeParse({ reason: "spam", note: "a\u0000b" }).success).toBe(
+      false,
+    );
+    expect(
+      hideReviewRequestSchema.safeParse({ reason: "spam", note: "x".repeat(501) }).success,
+    ).toBe(false);
+  });
+
+  it("requires an explanation of at least 10 characters for 'other' when hiding", () => {
+    const bad = hideReviewRequestSchema.safeParse({ reason: "other", note: "too short" });
+    expect(bad.success).toBe(false);
+    if (!bad.success) expect(bad.error.issues[0]?.path).toEqual(["note"]);
+    expect(
+      hideReviewRequestSchema.safeParse({ reason: "other", note: "x".repeat(10) }).success,
+    ).toBe(true);
+    expect(hideReviewRequestSchema.safeParse({ reason: "spam" }).success).toBe(true);
+  });
+
+  it("rejects unknown fields, so a rating or text cannot ride along", () => {
+    expect(hideReviewRequestSchema.safeParse({ reason: "spam", rating: 1 }).success).toBe(false);
+    expect(restoreReviewRequestSchema.safeParse({ body: "rewritten" }).success).toBe(false);
+  });
+
+  it("needs an appeal message and a clear decision", () => {
+    expect(appealReviewRequestSchema.safeParse({ message: "   " }).success).toBe(false);
+    expect(appealReviewRequestSchema.safeParse({ message: "x".repeat(501) }).success).toBe(false);
+    expect(appealReviewRequestSchema.safeParse({ message: "This is fair feedback." }).success).toBe(
+      true,
+    );
+    expect(decideAppealRequestSchema.safeParse({ decision: "maybe" }).success).toBe(false);
+    expect(decideAppealRequestSchema.safeParse({ decision: "overturn" }).success).toBe(true);
+  });
+
+  it("parses an older own-review response without a moderation field", () => {
+    expect(myReviewResponseSchema.parse({ review: null }).moderation).toBeNull();
   });
 });
