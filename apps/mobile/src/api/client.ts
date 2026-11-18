@@ -41,6 +41,8 @@ export function deviceLabel(): string {
 export interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
+  /** Raw bytes sent as application/octet-stream (upload parts). Takes the place of `body`. */
+  rawBody?: Uint8Array;
   signal?: AbortSignal;
   /** Supplies the access token. `mobile-auth` will provide this; none exists yet. */
   getToken?: () => string | null;
@@ -66,10 +68,18 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
         accept: "application/json",
         "x-request-id": requestId,
         "x-device-label": deviceLabel(),
-        ...(options.body !== undefined ? { "content-type": "application/json" } : {}),
+        ...(options.rawBody !== undefined
+          ? { "content-type": "application/octet-stream" }
+          : options.body !== undefined
+            ? { "content-type": "application/json" }
+            : {}),
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
-      ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+      ...(options.rawBody !== undefined
+        ? { body: options.rawBody as unknown as BodyInit }
+        : options.body !== undefined
+          ? { body: JSON.stringify(options.body) }
+          : {}),
       signal: controller.signal,
     });
   } catch {
