@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { AccessibilityInfo, View } from "react-native";
 import { isAppError, messageFor } from "../api/errors";
 import { ConfirmDialog } from "../auth/ConfirmDialog";
+import { useSession } from "../session/session-store";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
 import { neutrals, radii, spacing } from "../theme";
@@ -10,6 +11,8 @@ import { Banner, Button, Skeleton, Text } from "../ui";
 import { RatingSummary } from "./RatingSummary";
 import { reviewsApi } from "./review-api";
 import { ReviewSheet } from "./ReviewSheet";
+import { HiddenNotice } from "./HiddenNotice";
+import { ReportSheet } from "./ReportSheet";
 
 const date = (iso: string): string =>
   new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
@@ -41,6 +44,11 @@ export function ReviewsSection({
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [reporting, setReporting] = useState<string | null>(null);
+  const reportRefs = useRef<Record<string, unknown>>({});
+  const reportOpener = useRef<unknown>(null);
+  const { status: sessionStatus } = useSession();
+  const signedIn = sessionStatus === "signed-in";
   const writeRef = useRef(null);
   const deleteRef = useRef(null);
   const own = mine.data?.review ?? null;
@@ -77,6 +85,9 @@ export function ReviewsSection({
       </Text>
       <RatingSummary rating={rating} testID="reviews-summary" />
       {message ? <Banner kind="error" message={message} testID="reviews-error" /> : null}
+      {enrolled && mine.status === "success" && mine.data?.moderation ? (
+        <HiddenNotice courseId={courseId} moderation={mine.data.moderation} />
+      ) : null}
       {enrolled && mine.status === "success" ? (
         <View style={{ gap: spacing.sm }}>
           <View ref={writeRef} collapsable={false}>
@@ -119,8 +130,6 @@ export function ReviewsSection({
             <View
               key={r.id}
               testID={`review-${r.id}`}
-              accessible
-              accessibilityLabel={`${r.rating} ${r.rating === 1 ? "star" : "stars"}, ${r.reviewerName}${r.mine ? ", your review" : ""}, ${date(r.createdAt)}. ${r.body}`}
               style={{
                 gap: spacing.xs,
                 padding: spacing.md,
@@ -129,14 +138,37 @@ export function ReviewsSection({
                 borderColor: neutrals.divider,
               }}
             >
-              <Text variant="bodyStrong">
-                {r.rating} {r.rating === 1 ? "star" : "stars"} · {r.reviewerName}
-                {r.mine ? " (you)" : ""}
-              </Text>
-              <Text variant="caption" tone="muted">
-                {date(r.createdAt)}
-              </Text>
-              {r.body ? <Text>{r.body}</Text> : null}
+              <View
+                accessible
+                accessibilityLabel={`${r.rating} ${r.rating === 1 ? "star" : "stars"}, ${r.reviewerName}${r.mine ? ", your review" : ""}, ${date(r.createdAt)}. ${r.body}`}
+                style={{ gap: spacing.xs }}
+              >
+                <Text variant="bodyStrong">
+                  {r.rating} {r.rating === 1 ? "star" : "stars"} · {r.reviewerName}
+                  {r.mine ? " (you)" : ""}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {date(r.createdAt)}
+                </Text>
+                {r.body ? <Text>{r.body}</Text> : null}
+              </View>
+              {signedIn && !r.mine ? (
+                <View
+                  ref={(node) => {
+                    reportRefs.current[r.id] = node;
+                  }}
+                  collapsable={false}
+                >
+                  <Button
+                    label={`Report review by ${r.reviewerName}`}
+                    variant="tertiary"
+                    onPress={() => {
+                      reportOpener.current = reportRefs.current[r.id];
+                      setReporting(r.id);
+                    }}
+                  />
+                </View>
+              ) : null}
             </View>
           ))}
           {list.hasNextPage ? (
@@ -149,6 +181,13 @@ export function ReviewsSection({
           ) : null}
         </View>
       )}
+      <ReportSheet
+        courseId={courseId}
+        reviewId={reporting ?? ""}
+        visible={reporting !== null}
+        onClose={() => setReporting(null)}
+        openerRef={reportOpener}
+      />
       <ReviewSheet
         courseId={courseId}
         existing={own}

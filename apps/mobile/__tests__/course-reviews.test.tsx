@@ -27,7 +27,14 @@ jest.mock("../src/progress/progress-api", () => ({
   },
 }));
 jest.mock("../src/reviews/review-api", () => ({
-  reviewsApi: { list: jest.fn(), mine: jest.fn(), write: jest.fn(), remove: jest.fn() },
+  reviewsApi: {
+    list: jest.fn(),
+    mine: jest.fn(),
+    write: jest.fn(),
+    remove: jest.fn(),
+    report: jest.fn(),
+    appeal: jest.fn(),
+  },
 }));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
@@ -142,7 +149,7 @@ describe("the reviews list", () => {
     expect(screen.getByText("Review text 1")).toBeTruthy();
     expect(screen.getByText("2 stars · Student")).toBeTruthy();
     expect(screen.getByText("3 stars · Person 2")).toBeTruthy();
-    expect(screen.getByTestId("review-r1").props.accessibilityLabel).toContain("2 stars, Student");
+    expect(screen.getByLabelText(/^2 stars, Student/)).toBeTruthy();
   });
 
   it("marks the person's own review", async () => {

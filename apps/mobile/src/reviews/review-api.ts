@@ -1,9 +1,11 @@
 import {
   deleteReviewResponseSchema,
   myReviewResponseSchema,
+  reportReviewResponseSchema,
   reviewSchema,
   type MyReviewResponse,
   type Page,
+  type ReportReviewRequest,
   type Review,
 } from "@chartnexa/api-contracts";
 import { z } from "zod";
@@ -33,6 +35,24 @@ export const reviewsApi = {
     return check(
       reviewSchema,
       await authedFetch(`/me/courses/${enc(courseId)}/review`, { method: "PUT", body }),
+    );
+  },
+  async report(courseId: string, reviewId: string, body: ReportReviewRequest): Promise<void> {
+    check(
+      reportReviewResponseSchema,
+      await authedFetch(`/courses/${enc(courseId)}/reviews/${enc(reviewId)}/report`, {
+        method: "POST",
+        body,
+      }),
+    );
+  },
+  async appeal(courseId: string, message: string): Promise<MyReviewResponse> {
+    return check(
+      myReviewResponseSchema,
+      await authedFetch(`/me/courses/${enc(courseId)}/review/appeal`, {
+        method: "POST",
+        body: { message },
+      }),
     );
   },
   async remove(courseId: string): Promise<{ deleted: boolean }> {

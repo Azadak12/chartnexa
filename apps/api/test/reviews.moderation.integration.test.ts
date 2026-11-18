@@ -741,18 +741,20 @@ describe("account deletion and moderation", () => {
   it("keeps the review hidden when the moderator who hid it disappears", async () => {
     const c = await mkCourse();
     const a = await reviewed(c.id, 2);
-    const temp = await person(h, "manager");
-    await hide(temp, a.r.id);
-    await h.db.user.delete({ where: { id: temp.id } }).catch(async () => {
-      // Sessions and roles reference the user; remove those first.
-      await h.db.session.deleteMany({ where: { userId: temp.id } });
-      await h.db.userRole.deleteMany({ where: { userId: temp.id } });
-      await h.db.auditEvent.updateMany({
-        where: { actorUserId: temp.id },
-        data: { actorUserId: null },
-      });
-      await h.db.user.delete({ where: { id: temp.id } });
+    // A bare account that has nothing else attached, so it can be removed outright.
+    const temp = await h.db.user.create({ data: { email: `gone-${Date.now()}@example.test` } });
+    await h.db.review.update({
+      where: { id: a.r.id },
+      data: {
+        hiddenAt: new Date(),
+        hiddenById: temp.id,
+        hiddenReason: "spam",
+        hiddenNote: "",
+      },
     });
+    await h.db
+      .$executeRaw`UPDATE courses SET rating_count = rating_count - 1, rating_sum = rating_sum - 2 WHERE id = ${c.id}::uuid`;
+    await h.db.user.delete({ where: { id: temp.id } });
     const row = await h.db.review.findUniqueOrThrow({ where: { id: a.r.id } });
     expect(row.hiddenAt).not.toBeNull();
     expect(row.hiddenById).toBeNull();

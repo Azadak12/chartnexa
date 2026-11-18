@@ -106,6 +106,10 @@ export const canPublishCourse = (a: AccessResponse | undefined, courseId: string
 export const canManageInstructors = (a: AccessResponse | undefined): boolean =>
   has(a, "instructor_permissions:manage");
 
+/** Admins and Managers hold this by default; the server checks it on every request. */
+export const canModerateReviews = (a: AccessResponse | undefined): boolean =>
+  has(a, "reviews:moderate");
+
 export const isAdmin = (a: AccessResponse | undefined): boolean => !!a && a.roles.includes("admin");
 
 /** Lesson authoring: the role permission, or a lesson grant on that course. */

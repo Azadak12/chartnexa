@@ -3,7 +3,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
-import { canManageCourses, canManageInstructors, fetchAccess } from "../../courses/course-api";
+import {
+  canManageCourses,
+  canModerateReviews,
+  canManageInstructors,
+  fetchAccess,
+} from "../../courses/course-api";
 import { applyServerErrors, nameSchema } from "../../forms/form-helpers";
 import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
@@ -128,6 +133,13 @@ export function ProfileScreen() {
                 label="Instructor permissions"
                 variant="secondary"
                 onPress={() => router.push("/profile/instructors")}
+              />
+            ) : null}
+            {canModerateReviews(access.data) ? (
+              <Button
+                label="Review moderation"
+                variant="secondary"
+                onPress={() => router.push("/profile/reviews")}
               />
             ) : null}
             {mfa.data?.required ? (
