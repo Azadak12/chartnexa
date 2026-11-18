@@ -18,6 +18,14 @@ jest.mock("../src/lessons/lesson-api", () => ({
 jest.mock("../src/progress/progress-api", () => ({
   progressApi: { read: jest.fn(), mark: jest.fn(), unmark: jest.fn() },
 }));
+jest.mock("../src/reviews/review-api", () => ({
+  reviewsApi: {
+    list: jest.fn(async () => ({ items: [], nextCursor: null })),
+    mine: jest.fn(async () => ({ review: null })),
+    write: jest.fn(),
+    remove: jest.fn(),
+  },
+}));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
     me: jest.fn().mockResolvedValue({

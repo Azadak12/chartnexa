@@ -11,12 +11,12 @@
 
 ## 2. App
 
-- [ ] 2.1 Build `RatingSummary` (cards and course page) and `ReviewsSection` with paging and all states; verify component tests per scenario in `mobile-course-reviews`, including singular and plural text, empty, error with Retry, offline and Show more.
-- [ ] 2.2 Build the review sheet (stars, text, count, validation), edit and delete with confirmation, retry without duplicates, double-press protection and lost-access handling; verify component tests per scenario, including star labels and announcements.
+- [x] 2.1 Build `RatingSummary` (cards and course page) and `ReviewsSection` with paging and all states; verify component tests per scenario in `mobile-course-reviews`, including singular and plural text, empty, error with Retry, offline and Show more.
+- [x] 2.2 Build the review sheet (stars, text, count, validation), edit and delete with confirmation, retry without duplicates, double-press protection and lost-access handling; verify component tests per scenario, including star labels and announcements.
 
 ## 3. Closing
 
-- [ ] 3.1 Add contract tests against the real API (owner writes, edits, deletes; summary matches; stranger and revoked owner refused; concurrent submits; paging; privacy); verify they pass.
+- [x] 3.1 Add contract tests against the real API (owner writes, edits, deletes; summary matches; stranger and revoked owner refused; concurrent submits; paging; privacy); verify they pass.
 - [ ] 3.2 Run mutation checks on the owner check, the one-review rule, the totals arithmetic, the course lock, name privacy and the deletion hook; record results.
 - [ ] 3.3 Update READMEs, the manual device checklist and the decision register after the owner answers; write evidence listing what ran and what was not verified on devices, and state in the README that reviews must not be released before moderation.
 - [ ] 3.4 Run the full checks and `openspec validate course-reviews-basic`; after review and merge, archive with `openspec archive`.

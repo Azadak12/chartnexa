@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import type { PublicCourseSummary } from "@chartnexa/api-contracts";
 import { colors, neutrals, radii, spacing } from "../theme";
+import { RatingSummary, ratingText } from "../reviews/RatingSummary";
 import { Text } from "../ui";
 import { CoverBlock } from "./CoverBlock";
 import { formatPrice } from "./money";
@@ -22,7 +23,7 @@ export function CourseCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${course.title}, ${LEVEL_LABEL[course.level]}, ${price}`}
+      accessibilityLabel={`${course.title}, ${LEVEL_LABEL[course.level]}, ${price}, ${ratingText(course.rating)}`}
       onPress={onPress}
       style={styles.card}
       testID={`course-${course.id}`}
@@ -35,6 +36,7 @@ export function CourseCard({
             {course.summary}
           </Text>
         ) : null}
+        <RatingSummary rating={course.rating} testID={`rating-${course.id}`} />
         <View style={styles.row}>
           <Text variant="caption" tone="muted">
             {LEVEL_LABEL[course.level]}

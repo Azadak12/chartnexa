@@ -12,6 +12,8 @@ import { CoverBlock } from "../CoverBlock";
 import { LessonOutlineSection } from "../../lessons/screens/LessonOutlineSection";
 import { lessonApi } from "../../lessons/lesson-api";
 import { ProgressBar } from "../../progress/ProgressBar";
+import { RatingSummary } from "../../reviews/RatingSummary";
+import { ReviewsSection } from "../../reviews/ReviewsSection";
 import { formatPrice } from "../money";
 
 export function CoursePageScreen() {
@@ -91,6 +93,7 @@ export function CoursePageScreen() {
           {formatPrice(c.priceCents)}
         </Text>
       </View>
+      <RatingSummary rating={c.rating} testID="course-rating" />
       {c.enrolled ? (
         <>
           <Banner
@@ -128,6 +131,7 @@ export function CoursePageScreen() {
         </View>
       ) : null}
       <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} />
+      <ReviewsSection courseId={c.id} enrolled={c.enrolled} rating={c.rating} />
       <Button label="Back to courses" variant="secondary" onPress={goHome} />
     </Screen>
   );

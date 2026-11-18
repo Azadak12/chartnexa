@@ -11,6 +11,14 @@ jest.mock("../src/courses/course-api", () => ({
   ...jest.requireActual("../src/courses/course-api"),
   courseApi: { list: jest.fn(), get: jest.fn() },
 }));
+jest.mock("../src/reviews/review-api", () => ({
+  reviewsApi: {
+    list: jest.fn(async () => ({ items: [], nextCursor: null })),
+    mine: jest.fn(async () => ({ review: null })),
+    write: jest.fn(),
+    remove: jest.fn(),
+  },
+}));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
     me: jest.fn().mockResolvedValue({
@@ -58,8 +66,8 @@ describe("catalog on Home", () => {
   it("shows published courses as cards with level and price, and Free for zero", async () => {
     await renderRouter(app, { initialUrl: "/home" });
     expect(await screen.findByTestId("course-c1")).toBeTruthy();
-    expect(screen.getByLabelText("Course 1, Beginner, $49.01")).toBeTruthy();
-    expect(screen.getByLabelText("Course 2, Beginner, Free")).toBeTruthy();
+    expect(screen.getByLabelText("Course 1, Beginner, $49.01, No reviews yet")).toBeTruthy();
+    expect(screen.getByLabelText("Course 2, Beginner, Free, No reviews yet")).toBeTruthy();
     expect(screen.getByText("Summary of course 1")).toBeTruthy();
     expect(api.list).toHaveBeenCalledWith({});
   });

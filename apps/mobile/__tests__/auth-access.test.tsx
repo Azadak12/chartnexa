@@ -17,6 +17,14 @@ jest.mock("../src/auth/auth-http", () => ({
     logout: jest.fn(),
   },
 }));
+jest.mock("../src/reviews/review-api", () => ({
+  reviewsApi: {
+    list: jest.fn(async () => ({ items: [], nextCursor: null })),
+    mine: jest.fn(async () => ({ review: null })),
+    write: jest.fn(),
+    remove: jest.fn(),
+  },
+}));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
     me: jest.fn().mockResolvedValue({
