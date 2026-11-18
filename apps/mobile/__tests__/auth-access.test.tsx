@@ -18,11 +18,38 @@ jest.mock("../src/auth/auth-http", () => ({
   },
 }));
 jest.mock("../src/auth/account-api", () => ({
-  accountApi: { me: jest.fn(), resendVerification: jest.fn() },
+  accountApi: {
+    me: jest.fn().mockResolvedValue({
+      id: "u1",
+      email: "a@b.co",
+      displayName: null,
+      emailVerified: true,
+      createdAt: "2026-11-17T00:00:00.000Z",
+    }),
+    resendVerification: jest.fn(),
+  },
 }));
 
 const http = authHttp as unknown as Record<keyof typeof authHttp, jest.Mock>;
 const secure = SecureStore as unknown as { __reset: () => void };
+
+jest.mock("../src/courses/course-api", () => ({
+  ...jest.requireActual("../src/courses/course-api"),
+  courseApi: {
+    list: jest.fn(async () => ({ items: [], nextCursor: null })),
+    get: jest.fn(async (id: string) => ({
+      id,
+      title: `Course ${id}`,
+      description: "About this course",
+      level: "beginner",
+      priceCents: 4900,
+      currency: "USD",
+      coverTone: "blue",
+      publishedAt: "2026-11-17T00:00:00.000Z",
+    })),
+  },
+}));
+
 const app = "./app";
 
 const type = (label: string, text: string) =>
@@ -54,11 +81,11 @@ describe("sign in", () => {
 
   it("goes to the remembered destination", async () => {
     http.login.mockResolvedValue(pair());
-    await renderRouter(app, { initialUrl: "/sign-in?returnTo=%2Fcourses%2F4" });
+    await renderRouter(app, { initialUrl: "/sign-in?returnTo=%2Fcourse%2F4" });
     await type("Email", "ann@example.com");
     await type("Password", "correct horse battery");
     await press("Sign in");
-    expect(screen).toHavePathname("/courses/4");
+    expect(screen).toHavePathname("/course/4");
   });
 
   it("shows one message for a wrong password or unknown email and clears the password", async () => {

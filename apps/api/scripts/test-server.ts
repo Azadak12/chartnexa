@@ -32,7 +32,7 @@ const config = loadConfig({
 const app = await createApp(config);
 await app.listen({ port: 0, host: "127.0.0.1" });
 const address = app.getHttpServer().address() as { port: number };
-console.log(`READY ${address.port} ${join(mailRoot, ".dev-mail")}`);
+console.log(`READY ${address.port} ${join(mailRoot, ".dev-mail")} ${db.url}`);
 
 const stop = async (): Promise<void> => {
   await app.close();

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
+import { canManageCourses, fetchAccess } from "../../courses/course-api";
 import { applyServerErrors, nameSchema } from "../../forms/form-helpers";
 import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
@@ -73,6 +74,7 @@ function EditNameSheet({
 export function ProfileScreen() {
   const router = useRouter();
   const query = useQuery({ queryKey: ["me"], queryFn: accountApi.me });
+  const access = useQuery({ queryKey: ["access"], queryFn: fetchAccess });
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const editRef = useRef(null);
@@ -112,6 +114,9 @@ export function ProfileScreen() {
             <View ref={editRef} collapsable={false}>
               <Button label="Edit name" variant="secondary" onPress={() => setEditing(true)} />
             </View>
+            {canManageCourses(access.data) ? (
+              <Button label="Manage courses" onPress={() => router.push("/manage")} />
+            ) : null}
             <Button
               label="Change password"
               variant="secondary"
