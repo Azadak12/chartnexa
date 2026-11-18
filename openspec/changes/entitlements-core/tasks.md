@@ -20,3 +20,12 @@
 - [x] 3.2 Run mutation checks on the permission, the entitlement check in lesson reads, the unique index and the optional-auth guard; record results.
 - [x] 3.3 Update READMEs and the manual device checklist, record R15 to R17 once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
 - [ ] 3.4 Run the full checks and `openspec validate entitlements-core`; after review and merge, archive with `openspec archive`.
+
+## Evidence
+
+- Local run (Node 26, PostgreSQL 16): lint, format, builds, typecheck, secrets scan and migration round trip all exit 0; 267 API tests (27 new in `entitlements.integration`, 4 in `entitlements.database`), 311 app unit tests (29 new), 41 contracts tests and 27 app contract tests against the real API (2 new flows: grant, read with the same token, unpublish, revoke, regrant; and ineligible accounts).
+- `pnpm check` itself cannot run in this container (Turbo's binary fails with "Exec format error"), so the same steps ran one by one; CI is the authoritative run.
+- Bugs found by the tests and fixed: the lesson outline route was missing the optional-auth decorator (an owner of an unpublished course got 404; caught by the owner test); a grant could fail with a 500 when the revoke of the row that blocked it committed between the insert conflict and the follow-up read (seen once as a flaky failure in a full run, then found by reading the code; the grant now retries, and the race test runs 12 rounds); the audit "no email" assertions compared case-sensitively, so a leak would have passed (found by a mutation check).
+- Mutation checks (change made, tests run, change reverted): owner check ignored, any signed-in person treated as owner, status ignored in the access check, revoke leaving access active, eligibility skipped, staff list open to any signed-in person, My Courses including revoked rows, and an email written into the audit row. All now cause failures.
+- Not verified (no device or simulator): look and feel, screen readers, keyboard behavior in the grant and revoke forms, large-text layout, and focus return on a phone. Rows were added to the manual checklist in `apps/mobile/README.md`.
+- Not covered: a real expired access token on the optional-auth routes (tests use malformed, garbage and revoked-session tokens; expiry is covered by the token service's own unit tests); load and capacity of the extra indexed read on locked lessons (no measurements, so no capacity claim).
