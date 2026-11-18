@@ -2,6 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { isAppError, messageFor } from "../../api/errors";
+import { ProgressBar, progressLabel } from "../../progress/ProgressBar";
 import { LEVEL_LABEL } from "../../courses/CourseCard";
 import { CoverBlock } from "../../courses/CoverBlock";
 import { useRestorableScroll } from "../../navigation/screen-memory";
@@ -70,7 +71,7 @@ export function MyCoursesScreen() {
         renderItem={({ item }) => (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${item.title}, ${LEVEL_LABEL[item.level]}${item.onSale ? "" : ", not currently on sale"}`}
+            accessibilityLabel={`${item.title}, ${LEVEL_LABEL[item.level]}${item.onSale ? "" : ", not currently on sale"}, ${progressLabel(item.progress.completed, item.progress.total)}`}
             onPress={() => router.push(`/course/${item.id}`)}
             style={styles.card}
             testID={`my-course-${item.id}`}
@@ -81,6 +82,11 @@ export function MyCoursesScreen() {
               <Text variant="caption" tone="muted">
                 {LEVEL_LABEL[item.level]}
               </Text>
+              <ProgressBar
+                completed={item.progress.completed}
+                total={item.progress.total}
+                testID={`progress-${item.id}`}
+              />
               {item.onSale ? null : (
                 <Text variant="caption" tone="warning" testID={`not-on-sale-${item.id}`}>
                   Not currently on sale

@@ -8,6 +8,7 @@ import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
 import { colors, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
 import { Button, BottomSheet, Skeleton, Text } from "../../ui";
+import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
 
 /** The curriculum on the course page. It fails on its own: the rest of the page stays usable. */
@@ -26,6 +27,14 @@ export function LessonOutlineSection({
     queryFn: () => lessonApi.outline(courseId),
     retry: shouldRetry,
   });
+
+  const progress = useQuery({
+    queryKey: ["progress", courseId],
+    enabled: enrolled,
+    queryFn: () => progressApi.read(courseId),
+    retry: shouldRetry,
+  });
+  const completedIds = new Set(progress.data?.lessons.map((l) => l.lessonId) ?? []);
 
   return (
     <View style={{ gap: spacing.md }} testID="lesson-outline">
@@ -55,7 +64,7 @@ export function LessonOutlineSection({
               key={l.id}
               testID={`lesson-${l.id}`}
               accessibilityRole="button"
-              accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}`}
+              accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}${enrolled && completedIds.has(l.id) ? ", completed" : ""}`}
               accessibilityHint={
                 l.isPreview || enrolled ? "Opens the lesson" : "Explains how to unlock it"
               }
@@ -74,6 +83,11 @@ export function LessonOutlineSection({
                 <Text variant="caption" tone={l.isPreview || enrolled ? "link" : "muted"}>
                   {l.isPreview ? "Free preview" : enrolled ? "Included" : "Locked"}
                 </Text>
+                {enrolled && completedIds.has(l.id) ? (
+                  <Text variant="caption" tone="success" testID={`completed-${l.id}`}>
+                    ✓ Completed
+                  </Text>
+                ) : null}
               </View>
             </Pressable>
           ))}

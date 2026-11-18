@@ -16,6 +16,13 @@ jest.mock("../src/lessons/lesson-api", () => ({
   lessonApi: { outline: jest.fn(), get: jest.fn() },
   staffLessonApi: {},
 }));
+jest.mock("../src/progress/progress-api", () => ({
+  progressApi: {
+    read: jest.fn(async () => ({ completed: 0, total: 2, nextLessonId: "l1", lessons: [] })),
+    mark: jest.fn(),
+    unmark: jest.fn(),
+  },
+}));
 jest.mock("../src/entitlements/entitlement-api", () => ({
   myCoursesApi: { list: jest.fn() },
   staffEntitlementApi: {},
@@ -49,6 +56,7 @@ const owned = (n: number, over: Record<string, unknown> = {}) => ({
   coverTone: "blue",
   onSale: true,
   enrolledAt: "2026-11-18T00:00:00.000Z",
+  progress: { completed: 0, total: 0 },
   ...over,
 });
 const page = (items: unknown[], nextCursor: string | null = null) => ({ items, nextCursor });
@@ -89,8 +97,10 @@ describe("My Courses", () => {
   it("lists owned courses and says in text when one is not on sale", async () => {
     await renderRouter(app, { initialUrl: "/courses" });
     expect(await screen.findByTestId("my-course-c1")).toBeTruthy();
-    expect(screen.getByLabelText("Course 1, Beginner")).toBeTruthy();
-    expect(screen.getByLabelText("Course 2, Beginner, not currently on sale")).toBeTruthy();
+    expect(screen.getByLabelText("Course 1, Beginner, No lessons yet")).toBeTruthy();
+    expect(
+      screen.getByLabelText("Course 2, Beginner, not currently on sale, No lessons yet"),
+    ).toBeTruthy();
     expect(screen.getByTestId("not-on-sale-c2")).toBeTruthy();
     expect(screen.queryByTestId("not-on-sale-c1")).toBeNull();
   });

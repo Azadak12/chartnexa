@@ -17,6 +17,9 @@ jest.mock("../src/lessons/lesson-api", () => ({
   lessonApi: { outline: jest.fn(), get: jest.fn() },
   staffLessonApi: {},
 }));
+jest.mock("../src/progress/progress-api", () => ({
+  progressApi: { read: jest.fn(), mark: jest.fn(), unmark: jest.fn() },
+}));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
     me: jest.fn().mockResolvedValue({

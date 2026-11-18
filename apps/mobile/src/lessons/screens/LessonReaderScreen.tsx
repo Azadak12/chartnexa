@@ -8,8 +8,11 @@ import { shouldRetry } from "../../state/query-client";
 import { useScreenMemoryState } from "../../navigation/screen-memory";
 import { StateView } from "../../state/StateView";
 import { colors, MIN_TOUCH_SIZE, neutrals, spacing } from "../../theme";
-import { Button, Screen, Text, useReducedMotion } from "../../ui";
+import { Banner, Button, Screen, Text, useReducedMotion } from "../../ui";
 import { focusElement } from "../../ui/focus";
+import { courseApi } from "../../courses/course-api";
+import { CompletionControl } from "../../progress/CompletionControl";
+import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
 import { clampStep, splitLessonText } from "../steps";
 
@@ -23,6 +26,20 @@ export function LessonReaderScreen() {
     retry: shouldRetry,
   });
   const qc = useQueryClient();
+  // Only owners can record progress; the course page already fetched this, so it is usually cached.
+  const course = useQuery({
+    queryKey: ["course", id],
+    queryFn: () => courseApi.get(String(id)),
+    retry: shouldRetry,
+  });
+  const owner = course.status === "success" && course.data.enrolled;
+  const progress = useQuery({
+    queryKey: ["progress", id],
+    enabled: owner,
+    queryFn: () => progressApi.read(String(id)),
+    retry: shouldRetry,
+  });
+  const done = progress.data?.lessons.some((l) => l.lessonId === lessonId) ?? false;
   const e = query.status === "error" ? query.error : null;
   const lostAccess =
     isAppError(e) && e.kind === "forbidden" && e.code === LESSON_ERROR_CODES.enrollmentRequired;
@@ -135,6 +152,7 @@ export function LessonReaderScreen() {
         <>
           <View
             testID="lesson-progress"
+            accessible
             accessibilityRole="progressbar"
             accessibilityLabel={`Step ${step + 1} of ${steps.length}`}
             accessibilityValue={{ min: 1, max: steps.length, now: step + 1 }}
@@ -188,6 +206,13 @@ export function LessonReaderScreen() {
           ) : null}
         </>
       )}
+      {owner && steps.length > 0 ? (
+        progress.status === "success" ? (
+          <CompletionControl courseId={String(id)} lessonId={String(lessonId)} completed={done} />
+        ) : progress.status === "error" ? (
+          <Banner kind="error" message="Progress could not be loaded." testID="progress-error" />
+        ) : null
+      ) : null}
       {stepping && !last ? (
         <Button label="Back to course" variant="tertiary" onPress={back} />
       ) : null}

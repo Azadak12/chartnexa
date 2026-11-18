@@ -10,6 +10,8 @@ import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { CoverBlock } from "../CoverBlock";
 import { LessonOutlineSection } from "../../lessons/screens/LessonOutlineSection";
+import { lessonApi } from "../../lessons/lesson-api";
+import { ProgressBar } from "../../progress/ProgressBar";
 import { formatPrice } from "../money";
 
 export function CoursePageScreen() {
@@ -58,6 +60,18 @@ export function CoursePageScreen() {
   }
 
   const c = query.data;
+  /** Opens the next lesson, or the first one when everything is complete. */
+  const goToLesson = async (courseId: string, lessonId: string | null) => {
+    let target = lessonId;
+    if (!target) {
+      try {
+        target = (await lessonApi.outline(courseId)).items[0]?.id ?? null;
+      } catch {
+        target = null;
+      }
+    }
+    if (target) router.push(`/course/${courseId}/lesson/${target}`);
+  };
   return (
     <Screen>
       <CoverBlock tone={c.coverTone} height={140} />
@@ -98,6 +112,21 @@ export function CoursePageScreen() {
         />
       )}
       {c.description ? <Text>{c.description}</Text> : null}
+      {c.enrolled && c.progress ? (
+        <View style={{ gap: spacing.md }}>
+          <ProgressBar
+            completed={c.progress.completed}
+            total={c.progress.total}
+            testID="course-progress"
+          />
+          {c.progress.total > 0 ? (
+            <Button
+              label={c.nextLessonId ? "Continue" : "Review course"}
+              onPress={() => void goToLesson(c.id, c.nextLessonId)}
+            />
+          ) : null}
+        </View>
+      ) : null}
       <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} />
       <Button label="Back to courses" variant="secondary" onPress={goHome} />
     </Screen>
