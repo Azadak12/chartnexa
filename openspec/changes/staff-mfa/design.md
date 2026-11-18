@@ -43,7 +43,7 @@ Additive tables plus a one-time session revocation statement. `down.sql` drops t
 
 ## Open Questions (owner)
 
-1. Require two-step sign-in for Admins and Managers, not for Instructors? (Proposed: yes.)
-2. Use `otpauth`, falling back to Node crypto if it fails the checks? (Proposed: yes.)
-3. End existing staff sessions at rollout and on promotion? (Proposed: yes.)
-4. Lost device: Admin reset plus operator command, no self-service removal? (Proposed: yes.)
+1. Require two-step sign-in for Admins and Managers, not for Instructors? (Approved, R21.)
+2. Use `otpauth`, falling back to Node crypto if it fails the checks? (Approved, R22; it passed.)
+3. End existing staff sessions at rollout and on promotion? (Approved, R23.)
+4. Lost device: Admin reset plus operator command, no self-service removal? (Approved, R24.)

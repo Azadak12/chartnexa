@@ -23,6 +23,6 @@
 ## 4. Closing
 
 - [x] 4.1 Add contract tests against the real API: staff enroll, sign out, sign in with code, recovery code use, replay refused, Admin reset, promotion forcing enrollment, and Student and Instructor unaffected.
-- [ ] 4.2 Run mutation checks on the gate, the replay protection, challenge single use and limits, the recovery-code consumption and the reset permission; record results.
-- [ ] 4.3 Update READMEs (setup, key generation, operator reset, rollout sign-out), the manual device checklist and the decision register (Q15 answer) after the owner answers; write evidence listing what ran and what was not verified on devices or with real authenticator apps.
+- [x] 4.2 Run mutation checks on the gate, the replay protection, challenge single use and limits, the recovery-code consumption and the reset permission; record results.
+- [x] 4.3 Update READMEs (setup, key generation, operator reset, rollout sign-out), the manual device checklist and the decision register (Q15 answer) after the owner answers; write evidence listing what ran and what was not verified on devices or with real authenticator apps.
 - [ ] 4.4 Run the full checks and `openspec validate staff-mfa`; after review and merge, archive with `openspec archive`.

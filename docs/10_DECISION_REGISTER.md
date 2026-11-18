@@ -68,7 +68,7 @@ Status of everything below: **Proposed or Pending. Nothing here is Confirmed** u
 |---|---|---|
 | Q13 | Instructor compensation: employee, revenue share, Stripe Connect payouts, or none? | Pending. Blocks payments schema (Phase 5), not earlier phases. |
 | Q14 | First-Admin bootstrap procedure and recovery if the only Admin is locked out? | Pending. Needed by `rbac-core-and-audit`. |
-| Q15 | MFA for Admin/Manager (proposed: TOTP required)? | Proposed. |
+| Q15 | MFA for Admin/Manager (proposed: TOTP required)? | Approved 2026-11-18 as R21 to R24 (`staff-mfa`). |
 | Q16 | Regulatory/disclaimer needs for trading education (risk disclosure, "no investment advice" wording), by jurisdiction? | Pending. Needs legal input; not decided by engineering. |
 | Q17 | Tax/VAT handling and invoices/receipts? | Pending. |
 | Q18 | Support channel and refund-request flow? | Pending. |
@@ -179,3 +179,8 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | R18 | Q07 for text lessons: a lesson is complete when its owner marks it complete (and can undo it). The 90 percent watched rule is deferred until video exists. Approved by the owner in chat on 2026-11-18 (`lesson-progress-basic`). |
 | R19 | Only owners (active entitlement) record progress; free-preview readers who do not own the course are not tracked. Approved 2026-11-18. |
 | R20 | Staff do not see student progress yet; a scoped report comes later under `students:read`. Approved 2026-11-18. |
+| R21 | Admins and Managers must pass a second step (TOTP authenticator code or a one-time recovery code) at every sign-in; Instructors and Students are not required to (Q15). Approved by the owner in chat on 2026-11-18 (`staff-mfa`). |
+| R22 | The TOTP library is `otpauth` (MIT, one dependency, `@noble/hashes`), checked against the RFC 6238 test vectors on Node 26. Approved 2026-11-18. |
+| R23 | Existing Admin and Manager sessions end at rollout, and assigning the Manager or Admin role ends the person's sessions, so the next sign-in goes through the second step. Approved 2026-11-18. |
+| R24 | Lost device: another Admin resets the person (reason, audited, ends their sessions) or the operator runs `admin:bootstrap --reset-mfa`; nobody can remove or reset their own. Real-time phishing of a code is not prevented by TOTP; passkeys are a possible later change. Approved 2026-11-18. |
+
