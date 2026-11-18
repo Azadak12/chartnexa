@@ -23,3 +23,11 @@
 - [x] 4.2 Run mutation checks on the permission, locked-body and order-lock logic (remove each, confirm a test fails); verify by recording the results.
 - [x] 4.3 Update `apps/mobile/README.md` (lessons now exist; manual device checklist for screen reader, keyboard and font scaling), record R11 to R14 in the decision register once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
 - [ ] 4.4 Run `pnpm check` and `openspec validate course-lessons-basic`; after review and merge, archive with `openspec archive`.
+
+## Evidence
+
+- Local run (Node 26, PostgreSQL 16): lint, format, builds, typecheck, secrets scan and migration round trip all exit 0; 240 API tests (45 new, including a deterministic edit-race test), 282 app unit tests (36 new) and 25 app contract tests against the real API (2 new flows: staff authoring with public reads, and Instructor grant, refusal and revocation).
+- `pnpm check` itself could not run here because the Turbo binary fails with "Exec format error" in this container; the same steps were run one by one instead. CI is the authoritative run.
+- Mutation checks (each change made, tests run, change reverted): locked body returned to everyone, no per-course lock on add, draft course readable publicly, route checked for any course instead of this one, outline not scoped to its course, delete not closing the gap, stale reorder accepted, audit storing text, and removing the version check. All caused failures. Removing only the early version check changed nothing, because the compare-and-swap in the write also catches it; removing both failed only after a deterministic race test was added (the first concurrent-edit test never truly interleaved).
+- Not verified (no device or simulator): look and feel, screen readers, keyboard behavior with the long text field, large-text layout, and focus return on a phone. Checklist rows were added to `apps/mobile/README.md`.
+- Deferred: purging old idempotency keys (no cleanup job exists), observability counters for lesson writes (no metrics facility exists yet), modules, media, progress.
