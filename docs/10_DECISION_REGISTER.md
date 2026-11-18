@@ -189,7 +189,7 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | R28 | Reviews are built and tested now but must not be released to real students before `reviews-moderation` exists, because staff cannot yet remove an abusive review. Approved 2026-11-18. |
 
 
-## Review moderation: pending owner decisions (change `reviews-moderation`, 2026-11-18)
+## Review moderation: owner decisions Q23 to Q29 (approved 2026-11-18, see R29 to R33)
 
 | ID | Question | Proposed answer |
 |---|---|---|
@@ -200,3 +200,15 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | Q27 | Hide automatically after N reports? | Never. |
 | Q28 | Can staff delete a review? | No, only hide (reversible). The author can still delete their own. |
 | Q29 | May the author edit a hidden review? | Yes; it stays hidden and moderators see the current text. |
+
+## Review moderation: built behaviour (change `reviews-moderation`, 2026-11-18)
+
+Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with your recommendations") and are now built:
+
+| ID | Decision |
+|---|---|
+| R29 | Any signed-in person except the author may report a review (20 a day). Reasons: spam or advertising, abusive or harassing, personal information, not about this course, other (hiding "other" needs a note of 10+ characters). No reason refers to the rating. (Q23, Q24) |
+| R30 | The author sees the reason and the moderator's note for a hidden review. (Q25) |
+| R31 | One appeal per hiding, decided by a moderator other than the one who hid it; a person who can manage roles (Admin) may decide any appeal. Restoring a review settles an open appeal as overturned. (Q26) |
+| R32 | Reviews are never hidden automatically, whatever the number of reports. Staff can only hide (reversible), never delete or edit; the author may still edit or delete their own, and editing a hidden review keeps it hidden. (Q27, Q28, Q29) |
+| R33 | R28 is lifted once moderation has been run with staff: it is built and tested, but no real moderator has used it yet. |

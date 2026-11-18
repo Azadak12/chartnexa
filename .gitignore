@@ -9,3 +9,6 @@ build/
 *.log
 .claude/
 .dev-mail/
+
+# Local OpenAPI export (CI writes its own copy)
+apps/api/openapi.json

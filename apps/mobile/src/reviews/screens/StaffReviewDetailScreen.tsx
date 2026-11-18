@@ -8,7 +8,7 @@ import {
   type ReviewReason,
   type StaffReviewDetail,
 } from "@chartnexa/api-contracts";
-import { isAppError, messageFor } from "../../api/errors";
+import { isAppError } from "../../api/errors";
 import { ConfirmDialog } from "../../auth/ConfirmDialog";
 import { formMessage } from "../../auth/errors-ui";
 import { canModerateReviews, fetchAccess, isAdmin } from "../../courses/course-api";

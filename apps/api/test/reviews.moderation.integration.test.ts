@@ -370,6 +370,20 @@ describe("hiding and restoring", () => {
     expect(rows.items).toEqual([]);
   });
 
+  it("keeps settled reports out of the Reported tab after a restore, and shows new ones", async () => {
+    const c = await mkCourse();
+    const a = await reviewed(c.id);
+    const first = await person(h);
+    await report(first, c.id, a.r.id, "spam");
+    await hide(manager, a.r.id);
+    await restore(manager2, a.r.id);
+    const tab = async () =>
+      ((await queue(manager, `tab=reported&courseId=${c.id}`)).json() as Page<StaffReview>).items;
+    expect(await tab()).toEqual([]);
+    await report(await person(h), c.id, a.r.id, "abusive");
+    expect((await tab()).map((x) => [x.id, x.openReportCount])).toEqual([[a.r.id, 1]]);
+  });
+
   it("keeps totals equal to the visible reviews through a random mix of actions", async () => {
     const c = await mkCourse();
     const people = await Promise.all(Array.from({ length: 5 }, () => owner(c.id)));
