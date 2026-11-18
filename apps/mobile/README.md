@@ -1,6 +1,6 @@
 # @chartnexa/mobile
 
-ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. Includes the app **shell** (brand tokens, base components, navigation rules, screen states) and **account access**: sign in, create account, verify email, forgot and reset password, and a Profile area (name, password, sessions, sign out, delete account). Courses: a catalog on Home (search, level filter, remembered position), a course page, and staff screens to create, edit, publish and unpublish courses (Profile, then Manage courses, for Admins and Managers). No lessons, video or buying yet.
+ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. Includes the app **shell** (brand tokens, base components, navigation rules, screen states) and **account access**: sign in, create account, verify email, forgot and reset password, and a Profile area (name, password, sessions, sign out, delete account). Courses: a catalog on Home (search, level filter, remembered position), a course page, and staff screens to create, edit, publish and unpublish courses (Profile, then Manage courses, for Admins and Managers). Lessons: the course page lists the lesson outline, free-preview lessons open in a reader, and staff add, edit, reorder (up and down buttons) and delete text lessons from Manage courses, then a course, then Lessons. No video, files or buying yet.
 
 ## What was verified and what was not
 - **Verified in automated tests and CI:** component behavior and accessibility properties, navigation and return-to rules, back handling order, remembered list position, API error mapping, offline banner, font fallback, contrast of every approved color pair, production bundles for iOS and Android build under pnpm, and the development gallery is absent from production bundles.
@@ -68,6 +68,9 @@ src/fonts                Inter loading with system-font fallback
 | Large text: course cards, price and status labels do not clip | yes | yes |
 | Instructor permissions: the Add permission sheet scrolls with the keyboard open, the reason field stays visible, dimmed items are announced as unavailable | yes | yes |
 | Screen reader announces "Permission added" / "Permission removed" and focus returns to the button that opened the sheet | TalkBack | VoiceOver |
+| Lessons: course page outline shows "Free preview" and "Locked" as text; opening a preview and going back keeps the scroll position | yes | yes |
+| Lessons: screen reader reads "Lesson 2: title, locked", the locked-lesson sheet, and announces "moved to 3 of 8" after Move up or down; focus returns to the opener when the sheet or delete dialog closes | TalkBack | VoiceOver |
+| Lessons form: the long text field scrolls with the keyboard open, the free-preview switch is announced as on or off, largest text does not clip titles or the move and delete buttons | yes | yes |
 | Sign in, kill the app from the task switcher, reopen: still signed in, no sign-in flash | yes | yes |
 | Sign in, delete the app, reinstall: asked to sign in (iOS Keychain can keep an old token, which the server rejects) | yes | yes |
 | Airplane mode: sign out works and says the server will be told later; sign in shows the offline message | yes | yes |

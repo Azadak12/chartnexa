@@ -40,7 +40,11 @@ export function toEnvelope(
     if (status < 500) {
       return {
         status,
-        body: { code: CODES[status] ?? "ERROR", message: safeMessage(exception), requestId },
+        body: {
+          code: stableCode(exception) ?? CODES[status] ?? "ERROR",
+          message: safeMessage(exception),
+          requestId,
+        },
       };
     }
     return {
@@ -52,6 +56,13 @@ export function toEnvelope(
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     body: { code: "INTERNAL_ERROR", message: "Something went wrong. Please try again.", requestId },
   };
+}
+
+/** A code we set ourselves, as `new ForbiddenException({ message, code: "SOME_CODE" })`. */
+function stableCode(e: HttpException): string | undefined {
+  const r = e.getResponse();
+  const code = typeof r === "object" ? (r as { code?: unknown }).code : undefined;
+  return typeof code === "string" && /^[A-Z][A-Z_]{2,40}$/.test(code) ? code : undefined;
 }
 
 /** Only HttpException messages we construct ourselves are shown; nothing from internals. */

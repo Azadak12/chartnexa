@@ -24,3 +24,4 @@ export * from "./auth.js";
 export * from "./access.js";
 export * from "./courses.js";
 export * from "./grants.js";
+export * from "./lessons.js";

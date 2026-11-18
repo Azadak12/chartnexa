@@ -1,0 +1,33 @@
+# Tasks
+
+## 1. Server data and rules
+
+- [x] 1.1 Add `lessons` and `lesson_create_keys` with CHECKs, deferrable unique position and cascade, migration and reviewed `down.sql`; verify `pnpm migrate:roundtrip` passes and tests show the database rejects an empty or over-long title, a body over the limit, position 0, a duplicate position committed, and an orphan lesson.
+- [x] 1.2 Add lesson schemas to `packages/api-contracts` (staff lesson, outline item, public lesson, create, update, reorder, error codes incl. `enrollment_required`); verify unit tests for bounds, trimming, control characters, 200-item limit and that unknown fields are rejected.
+- [x] 1.3 Implement the lessons service and staff endpoints with per-course lock, gapless positions, version checks, idempotent create, limit of 200, and audit in the same transaction; verify integration tests for every scenario in `course-lessons`, including simultaneous adds, add racing reorder, stale reorder 409, delete closing the gap, repeated add with one key, audit rollback on injected failure, and no body in audit or logs.
+- [x] 1.4 Apply permissions: Admin and Manager by role default; Student 403, signed-out 401; wrong course in path 404; verify tests for each role and for the identical 403 body for missing and ungranted courses (Instructor grant cases included; PR 22 is merged).
+- [x] 1.5 Implement public outline and lesson endpoints, draft and unpublish giving 404, locked body giving 403 `enrollment_required`, and counts on the course detail; verify tests for outline without bodies, preview body, locked, draft, unpublish-then-404, empty course, and that responses hold no internal fields.
+- [x] 1.6 Update the OpenAPI route check in CI for the new routes; verify the check fails when a route is removed and passes with them present.
+
+## 2. App: students
+
+- [x] 2.1 Add the Lessons section to the course page and the preview reader route with loading, empty, error-retry, offline, locked sheet and "no longer available" states, preserved scroll; verify component tests per state and per scenario in `mobile-course-lessons`, plus accessibility checks (labels, text-based preview mark, large font).
+
+## 3. App: staff
+
+- [x] 3.1 Add the staff lessons list with move up and down (optimistic with rollback and announcements), delete dialog, and the full-screen add and edit form with typed-text preservation, field errors and conflict handling; verify component tests for add, edit, validation, conflict, delete confirm and cancel, move, no-access state, and retry without duplicate.
+
+## 4. Integration and closing
+
+- [x] 4.1 Add contract tests against the real API: staff flow (create course, add, edit, reorder, delete, publish, student outline and preview, locked refusal); includes an Instructor-with-grant flow, an ungranted-Instructor refusal and a revoked-grant refusal (PR 22 is merged).
+- [x] 4.2 Run mutation checks on the permission, locked-body and order-lock logic (remove each, confirm a test fails); verify by recording the results.
+- [x] 4.3 Update `apps/mobile/README.md` (lessons now exist; manual device checklist for screen reader, keyboard and font scaling), record R11 to R14 in the decision register once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
+- [ ] 4.4 Run `pnpm check` and `openspec validate course-lessons-basic`; after review and merge, archive with `openspec archive`.
+
+## Evidence
+
+- Local run (Node 26, PostgreSQL 16): lint, format, builds, typecheck, secrets scan and migration round trip all exit 0; 240 API tests (45 new, including a deterministic edit-race test), 282 app unit tests (36 new) and 25 app contract tests against the real API (2 new flows: staff authoring with public reads, and Instructor grant, refusal and revocation).
+- `pnpm check` itself could not run here because the Turbo binary fails with "Exec format error" in this container; the same steps were run one by one instead. CI is the authoritative run.
+- Mutation checks (each change made, tests run, change reverted): locked body returned to everyone, no per-course lock on add, draft course readable publicly, route checked for any course instead of this one, outline not scoped to its course, delete not closing the gap, stale reorder accepted, audit storing text, and removing the version check. All caused failures. Removing only the early version check changed nothing, because the compare-and-swap in the write also catches it; removing both failed only after a deterministic race test was added (the first concurrent-edit test never truly interleaved).
+- Not verified (no device or simulator): look and feel, screen readers, keyboard behavior with the long text field, large-text layout, and focus return on a phone. Checklist rows were added to `apps/mobile/README.md`.
+- Deferred: purging old idempotency keys (no cleanup job exists), observability counters for lesson writes (no metrics facility exists yet), modules, media, progress.

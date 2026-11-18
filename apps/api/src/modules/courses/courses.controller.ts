@@ -20,7 +20,7 @@ import {
   type CatalogQuery,
   type CreateCourseRequest,
   type Page,
-  type PublicCourse,
+  type PublicCourseDetail,
   type PublicCourseSummary,
   type StaffCourse,
   type StaffCourseQuery,
@@ -56,7 +56,7 @@ export class CoursesController {
   @Get(":id")
   @ApiOperation({ summary: "Open one published course (anyone). Drafts answer 404." })
   @ApiErrors(400, 404)
-  get(@Param("id", idPipe()) id: string): Promise<PublicCourse> {
+  get(@Param("id", idPipe()) id: string): Promise<PublicCourseDetail> {
     return this.courses.getPublished(id);
   }
 }

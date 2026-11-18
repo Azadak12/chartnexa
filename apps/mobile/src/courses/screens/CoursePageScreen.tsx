@@ -9,6 +9,7 @@ import { Banner, Button, Screen, Text } from "../../ui";
 import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { CoverBlock } from "../CoverBlock";
+import { LessonOutlineSection } from "../../lessons/screens/LessonOutlineSection";
 import { formatPrice } from "../money";
 
 export function CoursePageScreen() {
@@ -82,6 +83,7 @@ export function CoursePageScreen() {
         testID="enroll-notice"
       />
       {c.description ? <Text>{c.description}</Text> : null}
+      <LessonOutlineSection courseId={c.id} />
       <Button label="Back to courses" variant="secondary" onPress={goHome} />
     </Screen>
   );

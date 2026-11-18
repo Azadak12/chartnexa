@@ -95,7 +95,15 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
     error.kind === "rate_limited" && retryAfterSeconds
       ? waitMessage(retryAfterSeconds)
       : error.message;
-  throw new AppError(error.kind, message, error.status, withId, error.fields, retryAfterSeconds);
+  throw new AppError(
+    error.kind,
+    message,
+    error.status,
+    withId,
+    error.fields,
+    retryAfterSeconds,
+    error.code,
+  );
 }
 
 export { isAppError, messageFor };

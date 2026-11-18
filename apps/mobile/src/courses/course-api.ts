@@ -1,11 +1,11 @@
 import {
-  publicCourseSchema,
+  publicCourseDetailSchema,
   publicCourseSummarySchema,
   staffCourseSchema,
   type CatalogQuery,
   type CreateCourseRequest,
   type Page,
-  type PublicCourse,
+  type PublicCourseDetail,
   type PublicCourseSummary,
   type StaffCourse,
   type UpdateCourseRequest,
@@ -39,8 +39,8 @@ export const courseApi = {
   async list(q: CatalogQuery = {}): Promise<Page<PublicCourseSummary>> {
     return check(pageOf(publicCourseSummarySchema), await apiFetch(`/courses${query({ ...q })}`));
   },
-  async get(id: string): Promise<PublicCourse> {
-    return check(publicCourseSchema, await apiFetch(`/courses/${encodeURIComponent(id)}`));
+  async get(id: string): Promise<PublicCourseDetail> {
+    return check(publicCourseDetailSchema, await apiFetch(`/courses/${encodeURIComponent(id)}`));
   },
 };
 
@@ -106,3 +106,8 @@ export const canManageInstructors = (a: AccessResponse | undefined): boolean =>
   has(a, "instructor_permissions:manage");
 
 export const isAdmin = (a: AccessResponse | undefined): boolean => !!a && a.roles.includes("admin");
+
+/** Lesson authoring: the role permission, or a lesson grant on that course. */
+export const canAuthorLessons = (a: AccessResponse | undefined, courseId: string): boolean =>
+  has(a, "lesson:upload") ||
+  grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("lesson:upload"));
