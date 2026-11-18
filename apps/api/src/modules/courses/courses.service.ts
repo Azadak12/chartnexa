@@ -3,6 +3,7 @@ import type {
   CreateCourseRequest,
   Page,
   PublicCourse,
+  PublicCourseDetail,
   PublicCourseSummary,
   StaffCourse,
   UpdateCourseRequest,
@@ -299,11 +300,38 @@ export class CoursesService {
     ]);
   }
 
-  async getPublished(id: string): Promise<PublicCourse> {
+  async getPublished(id: string): Promise<PublicCourseDetail> {
     const row = await this.db.course.findFirst({ where: { id, status: "published" } });
     // Drafts and unknown ids look the same, so a draft's existence is not revealed.
     if (!row) throw new NotFoundException("Course not found.");
-    return toPublic(row);
+    const [counts] = await this.db.$queryRaw<{ total: bigint; previews: bigint }[]>`
+      SELECT count(*) AS total, count(*) FILTER (WHERE is_preview) AS previews
+      FROM lessons WHERE course_id = ${id}::uuid`;
+    return {
+      ...toPublic(row),
+      lessonCount: Number(counts?.total ?? 0),
+      previewCount: Number(counts?.previews ?? 0),
+    };
+  }
+
+  /** Throws the same 404 for a draft and an unknown course. */
+  async assertPublished(id: string): Promise<void> {
+    const row = await this.db.course.findFirst({
+      where: { id, status: "published" },
+      select: { id: true },
+    });
+    if (!row) throw new NotFoundException("Course not found.");
+  }
+
+  /**
+   * Takes a row lock on the course for the rest of the transaction, so changes to its lesson list
+   * happen one at a time. Throws 404 if the course does not exist.
+   */
+  async lockForUpdate(tx: Tx, id: string): Promise<void> {
+    const rows = await tx.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM courses WHERE id = ${id}::uuid FOR UPDATE`;
+    if (rows.length === 0) throw new NotFoundException("Course not found.");
   }
 
   // --- helpers -------------------------------------------------------------------------------

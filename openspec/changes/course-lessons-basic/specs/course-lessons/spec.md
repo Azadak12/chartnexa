@@ -26,11 +26,11 @@ A lesson SHALL have a title of 1 to 120 characters after trimming and a body of 
 
 #### Scenario: Invalid input
 - **WHEN** the title is empty or too long, or the body is too long
-- **THEN** the response is 422 with field errors and nothing is saved
+- **THEN** the response is 400 with field errors (the API's existing validation response) and nothing is saved
 
 #### Scenario: Limit reached
 - **WHEN** a course already has 200 lessons and another is added
-- **THEN** the response says the limit is reached and nothing is saved
+- **THEN** the response is 409 with code `LESSON_LIMIT_REACHED` and nothing is saved
 
 #### Scenario: Plain text only
 - **WHEN** a body contains markup such as HTML tags

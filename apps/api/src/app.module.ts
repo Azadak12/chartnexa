@@ -4,6 +4,7 @@ import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { CoursesModule } from "./modules/courses/index.js";
+import { LessonsModule } from "./modules/lessons/index.js";
 import { AccessModule } from "./modules/access/index.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { MailerModule } from "./modules/mailer/index.js";
@@ -22,6 +23,7 @@ export class AppModule {
         IdentityModule,
         AccessModule,
         CoursesModule,
+        LessonsModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };
