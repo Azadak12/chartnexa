@@ -580,7 +580,13 @@ describe("public reading", () => {
     ]);
     expect(JSON.stringify(out)).not.toContain("BODY");
     for (const item of out.items) {
-      expect(Object.keys(item).sort()).toEqual(["id", "isPreview", "position", "title"]);
+      expect(Object.keys(item).sort()).toEqual([
+        "id",
+        "isPreview",
+        "moduleId",
+        "position",
+        "title",
+      ]);
     }
   });
 
@@ -602,6 +608,7 @@ describe("public reading", () => {
       title: "Free",
       position: 1,
       isPreview: true,
+      moduleId: null,
       body: "Free text",
     });
   });

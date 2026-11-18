@@ -16,6 +16,7 @@ import {
   type UpdateLessonRequest,
 } from "@chartnexa/api-contracts";
 import { PrismaService } from "../../database/prisma.service.js";
+import { ValidationFailed } from "../../platform/zod.pipe.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { AuditService } from "../access/index.js";
 import { CoursesService } from "../courses/index.js";
@@ -33,10 +34,30 @@ export const LOCKED_MESSAGE = "Enroll in this course to read this lesson.";
 
 const iso = (d: Date): string => d.toISOString();
 
+/**
+ * Rewrites lesson positions 1..n so the reading order is grouped by module order: lessons without
+ * a module first, then each module's lessons, each group in its existing order. `lastId` puts one
+ * lesson at the end of its group (a lesson just added or moved into a module). Positions are a
+ * deferred unique pair, so the whole rewrite is checked at commit.
+ */
+export async function renumberLessons(tx: Tx, courseId: string, lastId?: string): Promise<void> {
+  const last = lastId ?? "00000000-0000-0000-0000-000000000000";
+  await tx.$executeRaw`UPDATE lessons AS l SET position = o.rn, updated_at = now()
+    FROM (
+      SELECT l2.id, row_number() OVER (
+        ORDER BY m.position ASC NULLS FIRST, (l2.id = ${last}::uuid) ASC, l2.position ASC, l2.id ASC
+      )::int AS rn
+      FROM lessons l2 LEFT JOIN course_modules m ON m.id = l2.module_id
+      WHERE l2.course_id = ${courseId}::uuid
+    ) AS o
+    WHERE l.id = o.id AND l.position <> o.rn`;
+}
+
 export function toStaffLesson(r: Row): StaffLesson {
   return {
     id: r.id,
     courseId: r.courseId,
+    moduleId: r.moduleId,
     title: r.title,
     body: r.body,
     position: r.position,
@@ -45,6 +66,21 @@ export function toStaffLesson(r: Row): StaffLesson {
     createdAt: iso(r.createdAt),
     updatedAt: iso(r.updatedAt),
   };
+}
+
+/** A module id must name a module of this course; otherwise it is a field error. */
+export async function assertModuleInCourse(
+  tx: Tx,
+  courseId: string,
+  moduleId: string,
+): Promise<void> {
+  const found = await tx.courseModule.findFirst({
+    where: { id: moduleId, courseId },
+    select: { id: true },
+  });
+  if (!found) {
+    throw new ValidationFailed([{ field: "moduleId", message: "Choose a module of this course" }]);
+  }
 }
 
 @Injectable()
@@ -64,11 +100,7 @@ export class LessonsService {
       select: { id: true },
     });
     if (!course) throw new NotFoundException("Course not found.");
-    const rows = await this.db.lesson.findMany({
-      where: { courseId },
-      orderBy: { position: "asc" },
-    });
-    return { items: rows.map(toStaffLesson) };
+    return this.listInTx(this.db, courseId);
   }
 
   async getForStaff(courseId: string, lessonId: string): Promise<StaffLesson> {
@@ -100,9 +132,12 @@ export class LessonsService {
           code: LESSON_ERROR_CODES.limitReached,
         });
       }
-      const row = await tx.lesson.create({
+      const moduleId = input.moduleId ?? null;
+      if (moduleId) await assertModuleInCourse(tx, courseId, moduleId);
+      let row = await tx.lesson.create({
         data: {
           courseId,
+          moduleId,
           title: input.title,
           body: input.body,
           isPreview: input.isPreview,
@@ -113,6 +148,9 @@ export class LessonsService {
       await tx.lessonCreateKey.create({
         data: { courseId, key: input.idempotencyKey, lessonId: row.id },
       });
+      // The new lesson goes to the end of its group (its module, or the lessons without one).
+      await renumberLessons(tx, courseId, row.id);
+      row = await tx.lesson.findUniqueOrThrow({ where: { id: row.id } });
       await this.audit.record(tx, {
         actorKind: "user",
         actorUserId: actorId,
@@ -120,7 +158,13 @@ export class LessonsService {
         targetType: "lesson",
         targetId: row.id,
         outcome: "success",
-        after: { courseId, title: row.title, position: row.position, isPreview: row.isPreview },
+        after: {
+          courseId,
+          title: row.title,
+          position: row.position,
+          isPreview: row.isPreview,
+          moduleId: row.moduleId,
+        },
         requestId,
       });
       return toStaffLesson(row);
@@ -237,6 +281,8 @@ export class LessonsService {
         await tx.$executeRaw`UPDATE lessons AS l SET position = v.pos, updated_at = now()
           FROM unnest(${lessonIds}::uuid[], ${positions}::int[]) AS v(id, pos)
           WHERE l.id = v.id AND l.course_id = ${courseId}::uuid`;
+        // Lessons stay grouped by module: the new order applies inside each module.
+        await renumberLessons(tx, courseId);
         await this.audit.record(tx, {
           actorKind: "user",
           actorUserId: actorId,
@@ -253,9 +299,20 @@ export class LessonsService {
     });
   }
 
-  private async listInTx(tx: Tx, courseId: string): Promise<StaffLessonList> {
-    const rows = await tx.lesson.findMany({ where: { courseId }, orderBy: { position: "asc" } });
-    return { items: rows.map(toStaffLesson) };
+  async listInTx(tx: Tx | PrismaService, courseId: string): Promise<StaffLessonList> {
+    const [rows, modules] = await Promise.all([
+      tx.lesson.findMany({ where: { courseId }, orderBy: { position: "asc" } }),
+      tx.courseModule.findMany({ where: { courseId }, orderBy: { position: "asc" } }),
+    ]);
+    return {
+      items: rows.map(toStaffLesson),
+      modules: modules.map((m) => ({
+        id: m.id,
+        title: m.title,
+        position: m.position,
+        version: m.version,
+      })),
+    };
   }
 
   // --- public --------------------------------------------------------------------------------
@@ -275,12 +332,19 @@ export class LessonsService {
 
   async outline(courseId: string, viewerId?: string): Promise<LessonOutline> {
     await this.assertVisible(courseId, viewerId);
-    const rows = await this.db.lesson.findMany({
-      where: { courseId },
-      orderBy: { position: "asc" },
-      select: { id: true, title: true, position: true, isPreview: true },
-    });
-    return { items: rows };
+    const [rows, modules] = await Promise.all([
+      this.db.lesson.findMany({
+        where: { courseId },
+        orderBy: { position: "asc" },
+        select: { id: true, title: true, position: true, isPreview: true, moduleId: true },
+      }),
+      this.db.courseModule.findMany({
+        where: { courseId },
+        orderBy: { position: "asc" },
+        select: { id: true, title: true, position: true },
+      }),
+    ]);
+    return { items: rows, modules };
   }
 
   /** Free previews are open to everyone; every other lesson needs an active entitlement. */
@@ -304,6 +368,7 @@ export class LessonsService {
       title: row.title,
       position: row.position,
       isPreview: row.isPreview,
+      moduleId: row.moduleId,
       body: row.body,
     };
   }

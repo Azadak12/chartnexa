@@ -35,6 +35,8 @@ export const createLessonRequestSchema = z.strictObject({
   body: body.default(""),
   isPreview: z.boolean().default(false),
   idempotencyKey: idempotencyKeySchema,
+  /** Adds the lesson at the end of this module; without it, the lesson has no module. */
+  moduleId: z.uuid().nullable().default(null),
 });
 
 /** `expectedVersion` is the version the editor started from; a newer lesson refuses the edit. */
@@ -59,9 +61,39 @@ export const reorderLessonsRequestSchema = z.strictObject({
     .refine((ids) => new Set(ids).size === ids.length, "Each lesson can appear once."),
 });
 
+export const MODULE_TITLE_MAX = 120;
+export const MAX_MODULES_PER_COURSE = 50;
+
+/** An ordered section of a course. */
+export const courseModuleSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  position: z.number().int(),
+});
+export const staffCourseModuleSchema = courseModuleSchema.extend({ version: z.number().int() });
+
+export const createModuleRequestSchema = z.strictObject({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Enter a module title")
+    .max(MODULE_TITLE_MAX, `Use ${MODULE_TITLE_MAX} characters or fewer`),
+});
+export const renameModuleRequestSchema = createModuleRequestSchema.extend({
+  expectedVersion: z.number().int().min(1),
+});
+export const reorderModulesRequestSchema = z.strictObject({
+  moduleIds: z.array(z.uuid()).max(MAX_MODULES_PER_COURSE),
+});
+/** null takes the lesson out of its module. */
+export const assignLessonModuleRequestSchema = z.strictObject({
+  moduleId: z.uuid().nullable(),
+});
+
 export const staffLessonSchema = z.object({
   id: z.string(),
   courseId: z.string(),
+  moduleId: z.string().nullable().default(null),
   title: z.string(),
   body: z.string(),
   position: z.number().int(),
@@ -71,8 +103,11 @@ export const staffLessonSchema = z.object({
   updatedAt: z.string(),
 });
 
-/** Staff list: lessons in order, with bodies. */
-export const staffLessonListSchema = z.object({ items: z.array(staffLessonSchema) });
+/** Staff list: lessons in reading order, with bodies, and the course's modules in order. */
+export const staffLessonListSchema = z.object({
+  items: z.array(staffLessonSchema),
+  modules: z.array(staffCourseModuleSchema).default([]),
+});
 
 /** What anyone may see of every lesson of a published course: no body. */
 export const lessonOutlineItemSchema = z.object({
@@ -80,8 +115,13 @@ export const lessonOutlineItemSchema = z.object({
   title: z.string(),
   position: z.number().int(),
   isPreview: z.boolean(),
+  moduleId: z.string().nullable().default(null),
 });
-export const lessonOutlineSchema = z.object({ items: z.array(lessonOutlineItemSchema) });
+/** Lessons in reading order; modules in order (lessons without a module come first). */
+export const lessonOutlineSchema = z.object({
+  items: z.array(lessonOutlineItemSchema),
+  modules: z.array(courseModuleSchema).default([]),
+});
 
 /** A lesson anyone may read (free preview only). */
 export const publicLessonSchema = lessonOutlineItemSchema.extend({ body: z.string() });
@@ -94,3 +134,7 @@ export type StaffLessonList = z.infer<typeof staffLessonListSchema>;
 export type LessonOutlineItem = z.infer<typeof lessonOutlineItemSchema>;
 export type LessonOutline = z.infer<typeof lessonOutlineSchema>;
 export type PublicLesson = z.infer<typeof publicLessonSchema>;
+export type CourseModule = z.infer<typeof courseModuleSchema>;
+export type StaffCourseModule = z.infer<typeof staffCourseModuleSchema>;
+export type CreateModuleRequest = z.input<typeof createModuleRequestSchema>;
+export type RenameModuleRequest = z.input<typeof renameModuleRequestSchema>;

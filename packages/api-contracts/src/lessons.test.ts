@@ -108,6 +108,13 @@ describe("public lesson", () => {
       version: 3,
       createdBy: "someone",
     });
-    expect(Object.keys(l).sort()).toEqual(["body", "id", "isPreview", "position", "title"]);
+    expect(Object.keys(l).sort()).toEqual([
+      "body",
+      "id",
+      "isPreview",
+      "moduleId",
+      "position",
+      "title",
+    ]);
   });
 });

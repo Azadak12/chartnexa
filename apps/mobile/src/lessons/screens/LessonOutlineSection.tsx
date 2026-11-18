@@ -59,38 +59,56 @@ export function LessonOutlineSection({
         </Text>
       ) : (
         <View ref={openerRef} collapsable={false} style={{ gap: spacing.sm }}>
-          {query.data.items.map((l) => (
-            <Pressable
-              key={l.id}
-              testID={`lesson-${l.id}`}
-              accessibilityRole="button"
-              accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}${enrolled && completedIds.has(l.id) ? ", completed" : ""}`}
-              accessibilityHint={
-                l.isPreview || enrolled ? "Opens the lesson" : "Explains how to unlock it"
-              }
-              onPress={() =>
-                l.isPreview || enrolled
-                  ? router.push(`/course/${courseId}/lesson/${l.id}`)
-                  : setLocked(l)
-              }
-              style={styles.row}
-            >
-              <Text variant="bodyStrong" style={styles.number}>
-                {l.position}
+          {query.data.items.map((l, i, all) => {
+            const modules = query.data.modules ?? [];
+            const startsModule =
+              l.moduleId !== null && (i === 0 || all[i - 1]?.moduleId !== l.moduleId);
+            const mod = startsModule ? modules.find((m) => m.id === l.moduleId) : undefined;
+            const header = mod ? (
+              <Text
+                key={`module-${mod.id}`}
+                variant="subheading"
+                accessibilityRole="header"
+                testID={`module-${mod.id}`}
+                style={{ marginTop: i === 0 ? 0 : spacing.sm }}
+              >
+                Module {mod.position}: {mod.title}
               </Text>
-              <View style={{ flex: 1, gap: spacing.xs }}>
-                <Text variant="body">{l.title}</Text>
-                <Text variant="caption" tone={l.isPreview || enrolled ? "link" : "muted"}>
-                  {l.isPreview ? "Free preview" : enrolled ? "Included" : "Locked"}
+            ) : null;
+            const row = (
+              <Pressable
+                key={l.id}
+                testID={`lesson-${l.id}`}
+                accessibilityRole="button"
+                accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}${enrolled && completedIds.has(l.id) ? ", completed" : ""}`}
+                accessibilityHint={
+                  l.isPreview || enrolled ? "Opens the lesson" : "Explains how to unlock it"
+                }
+                onPress={() =>
+                  l.isPreview || enrolled
+                    ? router.push(`/course/${courseId}/lesson/${l.id}`)
+                    : setLocked(l)
+                }
+                style={styles.row}
+              >
+                <Text variant="bodyStrong" style={styles.number}>
+                  {l.position}
                 </Text>
-                {enrolled && completedIds.has(l.id) ? (
-                  <Text variant="caption" tone="success" testID={`completed-${l.id}`}>
-                    ✓ Completed
+                <View style={{ flex: 1, gap: spacing.xs }}>
+                  <Text variant="body">{l.title}</Text>
+                  <Text variant="caption" tone={l.isPreview || enrolled ? "link" : "muted"}>
+                    {l.isPreview ? "Free preview" : enrolled ? "Included" : "Locked"}
                   </Text>
-                ) : null}
-              </View>
-            </Pressable>
-          ))}
+                  {enrolled && completedIds.has(l.id) ? (
+                    <Text variant="caption" tone="success" testID={`completed-${l.id}`}>
+                      ✓ Completed
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            );
+            return header ? [header, row] : row;
+          })}
         </View>
       )}
       <BottomSheet

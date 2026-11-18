@@ -17,13 +17,13 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 1 | bootstrap-monorepo-ci | Archived | |
 | 1 | api-foundation | Archived | |
 | 1 | mobile-shell-and-tokens | Archived | Also `mobile-auth` archived |
-| 1 | observability-baseline | In progress | Logs, metrics, trace ids, alerts; Q30, Q31 pending |
+| 1 | observability-baseline | Archived | CI run 76; Q30, Q31 (tracing SDK, error tracking service) pending |
 | 2 | auth-accounts-sessions | Archived | |
 | 2 | rbac-core-and-audit | Archived | |
 | 2 | instructor-permission-delegation | Archived | Fresh-clone check recorded 2026-11-18 |
 | 2 | staff-mfa | Archived | |
 | 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` archived; `course-categories` built (awaiting CI and archive); lifecycle validation pending decision |
-| 3 | curriculum-crud | Partly built | `course-lessons-basic` archived (flat text lessons); modules and lesson types not started |
+| 3 | curriculum-crud | Partly built | `course-lessons-basic` archived; `course-modules` built (awaiting CI and archive); lesson types wait for media |
 | 3 | asset-upload-pipeline | Not started | Storage and scanning providers not chosen |
 | 3 | video-processing-integration | Blocked | Video provider not chosen (Q09) |
 | 3 | entitlements-core | Archived | `admin_grant` source only |

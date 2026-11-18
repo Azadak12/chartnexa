@@ -16,7 +16,7 @@
 ## 3. Closing
 
 - [x] 3.1 Mutation checks on the query redaction, error message stripping, route labelling and the production token rule; record results.
-- [ ] 3.2 Run the full checks and `openspec validate observability-baseline`; archive after CI passes.
+- [x] 3.2 Run the full checks and `openspec validate observability-baseline`; CI on `main` passed (run 76, `416e42a`), then archived.
 
 ## Evidence
 

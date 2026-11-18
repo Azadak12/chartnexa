@@ -2,16 +2,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { AccessibilityInfo, View } from "react-native";
-import type { StaffCategory } from "@chartnexa/api-contracts";
+import { CATEGORY_NAME_MAX, CATEGORY_NAME_MIN, type StaffCategory } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../api/errors";
 import { ConfirmDialog } from "../auth/ConfirmDialog";
 import { canManageCategories, fetchAccess } from "../courses/course-api";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
 import { neutrals, radii, spacing } from "../theme";
-import { Banner, Button, Screen, Text } from "../ui";
+import { Banner, Button, NameSheet, Screen, Text } from "../ui";
 import { staffCategoryApi } from "./category-api";
-import { CategoryNameSheet } from "./CategoryNameSheet";
 
 const courses = (n: number) => `${n} ${n === 1 ? "course" : "courses"}`;
 
@@ -133,8 +132,11 @@ export function StaffCategoriesScreen() {
           ))}
         </View>
       )}
-      <CategoryNameSheet
+      <NameSheet
         visible={adding}
+        label="Category name"
+        min={CATEGORY_NAME_MIN}
+        max={CATEGORY_NAME_MAX}
         title="Add category"
         initialName=""
         confirmLabel="Add category"
@@ -147,8 +149,11 @@ export function StaffCategoriesScreen() {
           AccessibilityInfo.announceForAccessibility(`Category ${name} added`);
         }}
       />
-      <CategoryNameSheet
+      <NameSheet
         visible={renaming !== null}
+        label="Category name"
+        min={CATEGORY_NAME_MIN}
+        max={CATEGORY_NAME_MAX}
         title="Rename category"
         initialName={renaming?.name ?? ""}
         confirmLabel="Save name"

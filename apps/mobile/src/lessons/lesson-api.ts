@@ -74,6 +74,59 @@ export const staffLessonApi = {
       method: "DELETE",
     });
   },
+  async addModule(courseId: string, title: string): Promise<StaffLessonList> {
+    return check(
+      staffLessonListSchema,
+      await authedFetch(`/staff/courses/${enc(courseId)}/modules`, {
+        method: "POST",
+        body: { title },
+      }),
+    );
+  },
+  async renameModule(
+    courseId: string,
+    moduleId: string,
+    expectedVersion: number,
+    title: string,
+  ): Promise<StaffLessonList> {
+    return check(
+      staffLessonListSchema,
+      await authedFetch(`/staff/courses/${enc(courseId)}/modules/${enc(moduleId)}`, {
+        method: "PATCH",
+        body: { expectedVersion, title },
+      }),
+    );
+  },
+  async removeModule(courseId: string, moduleId: string): Promise<StaffLessonList> {
+    return check(
+      staffLessonListSchema,
+      await authedFetch(`/staff/courses/${enc(courseId)}/modules/${enc(moduleId)}`, {
+        method: "DELETE",
+      }),
+    );
+  },
+  async reorderModules(courseId: string, moduleIds: string[]): Promise<StaffLessonList> {
+    return check(
+      staffLessonListSchema,
+      await authedFetch(`/staff/courses/${enc(courseId)}/modules/order`, {
+        method: "PUT",
+        body: { moduleIds },
+      }),
+    );
+  },
+  async moveToModule(
+    courseId: string,
+    lessonId: string,
+    moduleId: string | null,
+  ): Promise<StaffLessonList> {
+    return check(
+      staffLessonListSchema,
+      await authedFetch(`/staff/courses/${enc(courseId)}/lessons/${enc(lessonId)}/module`, {
+        method: "PUT",
+        body: { moduleId },
+      }),
+    );
+  },
   async reorder(courseId: string, lessonIds: string[]): Promise<StaffLessonList> {
     return check(
       staffLessonListSchema,

@@ -1,12 +1,21 @@
 import { useEffect, useState, type RefObject } from "react";
-import { CATEGORY_NAME_MAX, CATEGORY_NAME_MIN } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../api/errors";
-import { BottomSheet, Banner, Button, TextField, useSubmitOnce } from "../ui";
+import { Banner } from "./Banner";
+import { BottomSheet } from "./BottomSheet";
+import { Button } from "./Button";
+import { TextField } from "./TextField";
+import { useSubmitOnce } from "./use-submit-once";
 
-/** Add or rename a category. A taken name is shown on the field; typed text survives a failure. */
-export function CategoryNameSheet({
+/**
+ * Asks for one short name (a category, a module). A server field error shows on the field and the
+ * typed text survives a failure.
+ */
+export function NameSheet({
   visible,
   title,
+  label,
+  min,
+  max,
   initialName,
   confirmLabel,
   onSave,
@@ -15,6 +24,9 @@ export function CategoryNameSheet({
 }: {
   visible: boolean;
   title: string;
+  label: string;
+  min: number;
+  max: number;
   initialName: string;
   confirmLabel: string;
   onSave: (name: string) => Promise<void>;
@@ -35,8 +47,14 @@ export function CategoryNameSheet({
   const { run, pending } = useSubmitOnce(async () => {
     setMessage(null);
     const trimmed = name.trim();
-    if (trimmed.length < CATEGORY_NAME_MIN || trimmed.length > CATEGORY_NAME_MAX) {
-      setFieldError(`Use ${CATEGORY_NAME_MIN} to ${CATEGORY_NAME_MAX} characters`);
+    if (trimmed.length < min || trimmed.length > max) {
+      setFieldError(
+        min <= 1
+          ? trimmed.length === 0
+            ? "Enter a name"
+            : `Use ${max} characters or fewer`
+          : `Use ${min} to ${max} characters`,
+      );
       return;
     }
     setFieldError(undefined);
@@ -58,13 +76,13 @@ export function CategoryNameSheet({
       onDismiss={onClose}
       {...(openerRef ? { openerRef } : {})}
     >
-      {message ? <Banner kind="error" message={message} testID="category-error" /> : null}
+      {message ? <Banner kind="error" message={message} testID="name-sheet-error" /> : null}
       <TextField
-        label="Category name"
+        label={label}
         value={name}
         onChangeText={setName}
         error={fieldError}
-        maxLength={CATEGORY_NAME_MAX + 10}
+        maxLength={max + 10}
         autoCapitalize="words"
       />
       <Button label={confirmLabel} loading={pending} onPress={() => void run()} />

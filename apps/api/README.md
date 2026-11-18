@@ -154,3 +154,8 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Public:** `GET /categories` (name order, `courseCount` counts published courses) and `GET /courses?category=<id>`. Course responses carry `categoryId`.
 - **Staff (`categories:manage`, Admin and Manager):** `GET /staff/categories` (with `totalCourseCount`), `POST /staff/categories` `{ name }`, `PATCH /staff/categories/:id` `{ expectedVersion, name }`, `DELETE /staff/categories/:id` (409 while any course uses it; repeating it answers `deleted: false`). Names are 2 to 40 characters, unique ignoring case, at most 50 categories (R34).
 - **Courses:** `categoryId` on `POST /staff/courses` and `PATCH /staff/courses/:id` (`null` removes it); an unknown id is a field error.
+
+## Course modules (change `course-modules`)
+- **Staff (`lesson:upload` for the course):** `POST /staff/courses/:courseId/modules` `{ title }`, `PUT .../modules/order` `{ moduleIds }` (every id once, else 409), `PATCH .../modules/:moduleId` `{ expectedVersion, title }`, `DELETE .../modules/:moduleId` (lessons stay, without a module), `PUT .../lessons/:lessonId/module` `{ moduleId | null }`. `POST .../lessons` accepts `moduleId`. All answer with the full staff list (`items`, `modules`).
+- **Order:** lesson `position` is the single reading order; the server renumbers it so lessons are grouped by module order with lessons without a module first (R35). Outline responses include `modules` and each lesson's `moduleId`.
+- **Database:** composite FK `lessons (module_id, course_id) -> course_modules (id, course_id)` with `ON DELETE SET NULL (module_id)`, which needs PostgreSQL 15 or later.

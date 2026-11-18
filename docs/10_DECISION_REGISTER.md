@@ -225,3 +225,4 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | ID | Decision (built; the owner may change it) |
 |---|---|
 | R34 | One optional category per course; names 2 to 40 characters, unique ignoring case, at most 50; Admins and Managers manage them (`categories:manage`); a category with any course cannot be deleted. Built under the owner's standing instruction to make routine decisions autonomously. |
+| R35 | Courses may be split into up to 50 ordered modules; a lesson belongs to at most one module of its course; lesson positions stay the single reading order, grouped by module with lessons without a module first; deleting a module keeps its lessons. Extends R11. Built under the owner's standing instruction (change `course-modules`). |

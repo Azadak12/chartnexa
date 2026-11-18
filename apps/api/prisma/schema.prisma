@@ -191,6 +191,7 @@ model Course {
   @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
   grants InstructorGrant[]
   lessons Lesson[]
+  modules CourseModule[]
   lessonKeys LessonCreateKey[]
   entitlements Entitlement[]
 
@@ -239,7 +240,12 @@ model Lesson {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  /// Optional module of the same course (composite FK in the migration; deleting the module sets
+  /// this to null and keeps the lesson).
+  moduleId  String?  @map("module_id") @db.Uuid
+
   course Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module CourseModule?     @relation(fields: [moduleId, courseId], references: [id, courseId], onDelete: NoAction, map: "lessons_module_same_course_fkey")
   keys   LessonCreateKey[]
   completions LessonCompletion[]
 
@@ -432,4 +438,22 @@ model Category {
   courses Course[]
 
   @@map("categories")
+}
+
+/// An ordered section of a course. Lesson positions stay the single reading order; the server
+/// renumbers them so lessons are grouped by module order (lessons without a module first).
+model CourseModule {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @map("course_id") @db.Uuid
+  title     String
+  position  Int
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([id, courseId], map: "course_modules_id_course_id_key")
+  @@map("course_modules")
 }
