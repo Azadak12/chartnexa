@@ -19,4 +19,17 @@
 - [x] 3.1 Add contract tests against the real API (owner writes, edits, deletes; summary matches; stranger and revoked owner refused; concurrent submits; paging; privacy); verify they pass.
 - [x] 3.2 Run mutation checks on the owner check, the one-review rule, the totals arithmetic, the course lock, name privacy and the deletion hook; record results.
 - [x] 3.3 Update READMEs, the manual device checklist and the decision register after the owner answers; write evidence listing what ran and what was not verified on devices, and state in the README that reviews must not be released before moderation.
-- [ ] 3.4 Run the full checks and `openspec validate course-reviews-basic`; after review and merge, archive with `openspec archive`.
+- [x] 3.4 Run the full checks and `openspec validate course-reviews-basic`; after review and merge, archive with `openspec archive`.
+
+## Evidence
+
+Run on the final code (commit `5d9a431`), locally, step by step (Turbo does not start in this environment, so `pnpm check` itself was not run):
+
+- `pnpm lint`, `pnpm format`, contract/token/type builds, `pnpm -r typecheck`: pass.
+- Tests: 374 API (Vitest, real Postgres), 402 app (Jest), 33 contract tests against a real running API: all pass.
+- `pnpm --filter @chartnexa/api build`, `pnpm --filter @chartnexa/mobile build`, `pnpm secrets`, `pnpm --filter @chartnexa/api migrate:roundtrip`: pass.
+- CI on `main`, run 71 (`5d9a431`): success.
+- Mutation checks (task 3.2) are recorded in the commit history. One mutation of the app's double-press guard was invalid (the edit broke the file instead of changing behaviour), so that guard has test coverage but no confirmed mutation result.
+
+Not verified: anything on a real iOS or Android device (look and feel, screen readers, large text), and load or capacity.
+Release note: reviews must not reach real students before `reviews-moderation` exists (decision R28).
