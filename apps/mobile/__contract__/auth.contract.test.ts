@@ -86,7 +86,9 @@ describe("account access against the real API", () => {
   it("slows down repeated failures with a wait", async () => {
     const email = await newAccount();
     let last: AppError | null = null;
-    for (let i = 0; i < 7; i++)
+    // Counters use fixed time windows, so on a slow machine the attempts can straddle two
+    // windows. Keep failing (up to 15 times) until the wait appears.
+    for (let i = 0; i < 15 && last?.kind !== "rate_limited"; i++)
       last = await failure(authHttp.login({ email, password: "wrong password value" }));
     expect(last?.kind).toBe("rate_limited");
     expect(last?.retryAfterSeconds).toBeGreaterThan(0);

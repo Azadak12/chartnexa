@@ -130,7 +130,7 @@ describe("first-Admin bootstrap", () => {
         },
       );
     const ok = cmd([]);
-    expect(ok.status).toBe(0);
+    expect(ok.status, `${ok.stderr}${ok.stdout}`).toBe(0);
     expect(ok.stdout).toContain(p.id);
     const again = cmd([]);
     expect(again.status).toBe(0); // already an Admin: idempotent

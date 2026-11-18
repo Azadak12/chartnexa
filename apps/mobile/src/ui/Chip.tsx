@@ -7,18 +7,22 @@ export function Chip({
   label,
   selected,
   onPress,
+  disabled = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  /** Shown dimmed and announced as unavailable; pressing does nothing. */
+  disabled?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
       onPress={onPress}
-      style={[styles.chip, selected ? styles.on : styles.off]}
+      style={[styles.chip, selected ? styles.on : styles.off, disabled ? { opacity: 0.45 } : null]}
     >
       <Text variant="bodyStrong" tone={selected ? "onBlue" : "body"}>
         {label}

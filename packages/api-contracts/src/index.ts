@@ -23,3 +23,4 @@ export const isRole = (value: string): value is Role =>
 export * from "./auth.js";
 export * from "./access.js";
 export * from "./courses.js";
+export * from "./grants.js";

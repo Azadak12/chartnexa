@@ -156,3 +156,6 @@ All of the following are **Proposed and need owner approval (Q06)**; nothing her
 | R05 | Staff roles require an active account with a verified email. |
 | R06 | Audit reading is Admin-only for now. Audit rows are append-only and keep only ids, role and permission names, reasons and request ids. Retention and legal erasure are undecided (Q10). |
 | R07 | First-Admin bootstrap (resolves Q14): an operator-run command with database access promotes an existing verified account when no Admin exists; a `--recovery` flag, always audited and marked, handles a locked-out sole Admin. |
+| R08 | Instructor grants: seven grantable permissions (create course academy-wide; update, publish, lesson upload, live scheduling, students read, reports read per course). Admins may grant all; Managers all except publish course. Fixed in code for now; an Admin-editable ceiling is deferred. Proposed resolution of Q06 (needs owner approval). |
+| R09 | An Instructor who creates a course automatically receives update, lessons, live, students and reports on it, never publish; revocable and audited. (needs owner approval) |
+| R10 | Grants end with the Instructor role (removal, replacement, account deletion) in the same transaction; grants of disabled accounts never take effect. A Manager may remove any grant, including an Admin's. (needs owner approval) |
