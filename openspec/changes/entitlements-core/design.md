@@ -41,4 +41,4 @@ Additive table and indexes with `down.sql`, covered by the round trip. No existi
 
 ## Open Questions (owner)
 
-The three decisions in the proposal. Record answers as R15 to R17 in `docs/10_DECISION_REGISTER.md`.
+None. The three decisions in the proposal were approved and are recorded as R15 to R17.

@@ -20,7 +20,7 @@ Lessons are locked behind "Enrollment is coming" and My Courses is empty, becaus
 - Proposed here, needs owner approval: an Instructor cannot grant or revoke entitlements (no grantable permission covers it); a revoke requires a reason of 3 to 200 characters and can be undone only by granting again; owners keep access when a course is unpublished? (see below).
 - Pending and not decided here: what a purchased entitlement looks like (payments change), store or dispute reversals (N01 is agreed but needs real payments), duplicate purchases across channels (Q19).
 
-## Open decisions for the owner
+## Owner decisions (approved in chat 2026-11-18, recorded as R15 to R17)
 
 1. **Unpublished course and owners.** Recommendation: an owner keeps reading lessons of an unpublished course (they own it for life, C15), but it disappears from the public catalog; My Courses still lists it, marked "Not currently on sale". The alternative (hide it from owners) conflicts with lifetime access. This also closes the open question left in `course-catalog-basics`.
 2. **Can Instructors see who is enrolled in their course?** Recommendation: not in this change; `students:read` is a separate, later "Students" view.

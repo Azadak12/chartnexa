@@ -163,3 +163,6 @@ All of the following are **Proposed and need owner approval (Q06)**; nothing her
 | R12 | A lesson is "eligible for preview" only when staff turn on its free-preview flag. Anyone may read a free-preview lesson of a published course; every other lesson body is refused by the server until entitlements exist (`ENROLLMENT_REQUIRED`). Approved 2026-11-18. |
 | R13 | Lessons are deleted for good (no soft delete) until progress tracking exists; `player-resources-progress` must revisit this. Approved 2026-11-18. |
 | R14 | Publishing a course does not yet require a lesson; to be revisited in `course-lifecycle`. Lessons of a published course go live as soon as they are saved. Approved 2026-11-18. |
+| R15 | Owners keep reading lessons of an unpublished course (lifetime access, C15); the course leaves the public catalog and My Courses marks it "Not currently on sale". Approved by the owner in chat on 2026-11-18 (`entitlements-core`); also answers the open question in `course-catalog-basics`. |
+| R16 | Instructors do not see who is enrolled in this change; a separate Students view comes later under `students:read`. Approved 2026-11-18. |
+| R17 | Only Admins and Managers (`enrollments:manage`) grant and revoke entitlements. Approved 2026-11-18. |
