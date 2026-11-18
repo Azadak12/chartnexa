@@ -23,6 +23,8 @@ export class AppError extends Error {
     public readonly fields: FieldError[] = [],
     /** Seconds to wait when the server asked the app to slow down (HTTP Retry-After). */
     public readonly retryAfterSeconds: number | null = null,
+    /** The server's machine code, for the few cases that need more than the kind. */
+    public readonly code: string | null = null,
   ) {
     super(message);
     this.name = "AppError";
@@ -75,7 +77,15 @@ export function fromResponse(status: number, body: unknown): AppError {
   if (parsed.success) {
     const env = parsed.data;
     const kind = BY_CODE[env.code] ?? kindFromStatus(status);
-    return new AppError(kind, MESSAGES[kind], status, env.requestId, env.fields ?? []);
+    return new AppError(
+      kind,
+      MESSAGES[kind],
+      status,
+      env.requestId,
+      env.fields ?? [],
+      null,
+      env.code,
+    );
   }
   const kind = kindFromStatus(status);
   return new AppError(kind, MESSAGES[kind], status, null);

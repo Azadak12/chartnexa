@@ -23,6 +23,7 @@ import { Banner, Button, Chip, Screen, Text, useSubmitOnce } from "../../ui";
 import { ConfirmDialog } from "../../auth/ConfirmDialog";
 import {
   canCreateCourses,
+  canAuthorLessons,
   canManageCourses,
   canPublishCourse,
   fetchAccess,
@@ -124,6 +125,7 @@ export function CourseFormScreen() {
       key={existing.data?.id ?? "new"}
       course={editing ? existing.data : undefined}
       canPublish={editing && canPublishCourse(access.data, String(id))}
+      canLessons={editing && canAuthorLessons(access.data, String(id))}
       onSaved={() => qc.invalidateQueries({ queryKey: ["staff-courses"] })}
     />
   );
@@ -132,10 +134,12 @@ export function CourseFormScreen() {
 function Form({
   course,
   canPublish,
+  canLessons,
   onSaved,
 }: {
   course: StaffCourse | undefined;
   canPublish: boolean;
+  canLessons: boolean;
   onSaved: () => unknown;
 }) {
   const router = useRouter();
@@ -350,6 +354,13 @@ function Form({
             onPress={() => setConfirm(status === "draft" ? "publish" : "unpublish")}
           />
         </View>
+      ) : null}
+      {course && canLessons ? (
+        <Button
+          label="Lessons"
+          variant="secondary"
+          onPress={() => router.push(`/manage/${course.id}/lessons`)}
+        />
       ) : null}
       <Button label="Back" variant="tertiary" onPress={() => router.back()} />
       <ConfirmDialog
