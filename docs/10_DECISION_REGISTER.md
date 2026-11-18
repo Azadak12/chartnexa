@@ -166,3 +166,13 @@ All of the following are **Proposed and need owner approval (Q06)**; nothing her
 | R15 | Owners keep reading lessons of an unpublished course (lifetime access, C15); the course leaves the public catalog and My Courses marks it "Not currently on sale". Approved by the owner in chat on 2026-11-18 (`entitlements-core`); also answers the open question in `course-catalog-basics`. |
 | R16 | Instructors do not see who is enrolled in this change; a separate Students view comes later under `students:read`. Approved 2026-11-18. |
 | R17 | Only Admins and Managers (`enrollments:manage`) grant and revoke entitlements. Approved 2026-11-18. |
+
+## UX reference review: pending owner decisions (2026-11-18)
+
+See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
+
+| ID | Question | Proposed answer |
+|---|---|---|
+| Q20 | Is `branhamleonel-pixel/trading-academy` a reference for layout and interaction ideas only, inside ChartNexa's white, black and blue brand? | Yes. Its dark palette, effects and visual style are not adopted. |
+| Q21 | Do any game mechanics (streaks, XP, quests, leagues, achievements) belong in the first release? | No. They conflict with the proposed Q08 exclusions; revisit after progress tracking (`player-resources-progress`). |
+| Q22 | May code or assets from the reference be reused, and who owns and licenses them? | No reuse until the owner states the licence and ownership; the repository has no LICENSE file. |
