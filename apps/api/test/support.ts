@@ -25,6 +25,16 @@ export class TestController {
     throw new Error("password=hunter2 at /srv/secret/path.ts");
   }
 
+  @Get("boom-db")
+  boomDb(): never {
+    const e = new Error("Can't reach database for user leak-me@example.com") as Error & {
+      code: string;
+    };
+    e.name = "PrismaClientKnownRequestError";
+    e.code = "P1001";
+    throw e;
+  }
+
   @Get("needs-course-update")
   @RequirePermission("course:update", {
     resource: (req) => ({ courseId: (req.query as { courseId?: string }).courseId ?? "c" }),

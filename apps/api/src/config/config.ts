@@ -41,6 +41,8 @@ const schema = z.object({
   RL_REVIEW_WINDOW_SECONDS: z.coerce.number().int().min(1).default(3600),
   RL_REVIEW_REPORT_MAX: z.coerce.number().int().min(1).default(20),
   RL_REVIEW_REPORT_WINDOW_SECONDS: z.coerce.number().int().min(1).default(86400),
+  /** Bearer token for GET /metrics. In production the endpoint is off without it. */
+  METRICS_TOKEN: z.string().min(32).optional(),
   RL_GENERIC_IP_MAX: z.coerce.number().int().min(1).default(60),
   RL_GENERIC_WINDOW_SECONDS: z.coerce.number().int().min(1).default(900),
 });

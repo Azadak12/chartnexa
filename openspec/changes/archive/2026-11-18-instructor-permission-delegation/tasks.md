@@ -27,7 +27,7 @@
 
 - [x] 4.1 Extend the contract tests to run a real flow against the API (Admin appoints an Instructor, Manager grants create course, Instructor creates and edits a course, cannot publish, Admin grants publish, Instructor publishes, revoke stops the next edit, Manager cannot grant publish); verify they pass locally and in CI.
 - [x] 4.2 Record R08 to R10 and the Q06 resolution in `docs/10_DECISION_REGISTER.md` as proposals awaiting approval, and update the API and app READMEs (endpoints, ceiling, phone walkthrough to appoint and grant an Instructor) and the manual device checklist; verify by following the walkthrough in a fresh clone.
-- [ ] 4.3 Run the full `pnpm check` from a fresh clone, confirm CI is green, and write the evidence including what could not be verified on this machine (device look and feel, keyboard, screen readers).
+- [x] 4.3 Run the full `pnpm check` from a fresh clone, confirm CI is green, and write the evidence including what could not be verified on this machine (device look and feel, keyboard, screen readers).
 
 ## Evidence
 
@@ -37,3 +37,4 @@
 - Design decisions made while building: the grant endpoint always answers 200 with `created: true|false` (not 201); access reads the courses table directly to avoid an import cycle; listing and opening a course for an Instructor depend on the update grant, so a publish-only grant does not show the course.
 - Not verified (no device or simulator here): how the Add permission sheet looks and scrolls with the keyboard open, large-text layout, screen readers announcing the success messages, and focus return on a real device. They are on the manual checklist in `apps/mobile/README.md`.
 - Proposals R08 to R10 are recorded as awaiting owner approval; nothing here is marked Confirmed.
+- Fresh-clone re-run on 2026-11-18 (clone of `main` at `ec6e7a0` into an empty directory): `pnpm install --frozen-lockfile`, lint, format, builds, typecheck, all tests (416 API, 420 app, 34 contract), API and app builds, secrets scan and the migration round trip all exit 0. `pnpm check` itself was run step by step because Turbo does not start in this environment. CI on `main` is green (run 75); the earlier red run 51 was superseded.

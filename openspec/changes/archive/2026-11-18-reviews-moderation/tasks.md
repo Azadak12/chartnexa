@@ -21,7 +21,7 @@
 - [x] 3.1 Contract tests against the real API (report, hide, public list and totals change, restore, appeal and decide, permission refusals, concurrency); verify they pass.
 - [x] 3.2 Mutation checks on the permission check, totals arithmetic, the hidden-only adjustment, the different-moderator rule, reporter privacy and the audit contents; record results.
 - [x] 3.3 Update READMEs, the device checklist and the decision register (owner answers), lift the R28 release block in the docs, and write evidence including what was not verified on devices.
-- [x] 3.4 Run the full checks and `openspec validate reviews-moderation` (archive follows once CI on `main` is green).
+- [x] 3.4 Run the full checks and `openspec validate reviews-moderation`; CI on `main` passed (run 75, commit `ec6e7a0`), then archived.
 
 ## Evidence
 

@@ -1,0 +1,59 @@
+{
+  "groups": [
+    {
+      "name": "chartnexa-api",
+      "rules": [
+        {
+          "alert": "ApiDown",
+          "expr": "up{job=\"chartnexa-api\"} == 0",
+          "for": "2m",
+          "labels": { "severity": "page" },
+          "annotations": {
+            "summary": "The API is not answering metrics scrapes.",
+            "runbook": "ops/observability/RUNBOOK.md#apidown"
+          }
+        },
+        {
+          "alert": "ApiHighServerErrorRate",
+          "expr": "sum(rate(http_requests_total{job=\"chartnexa-api\",status_class=\"5xx\"}[5m])) / clamp_min(sum(rate(http_requests_total{job=\"chartnexa-api\"}[5m])), 1) > 0.02",
+          "for": "5m",
+          "labels": { "severity": "page" },
+          "annotations": {
+            "summary": "More than 2% of requests fail with a server error.",
+            "runbook": "ops/observability/RUNBOOK.md#apihighservererrorrate"
+          }
+        },
+        {
+          "alert": "ApiDependencyFailures",
+          "expr": "sum(rate(app_errors_total{job=\"chartnexa-api\",error_class=\"dependency\"}[5m])) > 0.1",
+          "for": "5m",
+          "labels": { "severity": "page" },
+          "annotations": {
+            "summary": "Requests are failing because the database or another dependency cannot be reached.",
+            "runbook": "ops/observability/RUNBOOK.md#apidependencyfailures"
+          }
+        },
+        {
+          "alert": "ApiSlowResponses",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"chartnexa-api\"}[10m]))) > 1",
+          "for": "10m",
+          "labels": { "severity": "ticket" },
+          "annotations": {
+            "summary": "95th percentile response time is above 1 second.",
+            "runbook": "ops/observability/RUNBOOK.md#apislowresponses"
+          }
+        },
+        {
+          "alert": "ApiEventLoopBlocked",
+          "expr": "max(nodejs_eventloop_delay_p99_seconds{job=\"chartnexa-api\"}) > 0.2",
+          "for": "5m",
+          "labels": { "severity": "ticket" },
+          "annotations": {
+            "summary": "An API instance's event loop is delayed by more than 200 ms.",
+            "runbook": "ops/observability/RUNBOOK.md#apieventloopblocked"
+          }
+        }
+      ]
+    }
+  ]
+}

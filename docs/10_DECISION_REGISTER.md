@@ -212,3 +212,10 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | R31 | One appeal per hiding, decided by a moderator other than the one who hid it; a person who can manage roles (Admin) may decide any appeal. Restoring a review settles an open appeal as overturned. (Q26) |
 | R32 | Reviews are never hidden automatically, whatever the number of reports. Staff can only hide (reversible), never delete or edit; the author may still edit or delete their own, and editing a hidden review keeps it hidden. (Q27, Q28, Q29) |
 | R33 | R28 is lifted once moderation has been run with staff: it is built and tested, but no real moderator has used it yet. |
+
+## Observability: pending owner decisions (change `observability-baseline`, 2026-11-18)
+
+| ID | Question | Proposed answer |
+|---|---|---|
+| Q30 | Add distributed tracing with an SDK (OpenTelemetry) and a hosted backend? | Not yet. Trace ids from `traceparent` are logged now; add the SDK when a second service or a queue exists. |
+| Q31 | Which error-tracking service (for example Sentry) for the API and the app, and who owns the account? | Pending: needs an account, a data-processing review (no personal data may be sent) and cost approval. The API reports through `ErrorReporter`, so adding one is a single implementation. |

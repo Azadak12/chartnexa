@@ -86,6 +86,7 @@ describe("log hygiene across the full auth flows", () => {
       "time",
       "service",
       "requestId",
+      "traceId",
       "event",
       "userId",
       "sessionId",

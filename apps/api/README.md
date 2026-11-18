@@ -142,3 +142,10 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Audit:** `review.report`, `review.hide`, `review.restore`, `review.appeal`, `review.appeal.decide`, with ids, the reason code or decision and the rating; never review text, notes or messages.
 - **Rollback:** `down.sql` counts hidden reviews in the totals again before dropping the columns.
 
+
+## Observability (change `observability-baseline`)
+- **Logs:** JSON lines with `requestId` (from a valid `x-request-id` or generated) and `traceId` (from a valid W3C `traceparent` or generated; also returned as `x-trace-id`). Request URLs are logged with query parameter names only (`/staff/users/lookup?email=`), never values. Unexpected errors are logged once as `unhandled error` with `err.type`, `err.code`, `err.errorClass` (`dependency` for database or network failures, `server` otherwise) and stack frames, never the message. Client errors (4xx) are not logged as errors.
+- **Error reporting:** every unexpected error goes through `ErrorReporter` (`src/platform/error-reporter.ts`). The only implementation writes the log line; an external error-tracking service is pending decision Q31.
+- **Metrics:** `GET /metrics` in Prometheus text: `http_requests_total` and `http_request_duration_seconds` by method, route pattern and status class (unknown paths count as `unmatched`), `app_errors_total` by class, memory, uptime and event-loop delay. Open in development and test; in production it answers 404 unless `METRICS_TOKEN` is set, then needs `Authorization: Bearer <token>`. Values are per instance and reset on restart.
+- **Alerts and runbook:** `ops/observability/alerts.rules.json` (JSON, which Prometheus reads as YAML) and `ops/observability/RUNBOOK.md`. Thresholds are starting points; no load test has been run and the rules have not been loaded into a running Prometheus.
+- **Not yet:** a tracing SDK (Q30), hosted error tracking (Q31), dashboards, log shipping, background-job metrics (no background jobs exist yet).

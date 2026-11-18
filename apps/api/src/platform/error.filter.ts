@@ -7,6 +7,9 @@ import {
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { ErrorEnvelope } from "@chartnexa/api-contracts";
+import { classifyError } from "./error-class.js";
+import type { ErrorReporter } from "./error-reporter.js";
+import type { Metrics } from "./metrics.js";
 import { RateLimitedException } from "./rate-limited.exception.js";
 import { ValidationFailed } from "./zod.pipe.js";
 
@@ -74,13 +77,27 @@ function safeMessage(e: HttpException): string {
 
 @Catch()
 export class ErrorFilter implements ExceptionFilter {
+  constructor(
+    private readonly reporter?: ErrorReporter,
+    private readonly metrics?: Metrics,
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest<FastifyRequest>();
     const reply = ctx.getResponse<FastifyReply>();
     const { status, body } = toEnvelope(exception, req.id);
     if (status >= 500) {
-      req.log.error({ err: exception }, "unhandled error");
+      // One safe line per unexpected error: type, code, class and stack frames, never the message.
+      this.metrics?.observeError(classifyError(exception));
+      const context = {
+        requestId: req.id,
+        traceId: (req.raw as { traceId?: string }).traceId,
+        method: req.method,
+        route: req.routeOptions?.url,
+        log: req.log,
+      };
+      if (this.reporter) this.reporter.report(exception, context);
     }
     if (exception instanceof RateLimitedException) {
       void reply.header("retry-after", String(exception.retryAfterSeconds));
