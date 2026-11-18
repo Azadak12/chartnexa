@@ -10,7 +10,7 @@ import {
 } from "@chartnexa/api-contracts";
 import { runBootstrap } from "../src/cli/admin-bootstrap.js";
 import { MfaService } from "../src/modules/mfa/index.js";
-import { DEV_MFA_KEY, parseKey, seal } from "../src/modules/mfa/secret-box.js";
+import { DEV_MFA_KEY, parseKey, seal } from "../src/platform/secret-box.js";
 import { codeForStep, newSecret, stepAt } from "../src/modules/mfa/totp.js";
 import { auditRows, giveRole, person, type Person } from "./access-helpers.js";
 import { makeHarness, type Harness } from "./auth-helpers.js";

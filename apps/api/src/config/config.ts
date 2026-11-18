@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DEV_MFA_KEY, parseKey } from "../modules/mfa/secret-box.js";
+import { DEV_MFA_KEY, parseKey } from "../platform/secret-box.js";
 
 export const CONFIG = Symbol("CONFIG");
 

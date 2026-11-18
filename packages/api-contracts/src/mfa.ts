@@ -19,7 +19,7 @@ export const mfaCodeSchema = z
   .trim()
   .min(6)
   .max(24)
-  .regex(/^[0-9A-Za-z \-]+$/, "Use only letters, numbers, spaces and hyphens");
+  .regex(/^[0-9A-Za-z -]+$/, "Use only letters, numbers, spaces and hyphens");
 const totpCode = z
   .string()
   .trim()

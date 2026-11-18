@@ -26,7 +26,7 @@ import {
   normalizeRecoveryCode,
   RECOVERY_CODE_COUNT,
 } from "./recovery-codes.js";
-import { DEV_MFA_KEY, open, parseKey, seal, type Sealed } from "./secret-box.js";
+import { DEV_MFA_KEY, open, parseKey, seal, type Sealed } from "../../platform/secret-box.js";
 import { matchStep, newSecret, otpauthUri } from "./totp.js";
 
 type Tx = Prisma.TransactionClient;

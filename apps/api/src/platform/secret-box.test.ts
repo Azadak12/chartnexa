@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { loadConfig } from "../../config/config.js";
+import { loadConfig } from "../config/config.js";
 import { DEV_MFA_KEY, open, parseKey, seal } from "./secret-box.js";
 
 const key = randomBytes(32);
