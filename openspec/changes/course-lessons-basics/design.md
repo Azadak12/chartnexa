@@ -4,13 +4,13 @@
 
 - Built: courses (`courses` table, optimistic `version`, staff and public controllers, audit), the permission catalog where `lesson:upload` is course-scoped, grants (from `instructor-permission-delegation`, PR 22, which this change builds on), the mobile course page, the staff editor with `ConfirmDialog` and `ReasonSheet`-style sheets, and the module-boundary lint rule.
 - This change depends on PR 22 being merged first, because the Instructor access to lessons is the `lesson:upload` grant it introduces. Admin and Manager access works without it.
-- Not built: enrollment, uploads, modules. Those shape the Non-Goals.
+- Not built: enrollment, uploads, modules. Uploads are planned as the next change, `lesson-files`, and a lesson's id and course id are the only things it needs from this change.
 
 ## Goals / Non-Goals
 
 **Goals:** a correct, always-complete ordering; lessons editable by the right people only; a public preview that can never leak locked content; screens that work with screen readers and without drag gestures.
 
-**Non-Goals:** modules, media, progress, enrollment-based access, requiring lessons to publish, rich text, localization, search inside lessons.
+**Non-Goals:** modules, file uploads (next change), progress, enrollment-based access, requiring lessons to publish, rich text, localization, search inside lessons.
 
 ## Decisions
 

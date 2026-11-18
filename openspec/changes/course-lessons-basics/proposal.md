@@ -9,10 +9,9 @@ A course in ChartNexa is only a title, price and description today, so there is 
 **Confirmation status**
 
 - Confirmed: courses contain lessons in a set order (C-series scope, docs/02); staff with the right permission build them; students can preview eligible lessons before buying (docs/02 [P] preview); enforcement is server-side.
-- Proposed, needs owner approval (recorded as R11 to R13 in the decision register):
-  - R11: version 1 lessons are flat (no modules) and text only. Modules, video and file uploads come later (`asset-upload-pipeline`, Q04).
-  - R12: each lesson has a Preview switch. Preview lessons can be read by anyone on a published course; other lessons show their title with a "locked until you enroll" note until enrollment exists.
-  - R13: lesson permissions follow `lesson:upload`: Admins and Managers on every course, Instructors only on courses where they were granted it.
+- Confirmed by the owner (2026-11-18): each lesson has a Preview switch; Preview lessons can be read by anyone on a published course; titles of other lessons stay public with a "locked until you enroll" note until enrollment exists (R12); Admins and Managers manage lessons on every course and Instructors only where it was assigned to them (R13).
+- Confirmed by the owner: lessons must eventually carry uploaded files (video, PDF and other formats). To keep each change small and safe, this change builds the lessons themselves (text) and the next change, `lesson-files`, adds uploads on top. Which formats are allowed is decided there (R14).
+- Proposed, needs owner approval: R11, version 1 of lessons is flat (no modules) and has text content; modules are not planned yet.
 
 **Build**
 
@@ -23,7 +22,7 @@ A course in ChartNexa is only a title, price and description today, so there is 
 
 **Out of scope**
 
-- Modules or sections, video, images, PDFs, Word files, uploads, downloads, quizzes, progress and completion, live sessions, comments.
+- Modules or sections, uploads of any file (video, PDF, images, Word and others) which the next change `lesson-files` adds, downloads, quizzes, progress and completion, live sessions, comments.
 - Who may read non-preview lessons (needs enrollment, a later change). Requiring at least one lesson to publish a course (would affect already published courses; deferred).
 - Rich text or HTML: content is plain text, shown as text.
 

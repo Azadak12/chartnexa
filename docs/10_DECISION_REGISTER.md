@@ -138,6 +138,9 @@ Q01, Q05, Q13 are closed. Q02 remains open for the billing method only.
 | C18 | **First-party authentication** (email and password in our own API). | ADR-0004 Accepted. |
 | C19 | **Apple and Google sign-in later**, not in the first auth change. | Sign in with Apple is only required once a third-party login is offered. |
 | C20 | **Mailer interface with a development-only sender** for verification and reset emails. | A real email provider and sender domain remain open before launch. |
+| C21 | **Lesson Preview switch confirmed (owner, 2026-11-18).** Preview lessons are public on published courses; titles of other lessons stay public and say they are locked until enrollment exists. | Same as R12. Planned in `course-lessons-basics`. |
+| C22 | **Who edits lessons confirmed (owner, 2026-11-18).** Admins and Managers on every course; Instructors only on courses where it is assigned to them. | Same as R13. |
+| C23 | **Lessons must carry uploaded files: video, PDF and other formats (owner, 2026-11-18).** | Planned as `lesson-files` after `course-lessons-basics`. The exact allowed formats, limits and download default are proposals R14 to R17. |
 
 Proposed defaults in `auth-accounts-sessions` (need owner approval, not yet confirmed): every self-registered account is a student; unverified accounts may sign in but a verified email is required before purchase; password 10 to 128 characters with no composition rules; access tokens 10 minutes, refresh tokens 30 days with a 90-day cap; account deletion erases personal data immediately and keeps only an anonymous id (retention policy pending legal review).
 
@@ -156,3 +159,12 @@ All of the following are **Proposed and need owner approval (Q06)**; nothing her
 | R05 | Staff roles require an active account with a verified email. |
 | R06 | Audit reading is Admin-only for now. Audit rows are append-only and keep only ids, role and permission names, reasons and request ids. Retention and legal erasure are undecided (Q10). |
 | R07 | First-Admin bootstrap (resolves Q14): an operator-run command with database access promotes an existing verified account when no Admin exists; a `--recovery` flag, always audited and marked, handles a locked-out sole Admin. |
+| R11 | Version 1 of lessons is flat (no modules) with text content; modules are not planned. (needs owner approval) |
+| R12 | Lesson Preview switch and public titles: see C21 (confirmed). |
+| R13 | Lesson permissions follow `lesson:upload`: see C22 (confirmed). |
+| R14 | Lesson files use an allowlist, not "any file": video MP4, MOV, WebM; PDF; images PNG, JPEG; Word DOCX. Never allowed: programs, scripts, archives, web pages, SVG, macro-enabled Office files. Types are decided from file content. More formats are added one at a time after a safety check. (needs owner approval) |
+| R15 | Lesson file limits: video 500 MB, PDF and Word 50 MB, image 10 MB, at most 20 files per lesson. (needs owner approval) |
+| R16 | Each file has a "students can download" switch, off by default (partly resolves Q04). It controls what the app offers; it cannot stop a viewer from capturing what they watch, and the app does not claim it can. (needs owner approval) |
+| R17 | Word files open in the phone's own viewer; no Word to PDF conversion in `lesson-files`. (needs owner approval) |
+
+Launch blockers recorded with `lesson-files` (not blockers for building it): production file storage (S3-compatible, region, cost) and a real virus scanner. The API refuses to start in production with the development storage or scanner.
