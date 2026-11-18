@@ -16,15 +16,10 @@ export const errorEnvelopeSchema = z.object({
 export type FieldError = z.infer<typeof fieldErrorSchema>;
 export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;
 
-export interface Page<T> {
-  items: T[];
-  nextCursor: string | null;
-}
-
-export const MAX_PAGE_SIZE = 100;
-export const DEFAULT_PAGE_SIZE = 25;
+export { MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE, type Page } from "./pagination.js";
 
 export const isRole = (value: string): value is Role =>
   ["student", "instructor", "manager", "admin"].includes(value);
 export * from "./auth.js";
 export * from "./access.js";
+export * from "./courses.js";

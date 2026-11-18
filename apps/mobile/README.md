@@ -1,6 +1,6 @@
 # @chartnexa/mobile
 
-ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. Includes the app **shell** (brand tokens, base components, navigation rules, screen states) and **account access**: sign in, create account, verify email, forgot and reset password, and a Profile area (name, password, sessions, sign out, delete account). There are no course screens yet.
+ChartNexa Academy app for iOS and Android: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router. Includes the app **shell** (brand tokens, base components, navigation rules, screen states) and **account access**: sign in, create account, verify email, forgot and reset password, and a Profile area (name, password, sessions, sign out, delete account). Courses: a catalog on Home (search, level filter, remembered position), a course page, and staff screens to create, edit, publish and unpublish courses (Profile, then Manage courses, for Admins and Managers). No lessons, video or buying yet.
 
 ## What was verified and what was not
 - **Verified in automated tests and CI:** component behavior and accessibility properties, navigation and return-to rules, back handling order, remembered list position, API error mapping, offline banner, font fallback, contrast of every approved color pair, production bundles for iOS and Android build under pnpm, and the development gallery is absent from production bundles.
@@ -63,6 +63,9 @@ src/fonts                Inter loading with system-font fallback
 | Airplane mode shows the offline banner, content stays | yes | yes |
 | Landscape layout is usable | yes | yes |
 | Tap targets feel at least as large as a thumb | yes | yes |
+| Catalog: scroll, open a course, go back: same scroll position, search and level | yes | yes |
+| Staff form: numeric keypad for price, multiline description is usable, keyboard does not hide the fields | yes | yes |
+| Large text: course cards, price and status labels do not clip | yes | yes |
 | Sign in, kill the app from the task switcher, reopen: still signed in, no sign-in flash | yes | yes |
 | Sign in, delete the app, reinstall: asked to sign in (iOS Keychain can keep an old token, which the server rejects) | yes | yes |
 | Airplane mode: sign out works and says the server will be told later; sign in shows the offline message | yes | yes |
@@ -104,3 +107,9 @@ EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
 
 ## Contract tests against the real API
 `pnpm --filter @chartnexa/mobile test:contract` starts the real API on a throwaway PostgreSQL database and runs the app's auth layer against it over HTTP (needs a local PostgreSQL, like the API tests). `pnpm test` runs both the unit and contract tests. CI's `mobile` job has a PostgreSQL service for this.
+
+## Courses in the app
+- **Catalog (Home):** published courses newest first, search after typing pauses, level chips, loads more as you scroll. Opening a course and coming back keeps the search, level and scroll position. A course page shows the cover, level, price (whole dollars or Free) and description, and says enrollment is coming (there is no buy button).
+- **Staff (Profile, then Manage courses):** shown only when `/me/access` includes course permissions (the server still checks every request). Create a draft, edit it, then publish it after a confirmation. Price is typed in dollars ("49.5" is saved as $49.50; more than two decimals is refused). If someone else changed the course, the app says so and offers "Use latest version" without losing what you typed.
+- **Try it:** sign up and verify in the app, make that account an Admin with `admin:bootstrap` (see the API README), sign in again, create and publish a course, then see it in the Home catalog from any account.
+- Money is whole US cents everywhere; dollars appear only on screen and in the staff form.

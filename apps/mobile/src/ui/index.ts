@@ -2,6 +2,7 @@ export { Banner, type BannerKind } from "./Banner";
 export { BottomSheet, Dialog, type SheetProps } from "./BottomSheet";
 export { Button, type ButtonProps, type ButtonVariant } from "./Button";
 export { Card } from "./Card";
+export { Chip } from "./Chip";
 export { IconButton, type IconName } from "./IconButton";
 export { OverlayProvider, useOverlays } from "./overlay";
 export { PasswordField } from "./PasswordField";

@@ -9,7 +9,7 @@ export default function MyCourses() {
       </Text>
       <StateView
         state="empty"
-        title="No courses yet"
+        title="You have not enrolled in any courses"
         message="Courses you purchase will appear here."
       />
     </Screen>

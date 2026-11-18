@@ -77,3 +77,12 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - Refuses (exit 1) if any active Admin exists. Prints only the account id; the audit record has actor kind `system` and reason `bootstrap`.
 - If the only Admin cannot sign in, add `--recovery`. It adds the named account as an Admin (it does not remove the locked-out one) and the audit record is marked `role.recovery`. Afterwards an Admin can revoke the unusable account through the API.
 - Run it the same way against a local database with `DATABASE_URL`, `CURSOR_SECRET` and `ACCESS_TOKEN_SECRET` set.
+
+## Courses (change `course-catalog-basics`)
+- **Public:** `GET /courses` (published only; `q` searches titles case-insensitively as plain text, `level` filters, newest published first, cursor paging, page size capped at 100) and `GET /courses/:id` (published only; drafts and unknown ids both answer 404). No sign-in needed; responses carry no staff-only fields.
+- **Staff:** `POST /staff/courses` (`course:create`), `GET /staff/courses` and `GET /staff/courses/:id` (`course:update`), `PATCH /staff/courses/:id` (`course:update`, must send `expectedVersion`), `POST /staff/courses/:id/publish` and `/unpublish` (`course:publish`). Admins and Managers hold these permissions by default; Instructors need grants (a later change).
+- **Safety:** an edit based on an older version answers 409 (the update is a compare-and-swap on the version, so of two simultaneous edits exactly one wins). Publishing needs a title and a description. Price is whole US cents from 0 to 1,000,000 (also enforced by database constraints). Every create, update, publish and unpublish is audited.
+- **First course for a phone test:** make an existing, verified account an Admin, sign in with it in the app, open Profile, then Manage courses.
+```bash
+pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
+```

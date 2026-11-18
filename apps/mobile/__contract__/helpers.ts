@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { request } from "node:http";
 import { join } from "node:path";
 
@@ -75,3 +76,39 @@ export async function waitForToken(to: string, subjectIncludes: string): Promise
 let counter = 0;
 export const uniqueEmail = (): string => `contract-${Date.now()}-${++counter}@example.com`;
 export const GOOD_PASSWORD = "correct horse battery staple";
+
+/**
+ * Makes an existing account an Admin with the real operator command. `--recovery` is used so the
+ * helper works however many Admins earlier tests created.
+ */
+export function makeAdmin(email: string): void {
+  const root = join(__dirname, "..", "..", "..");
+  const r = spawnSync(
+    "pnpm",
+    [
+      "--filter",
+      "@chartnexa/api",
+      "exec",
+      "tsx",
+      "scripts/admin-bootstrap.ts",
+      "--",
+      "--email",
+      email,
+      "--recovery",
+    ],
+    {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NODE_ENV: "test",
+        LOG_LEVEL: "silent",
+        DATABASE_URL: process.env.CONTRACT_DATABASE_URL,
+        CURSOR_SECRET: "contract-cursor-secret-contract-cursor",
+        ACCESS_TOKEN_SECRET: "contract-access-secret-contract-access",
+        MAILER_DRIVER: "memory",
+      },
+    },
+  );
+  if (r.status !== 0) throw new Error(`admin bootstrap failed: ${r.stdout}${r.stderr}`);
+}

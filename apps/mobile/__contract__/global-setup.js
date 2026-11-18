@@ -26,11 +26,12 @@ module.exports = async () => {
     const timer = setTimeout(() => reject(new Error(`API did not start in time:\n${out}`)), 60000);
     child.stdout.on("data", (d) => {
       out += d.toString();
-      const m = /READY (\d+) (.+)/.exec(out);
+      const m = /READY (\d+) (\S+) (\S+)/.exec(out);
       if (m) {
         clearTimeout(timer);
         process.env.CONTRACT_API_URL = `http://127.0.0.1:${m[1]}`;
         process.env.CONTRACT_MAIL_DIR = m[2].trim();
+        process.env.CONTRACT_DATABASE_URL = m[3].trim();
         resolve();
       }
     });

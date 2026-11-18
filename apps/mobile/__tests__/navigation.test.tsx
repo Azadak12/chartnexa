@@ -8,6 +8,23 @@ import { clearScreenMemory } from "../src/navigation/screen-memory";
 import { sessionStore } from "../src/session/session-store";
 import { mockBackHandler } from "../test-utils/back-handler";
 
+jest.mock("../src/courses/course-api", () => ({
+  ...jest.requireActual("../src/courses/course-api"),
+  courseApi: {
+    list: jest.fn(async () => ({ items: [], nextCursor: null })),
+    get: jest.fn(async (id: string) => ({
+      id,
+      title: `Course ${id}`,
+      description: "About this course",
+      level: "beginner",
+      priceCents: 4900,
+      currency: "USD",
+      coverTone: "blue",
+      publishedAt: "2026-11-17T00:00:00.000Z",
+    })),
+  },
+}));
+
 const app = "./app";
 
 beforeEach(() => {
@@ -17,15 +34,15 @@ beforeEach(() => {
 
 describe("protected area and sign-in return", () => {
   it("sends a signed-out deep link to sign-in and returns to the same screen with its parameters", async () => {
-    await renderRouter(app, { initialUrl: "/courses/42?tab=reviews" });
+    await renderRouter(app, { initialUrl: "/course/42?tab=reviews" });
     expect(screen).toHavePathname("/sign-in");
-    expect(screen).toHaveSearchParams({ returnTo: "/courses/42?tab=reviews" });
+    expect(screen).toHaveSearchParams({ returnTo: "/course/42?tab=reviews" });
     expect(screen.getByRole("header", { name: "Sign in" })).toBeTruthy();
 
     await act(async () => sessionStore.set("signed-in"));
-    expect(screen).toHavePathname("/courses/42");
+    expect(screen).toHavePathname("/course/42");
     expect(screen).toHaveSearchParams({ id: "42", tab: "reviews" });
-    expect(screen.getByText("Course 42")).toBeTruthy();
+    expect(await screen.findByText("Course 42")).toBeTruthy();
   });
 
   it("goes Home when there is no remembered destination", async () => {
@@ -36,13 +53,13 @@ describe("protected area and sign-in return", () => {
 
   it("returns to the same screen after the session expires mid-use", async () => {
     sessionStore.set("signed-in");
-    await renderRouter(app, { initialUrl: "/courses/7" });
-    expect(screen).toHavePathname("/courses/7");
+    await renderRouter(app, { initialUrl: "/course/7" });
+    expect(screen).toHavePathname("/course/7");
     await act(async () => sessionStore.expire());
     expect(screen).toHavePathname("/sign-in");
-    expect(screen).toHaveSearchParams({ returnTo: "/courses/7" });
+    expect(screen).toHaveSearchParams({ returnTo: "/course/7" });
     await act(async () => sessionStore.set("signed-in"));
-    expect(screen).toHavePathname("/courses/7");
+    expect(screen).toHavePathname("/course/7");
   });
 
   it.each([
@@ -70,25 +87,23 @@ describe("protected area and sign-in return", () => {
 describe("tabs and back", () => {
   it("keeps each tab's own screen when switching tabs and coming back", async () => {
     sessionStore.set("signed-in");
-    const view = await renderRouter(app, { initialUrl: "/courses" });
-    await act(async () => router.push("/courses/42"));
-    expect(view.getByText("Course 42")).toBeTruthy();
+    const view = await renderRouter(app, { initialUrl: "/profile/change-password" });
+    expect(view.getByRole("header", { name: "Change password" })).toBeTruthy();
 
     // The tab bar is native, so a tab press is simulated with the same action it dispatches.
     const { result } = await renderHook(() => useNavigationContainerRef());
     const pressTab = (name: string) =>
       act(async () => result.current.dispatch({ type: "JUMP_TO", payload: { name } } as never));
-    await pressTab("profile");
-    expect(view).toHavePathname("/profile");
     await pressTab("courses");
-    expect(view).toHavePathname("/courses/42");
-    expect(view.getByText("Course 42")).toBeTruthy();
+    expect(view).toHavePathname("/courses");
+    await pressTab("profile");
+    expect(view).toHavePathname("/profile/change-password");
   });
 
   it("goes back to the previous screen when no overlay is open", async () => {
     sessionStore.set("signed-in");
     await renderRouter(app, { initialUrl: "/courses" });
-    await act(async () => router.push("/courses/9"));
+    await act(async () => router.push("/course/9"));
     await act(async () => router.back());
     expect(screen).toHavePathname("/courses");
   });
@@ -144,9 +159,9 @@ describe("placeholder screens", () => {
   it("shows empty states in the tabs and signs out from Profile", async () => {
     sessionStore.set("signed-in");
     await renderRouter(app, { initialUrl: "/home" });
-    expect(screen.getByText("Courses are coming soon")).toBeTruthy();
+    expect(await screen.findByText("No courses yet")).toBeTruthy();
     await act(async () => router.navigate("/courses"));
-    expect(screen.getByText("No courses yet")).toBeTruthy();
+    expect(screen.getByText("You have not enrolled in any courses")).toBeTruthy();
     await act(async () => router.navigate("/profile"));
     await fireEvent.press(screen.getByRole("button", { name: "Sign out" }));
     expect(screen).toHavePathname("/sign-in");
@@ -160,8 +175,8 @@ describe("session ended by the API", () => {
     api.install();
     const pair = api.newSession();
     await sessionManager.signIn(pair);
-    await renderRouter(app, { initialUrl: "/courses/5" });
-    expect(screen).toHavePathname("/courses/5");
+    await renderRouter(app, { initialUrl: "/course/5" });
+    expect(screen).toHavePathname("/course/5");
 
     // The session is revoked elsewhere; the next request finds out.
     api.sessions.get(pair.sessionId)!.revoked = true;
@@ -170,11 +185,11 @@ describe("session ended by the API", () => {
       await authedFetch("/me").catch(() => undefined);
     });
     expect(screen).toHavePathname("/sign-in");
-    expect(screen).toHaveSearchParams({ returnTo: "/courses/5" });
+    expect(screen).toHaveSearchParams({ returnTo: "/course/5" });
     expect(screen.getByText(/Your session ended/)).toBeTruthy();
 
     await act(async () => sessionStore.set("signed-in"));
-    expect(screen).toHavePathname("/courses/5");
+    expect(screen).toHavePathname("/course/5");
     sessionManager._resetForTests();
   });
 });
