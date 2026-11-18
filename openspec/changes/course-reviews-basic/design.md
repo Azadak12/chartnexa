@@ -43,4 +43,4 @@ Additive table and two columns with defaults, plus a backfill that is trivially 
 
 ## Open Questions (owner)
 
-The four decisions in the proposal.
+None. The four decisions in the proposal were approved and are recorded as R25 to R28.

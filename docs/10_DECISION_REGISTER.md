@@ -183,4 +183,8 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | R22 | The TOTP library is `otpauth` (MIT, one dependency, `@noble/hashes`), checked against the RFC 6238 test vectors on Node 26. Approved 2026-11-18. |
 | R23 | Existing Admin and Manager sessions end at rollout, and assigning the Manager or Admin role ends the person's sessions, so the next sign-in goes through the second step. Approved 2026-11-18. |
 | R24 | Lost device: another Admin resets the person (reason, audited, ends their sessions) or the operator runs `admin:bootstrap --reset-mfa`; nobody can remove or reset their own. Real-time phishing of a code is not prevented by TOTP; passkeys are a possible later change. Approved 2026-11-18. |
+| R25 | Being enrolled (an active entitlement) is enough to review a course; no minimum progress yet (it is cheap to add later). Approved by the owner in chat on 2026-11-18 (`course-reviews-basic`). |
+| R26 | A review shows the author's display name, or "Student" when none is set; never an email address or user id. Approved 2026-11-18. |
+| R27 | A revoked owner's existing review stays visible; they can no longer write, edit or delete. Approved 2026-11-18. |
+| R28 | Reviews are built and tested now but must not be released to real students before `reviews-moderation` exists, because staff cannot yet remove an abusive review. Approved 2026-11-18. |
 

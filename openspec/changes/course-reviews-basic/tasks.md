@@ -17,6 +17,6 @@
 ## 3. Closing
 
 - [x] 3.1 Add contract tests against the real API (owner writes, edits, deletes; summary matches; stranger and revoked owner refused; concurrent submits; paging; privacy); verify they pass.
-- [ ] 3.2 Run mutation checks on the owner check, the one-review rule, the totals arithmetic, the course lock, name privacy and the deletion hook; record results.
-- [ ] 3.3 Update READMEs, the manual device checklist and the decision register after the owner answers; write evidence listing what ran and what was not verified on devices, and state in the README that reviews must not be released before moderation.
+- [x] 3.2 Run mutation checks on the owner check, the one-review rule, the totals arithmetic, the course lock, name privacy and the deletion hook; record results.
+- [x] 3.3 Update READMEs, the manual device checklist and the decision register after the owner answers; write evidence listing what ran and what was not verified on devices, and state in the README that reviews must not be released before moderation.
 - [ ] 3.4 Run the full checks and `openspec validate course-reviews-basic`; after review and merge, archive with `openspec archive`.
