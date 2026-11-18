@@ -5,6 +5,7 @@ import type {
   PublicCourse,
   PublicCourseDetail,
   PublicCourseSummary,
+  CourseRating,
   StaffCourse,
   UpdateCourseRequest,
 } from "@chartnexa/api-contracts";
@@ -43,6 +44,14 @@ export function toStaff(r: Row): StaffCourse {
   };
 }
 
+/** Count and average (one decimal) from the totals stored on the course row. */
+export function ratingOf(r: Pick<Row, "ratingCount" | "ratingSum">): CourseRating {
+  return {
+    count: r.ratingCount,
+    average: r.ratingCount === 0 ? null : Math.round((r.ratingSum / r.ratingCount) * 10) / 10,
+  };
+}
+
 export function toPublic(r: Row): PublicCourse {
   return {
     id: r.id,
@@ -62,7 +71,7 @@ function toSummary(r: Row): PublicCourseSummary {
     description.length > SUMMARY_LENGTH
       ? `${description.slice(0, SUMMARY_LENGTH).trimEnd()}…`
       : description;
-  return { ...rest, summary };
+  return { ...rest, summary, rating: ratingOf(r) };
 }
 
 /** Treats the search text as plain text: LIKE wildcards and the escape character match literally. */
@@ -337,6 +346,7 @@ export class CoursesService {
       previewCount: Number(counts?.previews ?? 0),
       enrolled: owner,
       onSale,
+      rating: ratingOf(row),
       progress: owner ? (mine?.get(id) ?? { completed: 0, total: 0 }) : null,
       nextLessonId: next,
     };

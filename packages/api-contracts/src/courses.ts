@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { MAX_PAGE_SIZE } from "./pagination.js";
 import { courseProgressSchema } from "./progress.js";
+import { courseRatingSchema, NO_RATING } from "./reviews.js";
 
 export const COURSE_LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export const COURSE_TONES = ["blue", "black", "tint"] as const;
@@ -69,11 +70,13 @@ export const publicCourseDetailSchema = publicCourseSchema.extend({
   progress: courseProgressSchema.nullable().default(null),
   /** Only for an owner: the first lesson not yet complete, or null. */
   nextLessonId: z.string().nullable().default(null),
+  rating: courseRatingSchema.default(NO_RATING),
 });
 
 export const publicCourseSummarySchema = publicCourseSchema.omit({ description: true }).extend({
   /** First part of the description for cards. */
   summary: z.string(),
+  rating: courseRatingSchema.default(NO_RATING),
 });
 
 export const staffCourseSchema = publicCourseSchema.omit({ publishedAt: true }).extend({
