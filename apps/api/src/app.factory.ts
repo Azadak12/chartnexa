@@ -5,6 +5,7 @@ import type { FastifyBaseLogger } from "fastify";
 import type { Bindings, ChildLoggerOptions } from "pino";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { AppModule } from "./app.module.js";
+import { UPLOAD_PART_BYTES } from "@chartnexa/api-contracts";
 import type { AppConfig } from "./config/config.js";
 import { ErrorFilter } from "./platform/error.filter.js";
 import { LogErrorReporter, type ErrorReporter } from "./platform/error-reporter.js";
@@ -42,6 +43,12 @@ export async function createApp(
       resolveRequestId(req.headers["x-request-id"]),
   });
   const fastify = adapter.getInstance();
+  // Upload parts arrive as raw bytes, one part (5 MB) at a time.
+  fastify.addContentTypeParser(
+    "application/octet-stream",
+    { parseAs: "buffer", bodyLimit: UPLOAD_PART_BYTES + 1024 },
+    (_req, body, done) => done(null, body),
+  );
   fastify.addHook("onSend", (req, reply, payload, done) => {
     void reply.header("x-request-id", req.id);
     const traceId = (req.raw as { traceId?: string }).traceId;

@@ -12,3 +12,4 @@ build/
 
 # Local OpenAPI export (CI writes its own copy)
 apps/api/openapi.json
+.dev-storage/

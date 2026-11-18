@@ -248,6 +248,8 @@ model Lesson {
   module CourseModule?     @relation(fields: [moduleId, courseId], references: [id, courseId], onDelete: NoAction, map: "lessons_module_same_course_fkey")
   keys   LessonCreateKey[]
   completions LessonCompletion[]
+  resources LessonResource[]
+  uploads   UploadSession[]
 
   @@unique([id, courseId], map: "lessons_id_course_id_key")
   @@map("lessons")
@@ -456,4 +458,49 @@ model CourseModule {
 
   @@unique([id, courseId], map: "course_modules_id_course_id_key")
   @@map("course_modules")
+}
+
+/// A file attached to a lesson. Bytes are in object storage under `storageKey` (server-made).
+model LessonResource {
+  id           String   @id @default(uuid()) @db.Uuid
+  courseId     String   @map("course_id") @db.Uuid
+  lessonId     String   @map("lesson_id") @db.Uuid
+  title        String
+  fileName     String   @map("file_name")
+  mimeType     String   @map("mime_type")
+  sizeBytes    Int      @map("size_bytes")
+  sha256       String
+  storageKey   String   @unique @map("storage_key")
+  scanStatus   String   @map("scan_status")
+  downloadable Boolean  @default(false)
+  version      Int      @default(1)
+  createdBy    String?  @map("created_by") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade, map: "lesson_resources_lesson_fkey")
+
+  @@index([lessonId, createdAt, id], map: "lesson_resources_lesson_idx")
+  @@map("lesson_resources")
+}
+
+/// An upload in progress. Parts are stored separately and assembled when it completes.
+model UploadSession {
+  id         String   @id @default(uuid()) @db.Uuid
+  courseId   String   @map("course_id") @db.Uuid
+  lessonId   String   @map("lesson_id") @db.Uuid
+  createdBy  String?  @map("created_by") @db.Uuid
+  fileName   String   @map("file_name")
+  mimeType   String   @map("mime_type")
+  sizeBytes  Int      @map("size_bytes")
+  partSize   Int      @map("part_size")
+  partCount  Int      @map("part_count")
+  status     String   @default("open")
+  resourceId String?  @map("resource_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
+
+  lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade, map: "upload_sessions_lesson_fkey")
+
+  @@map("upload_sessions")
 }

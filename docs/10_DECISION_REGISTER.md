@@ -226,3 +226,11 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 |---|---|
 | R34 | One optional category per course; names 2 to 40 characters, unique ignoring case, at most 50; Admins and Managers manage them (`categories:manage`); a category with any course cannot be deleted. Built under the owner's standing instruction to make routine decisions autonomously. |
 | R35 | Courses may be split into up to 50 ordered modules; a lesson belongs to at most one module of its course; lesson positions stay the single reading order, grouped by module with lessons without a module first; deleting a module keeps its lessons. Extends R11. Built under the owner's standing instruction (change `course-modules`). |
+
+## Files: pending owner decisions (change `lesson-resources`, 2026-11-18)
+
+| ID | Question | Proposed answer |
+|---|---|---|
+| Q32 | Storage and delivery provider for files and video (object storage, CDN, region), and who owns the account? | Pending. The API uses an `ObjectStorage` interface; only a local-disk adapter exists and production refuses it. |
+| Q33 | Malware scanning for uploads (a hosted service or a self-run scanner)? | Pending. Uploads go through a `MalwareScanner` interface; today files are marked "not scanned" and production refuses to start without a scanner. |
+| Q04 (still open) | Which resources may students download? | Built default: each file has a download switch, off until staff turn it on. Word-to-PDF preview needs a conversion service and is not built. |

@@ -25,6 +25,13 @@ const schema = z.object({
   RL_MFA_USER_MAX: z.coerce.number().int().min(1).default(10),
   RL_MFA_WINDOW_SECONDS: z.coerce.number().int().min(1).default(900),
   MAILER_DRIVER: z.enum(["dev", "memory"]).default("dev"),
+  /** Where uploaded files live. Only the local-disk driver exists; production refuses it. */
+  STORAGE_DRIVER: z.enum(["local"]).default("local"),
+  STORAGE_DIR: z.string().min(1).default(".dev-storage"),
+  /** Malware scanning. Only "none" exists; files are marked not scanned and production refuses it. */
+  SCANNER: z.enum(["none"]).default("none"),
+  /** Lifetime of a signed link to read a file. */
+  FILE_LINK_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
   APP_LINK_BASE: z.string().min(1).default("chartnexa://"),
   TRUST_PROXY: z
     .enum(["true", "false"])
@@ -63,6 +70,20 @@ const checked = schema.superRefine((c, ctx) => {
       code: "custom",
       path: ["MFA_ENCRYPTION_KEY"],
       message: "a real encryption key is required in production",
+    });
+  }
+  if (c.NODE_ENV === "production" && c.STORAGE_DRIVER === "local") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["STORAGE_DRIVER"],
+      message: "local-disk storage is not allowed in production; a storage provider is pending",
+    });
+  }
+  if (c.NODE_ENV === "production" && c.SCANNER === "none") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["SCANNER"],
+      message: "uploads must be scanned in production; a scanning provider is pending",
     });
   }
   // Only dev and memory senders exist today, so production is rejected until a real provider is added.
