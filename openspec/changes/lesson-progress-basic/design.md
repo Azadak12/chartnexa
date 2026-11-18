@@ -38,6 +38,6 @@ Additive table with `down.sql`, covered by the migration round trip (it needs a 
 
 ## Open Questions (owner)
 
-1. Approve Q07 for text lessons as a manual mark? (Proposed: yes.)
-2. Should people who only read free previews be able to mark them? (Proposed: no, owners only.)
-3. Should staff see student progress? (Proposed: later, as a scoped report.)
+1. Approve Q07 for text lessons as a manual mark? (Approved, R18.)
+2. Should people who only read free previews be able to mark them? (Approved: no, owners only, R19.)
+3. Should staff see student progress? (Approved: later, as a scoped report, R20.)

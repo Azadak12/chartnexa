@@ -204,6 +204,9 @@ describe("who may record progress", () => {
     await mark(b, c.id, l2!.id);
     expect((await read(a, c.id)).lessons.map((l) => l.lessonId)).toEqual([l1!.id]);
     expect((await read(b, c.id)).lessons.map((l) => l.lessonId)).toEqual([l2!.id]);
+    // Counts and the next lesson are each person's own.
+    expect(await read(a, c.id)).toMatchObject({ completed: 1, total: 2, nextLessonId: l2!.id });
+    expect(await read(b, c.id)).toMatchObject({ completed: 1, total: 2, nextLessonId: l1!.id });
     await unmark(b, c.id, l1!.id);
     expect((await read(a, c.id)).completed).toBe(1);
   });

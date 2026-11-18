@@ -176,3 +176,6 @@ See `docs/11_UX_REFERENCE_REVIEW.md`. All three are Proposed and need the owner.
 | Q20 | Is `branhamleonel-pixel/trading-academy` a reference for layout and interaction ideas only, inside ChartNexa's white, black and blue brand? | Yes. Its dark palette, effects and visual style are not adopted. |
 | Q21 | Do any game mechanics (streaks, XP, quests, leagues, achievements) belong in the first release? | No. They conflict with the proposed Q08 exclusions; revisit after progress tracking (`player-resources-progress`). |
 | Q22 | May code or assets from the reference be reused, and who owns and licenses them? | No reuse until the owner states the licence and ownership; the repository has no LICENSE file. |
+| R18 | Q07 for text lessons: a lesson is complete when its owner marks it complete (and can undo it). The 90 percent watched rule is deferred until video exists. Approved by the owner in chat on 2026-11-18 (`lesson-progress-basic`). |
+| R19 | Only owners (active entitlement) record progress; free-preview readers who do not own the course are not tracked. Approved 2026-11-18. |
+| R20 | Staff do not see student progress yet; a scoped report comes later under `students:read`. Approved 2026-11-18. |
