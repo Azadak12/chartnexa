@@ -66,6 +66,8 @@ src/fonts                Inter loading with system-font fallback
 | Catalog: scroll, open a course, go back: same scroll position, search and level | yes | yes |
 | Staff form: numeric keypad for price, multiline description is usable, keyboard does not hide the fields | yes | yes |
 | Large text: course cards, price and status labels do not clip | yes | yes |
+| Instructor permissions: the Add permission sheet scrolls with the keyboard open, the reason field stays visible, dimmed items are announced as unavailable | yes | yes |
+| Screen reader announces "Permission added" / "Permission removed" and focus returns to the button that opened the sheet | TalkBack | VoiceOver |
 | Sign in, kill the app from the task switcher, reopen: still signed in, no sign-in flash | yes | yes |
 | Sign in, delete the app, reinstall: asked to sign in (iOS Keychain can keep an old token, which the server rejects) | yes | yes |
 | Airplane mode: sign out works and says the server will be told later; sign in shows the offline message | yes | yes |
@@ -113,3 +115,9 @@ EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
 - **Staff (Profile, then Manage courses):** shown only when `/me/access` includes course permissions (the server still checks every request). Create a draft, edit it, then publish it after a confirmation. Price is typed in dollars ("49.5" is saved as $49.50; more than two decimals is refused). If someone else changed the course, the app says so and offers "Use latest version" without losing what you typed.
 - **Try it:** sign up and verify in the app, make that account an Admin with `admin:bootstrap` (see the API README), sign in again, create and publish a course, then see it in the Home catalog from any account.
 - Money is whole US cents everywhere; dollars appear only on screen and in the staff form.
+
+## Instructor permissions in the app
+- **Profile, then Instructor permissions** (Admins and Managers only; the server checks every request). Type a person's exact email and press Find. An Instructor opens a page of their permissions, in words, with the course each applies to. **Add permission** opens a sheet: pick what they can do, the course if it needs one, and a reason. **Remove** asks for a reason too. Managers see "Publish and unpublish courses" dimmed; only an Admin can give it.
+- **Admins** can also press **Make Instructor** on someone who is not one, and **Remove Instructor role** on the person's page (this ends all their permissions).
+- **Instructors** see Manage courses only when they have been given access, and only their own courses. New course appears only with "Create new courses"; Publish appears only with the publish permission on that course.
+- **Try it on the phone:** make account A an Admin (`admin:bootstrap`), create account B in the app. As A: Profile > Instructor permissions > find B > Make Instructor > Add permission > "Create new courses". Sign in as B: Profile > Manage courses > New course. Back as A, give B "Publish and unpublish courses" for that course, and B can publish it.

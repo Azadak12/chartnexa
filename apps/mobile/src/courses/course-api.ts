@@ -85,5 +85,24 @@ export async function fetchAccess(): Promise<AccessResponse> {
   return check(accessResponseSchema, await authedFetch("/me/access"));
 }
 
+const grantsOf = (a: AccessResponse | undefined) => a?.courseGrants ?? [];
+const has = (a: AccessResponse | undefined, p: string) => !!a && a.permissions.includes(p);
+
+/** Role permission, or (for Instructors) at least one edit grant or the create grant. */
 export const canManageCourses = (a: AccessResponse | undefined): boolean =>
-  !!a && (a.permissions.includes("course:create") || a.permissions.includes("course:update"));
+  has(a, "course:create") ||
+  has(a, "course:update") ||
+  grantsOf(a).some((g) => g.permissions.includes("course:update"));
+
+export const canCreateCourses = (a: AccessResponse | undefined): boolean => has(a, "course:create");
+
+/** Publishing needs the role permission or a publish grant on that course. */
+export const canPublishCourse = (a: AccessResponse | undefined, courseId: string): boolean =>
+  has(a, "course:publish") ||
+  grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("course:publish"));
+
+/** People who may manage Instructor permissions (Admins and Managers). */
+export const canManageInstructors = (a: AccessResponse | undefined): boolean =>
+  has(a, "instructor_permissions:manage");
+
+export const isAdmin = (a: AccessResponse | undefined): boolean => !!a && a.roles.includes("admin");

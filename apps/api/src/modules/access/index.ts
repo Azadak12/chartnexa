@@ -7,6 +7,7 @@ export {
   type Resource,
 } from "./authorization/authorization.service.js";
 export { AuditService, type AuditInput } from "./audit/audit.service.js";
+export { GrantsService, MANAGER_CEILING } from "./grants/grants.service.js";
 export { RolesService } from "./roles/roles.service.js";
 export {
   ALL_PERMISSIONS,

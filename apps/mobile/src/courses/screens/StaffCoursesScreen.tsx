@@ -6,7 +6,7 @@ import { isAppError, messageFor } from "../../api/errors";
 import { StateView } from "../../state/StateView";
 import { colors, neutrals, radii, spacing } from "../../theme";
 import { Button, Chip, Screen, Text } from "../../ui";
-import { canManageCourses, fetchAccess, staffCourseApi } from "../course-api";
+import { canCreateCourses, canManageCourses, fetchAccess, staffCourseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { formatPrice } from "../money";
 
@@ -68,7 +68,9 @@ export function StaffCoursesScreen() {
       <Text variant="title" accessibilityRole="header">
         Manage courses
       </Text>
-      <Button label="New course" onPress={() => router.push("/manage/new")} />
+      {canCreateCourses(access.data) ? (
+        <Button label="New course" onPress={() => router.push("/manage/new")} />
+      ) : null}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
         {(["all", "draft", "published"] as const).map((s) => (
           <Chip
@@ -93,11 +95,18 @@ export function StaffCoursesScreen() {
       />
     );
   } else if (items.length === 0) {
+    const fullAccess = (access.data?.permissions ?? []).includes("course:update");
     empty = (
       <StateView
         state="empty"
         title="No courses"
-        message={status === "all" ? "Create the first course." : "No courses with this status."}
+        message={
+          status !== "all"
+            ? "No courses with this status."
+            : fullAccess
+              ? "Create the first course."
+              : "Courses you are given access to will appear here. An Admin or Manager can give you access."
+        }
       />
     );
   }

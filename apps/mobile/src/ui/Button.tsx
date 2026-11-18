@@ -11,6 +11,8 @@ export interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   accessibilityHint?: string;
+  /** Overrides the spoken name when the visible label alone is ambiguous (several Remove buttons). */
+  accessibilityLabel?: string;
   testID?: string;
 }
 
@@ -22,6 +24,7 @@ export function Button({
   disabled = false,
   loading = false,
   accessibilityHint,
+  accessibilityLabel,
   testID,
 }: ButtonProps) {
   const inactive = disabled || loading;
@@ -30,7 +33,7 @@ export function Button({
     <Pressable
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}

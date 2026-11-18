@@ -13,7 +13,7 @@ import { PrismaService } from "../../database/prisma.service.js";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { buildPage, decodeCursor } from "../../pagination/cursor.js";
 import { ValidationFailed } from "../../platform/zod.pipe.js";
-import { AuditService } from "../access/index.js";
+import { AuditService, GrantsService } from "../access/index.js";
 
 type Row = Prisma.CourseGetPayload<object>;
 type Tx = Prisma.TransactionClient;
@@ -76,6 +76,7 @@ export class CoursesService {
   constructor(
     @Inject(PrismaService) private readonly db: PrismaService,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(GrantsService) private readonly grants: GrantsService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -104,6 +105,7 @@ export class CoursesService {
         },
         requestId,
       });
+      await this.grants.grantOwnerAccess(tx, actorId, row.id, requestId);
       return toStaff(row);
     });
   }
@@ -221,14 +223,22 @@ export class CoursesService {
     return this.db.$transaction((tx) => this.transition(tx, actorId, id, "draft", requestId));
   }
 
-  async listForStaff(q: {
-    status?: "draft" | "published" | undefined;
-    limit?: number | undefined;
-    cursor?: string | undefined;
-  }): Promise<Page<StaffCourse>> {
+  /** `onlyCourseIds` limits the list to those courses (Instructors); omit it to list all. */
+  async listForStaff(
+    q: {
+      status?: "draft" | "published" | undefined;
+      limit?: number | undefined;
+      cursor?: string | undefined;
+    },
+    onlyCourseIds?: readonly string[],
+  ): Promise<Page<StaffCourse>> {
     const limit = q.limit ?? DEFAULT_PAGE_SIZE;
     const where: string[] = [];
     const params: unknown[] = [];
+    if (onlyCourseIds) {
+      params.push([...onlyCourseIds]);
+      where.push(`id = ANY($${params.length}::uuid[])`);
+    }
     if (q.status) {
       params.push(q.status);
       where.push(`status = $${params.length}::"CourseStatus"`);

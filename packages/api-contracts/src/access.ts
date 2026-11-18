@@ -22,6 +22,10 @@ export const lookupQuerySchema = z.strictObject({
 export const accessResponseSchema = z.object({
   roles: z.array(z.enum(["student", ...STAFF_ROLE_VALUES])),
   permissions: z.array(z.string()),
+  /** Course-specific grants of an Instructor. Informational; older servers omit it. */
+  courseGrants: z
+    .array(z.object({ courseId: z.string(), permissions: z.array(z.string()) }))
+    .default([]),
 });
 export const userLookupResponseSchema = z.object({
   id: z.string(),

@@ -4,15 +4,17 @@ import { AccountDeletionHooks, IdentityModule, type RequestCtx } from "../identi
 import { AuditService } from "./audit/audit.service.js";
 import { AuthorizationService } from "./authorization/authorization.service.js";
 import { PermissionGuard } from "./authorization/require-permission.js";
+import { GrantsController } from "./http/grants.controller.js";
+import { GrantsService } from "./grants/grants.service.js";
 import { MeAccessController } from "./http/me-access.controller.js";
 import { StaffController } from "./http/staff.controller.js";
 import { RolesService } from "./roles/roles.service.js";
 
 @Module({
   imports: [IdentityModule],
-  controllers: [StaffController, MeAccessController],
-  providers: [AuditService, AuthorizationService, RolesService, PermissionGuard],
-  exports: [AuthorizationService, AuditService, RolesService, PermissionGuard],
+  controllers: [StaffController, GrantsController, MeAccessController],
+  providers: [AuditService, AuthorizationService, RolesService, GrantsService, PermissionGuard],
+  exports: [AuthorizationService, AuditService, RolesService, GrantsService, PermissionGuard],
 })
 export class AccessModule implements OnModuleInit {
   constructor(

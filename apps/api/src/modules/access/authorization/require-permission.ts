@@ -22,6 +22,8 @@ const KEY = "access:requirement";
 export interface RequirementOptions {
   /** Derive the resource (for example a course id) from the request. */
   resource?: (req: FastifyRequest) => Resource | undefined;
+  /** For endpoints with no single course (a list): holding the permission for any course passes. */
+  anyCourse?: boolean;
   /** When set, a denial is written to the audit trail under this action. */
   auditDenied?: { action: string; targetType: string; target: (req: FastifyRequest) => string };
 }
@@ -47,7 +49,12 @@ export class PermissionGuard implements CanActivate {
 
     const access = await this.authz.accessForRequest(req, auth.userId);
     const resource = requirement.resource?.(req);
-    if (this.authz.decide(access, requirement.permission, resource)) return true;
+    if (
+      this.authz.decide(access, requirement.permission, resource, {
+        anyCourse: requirement.anyCourse === true,
+      })
+    )
+      return true;
 
     logEvent({ log: req.log }, "authz.denied", {
       userId: auth.userId,

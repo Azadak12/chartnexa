@@ -103,7 +103,7 @@ describe("own access and staff lookup", () => {
     const student = await person(h);
     const manager = await person(h, "manager");
     const a = (await h.call("GET", "/me/access", { token: student.accessToken })).json();
-    expect(a).toEqual({ roles: ["student"], permissions: [] });
+    expect(a).toEqual({ roles: ["student"], permissions: [], courseGrants: [] });
     const m = (await h.call("GET", "/me/access", { token: manager.accessToken })).json();
     expect(m.roles).toEqual(["student", "manager"]);
     expect(m.permissions).toEqual(permissionsForRole("manager").sort());
