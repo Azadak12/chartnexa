@@ -33,7 +33,6 @@ afterAll(async () => {
   await drop();
 });
 
-let pos = 0;
 const mkCourse = async (publish = true) => {
   const c = await courses.create(
     admin.id,
@@ -56,7 +55,6 @@ const mkLessons = async (courseId: string, n: number) => {
         data: { courseId, title: `Lesson ${i}`, body: `Body ${i}`, position: i },
       }),
     );
-    pos++;
   }
   return out;
 };
