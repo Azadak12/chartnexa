@@ -253,6 +253,20 @@ describe("deleting", () => {
   });
 });
 
+describe("writing lessons for step reading", () => {
+  it("tells staff to leave a blank line between paragraphs, on both the add and edit forms", async () => {
+    await renderRouter(app, { initialUrl: "/manage/c1/lessons/new" });
+    await screen.findByLabelText("Title");
+    expect(screen.getByTestId("lesson-text-hint")).toBeTruthy();
+    expect(screen.getByText(/Leave a blank line between paragraphs/)).toBeTruthy();
+    await screen.unmount();
+    api.get.mockResolvedValue(lesson(2));
+    await renderRouter(app, { initialUrl: "/manage/c1/lessons/l2" });
+    await screen.findByDisplayValue("Lesson 2");
+    expect(screen.getByTestId("lesson-text-hint")).toBeTruthy();
+  });
+});
+
 describe("adding a lesson", () => {
   const open = async () => {
     await renderRouter(app, { initialUrl: "/manage/c1/lessons/new" });

@@ -240,6 +240,9 @@ function Form({
         numberOfLines={10}
         textAlignVertical="top"
       />
+      <Text variant="caption" tone="muted" testID="lesson-text-hint">
+        Leave a blank line between paragraphs. Students read one paragraph at a time.
+      </Text>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
         <View style={{ flex: 1, gap: spacing.xs }}>
           <Text variant="bodyStrong">Free preview</Text>
