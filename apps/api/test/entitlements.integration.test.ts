@@ -280,7 +280,7 @@ describe("revoking access", () => {
 
   it("never leaves two active entitlements when a revoke and a grant race", async () => {
     const c = await mkCourse();
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 12; i++) {
       const student = await person(h);
       const e = await granted(admin, c.id, student.id);
       const [rev, gr] = await Promise.all([

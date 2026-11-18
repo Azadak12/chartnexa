@@ -78,18 +78,24 @@ export class EntitlementsService {
         );
       }
 
-      // The partial unique index decides who wins when two requests arrive together.
-      const inserted = await tx.$queryRaw<{ id: string }[]>`
-        INSERT INTO entitlements (id, user_id, course_id, source, status, grant_reason, granted_by)
-        VALUES (gen_random_uuid(), ${input.userId}::uuid, ${courseId}::uuid, 'admin_grant', 'active',
-                ${input.reason}, ${actor.userId}::uuid)
-        ON CONFLICT (user_id, course_id) WHERE status = 'active' DO NOTHING
-        RETURNING id`;
-      if (inserted.length === 0) {
-        const existing = await tx.entitlement.findFirstOrThrow({
+      // The partial unique index decides who wins when two requests arrive together. If the row
+      // that blocked the insert is revoked before we can read it, the loop simply tries again.
+      let inserted: { id: string }[] = [];
+      for (let attempt = 0; attempt < 3; attempt++) {
+        inserted = await tx.$queryRaw<{ id: string }[]>`
+          INSERT INTO entitlements (id, user_id, course_id, source, status, grant_reason, granted_by)
+          VALUES (gen_random_uuid(), ${input.userId}::uuid, ${courseId}::uuid, 'admin_grant', 'active',
+                  ${input.reason}, ${actor.userId}::uuid)
+          ON CONFLICT (user_id, course_id) WHERE status = 'active' DO NOTHING
+          RETURNING id`;
+        if (inserted.length > 0) break;
+        const existing = await tx.entitlement.findFirst({
           where: { userId: input.userId, courseId, status: "active" },
         });
-        return { created: false, entitlement: toEntitlement(existing) };
+        if (existing) return { created: false, entitlement: toEntitlement(existing) };
+      }
+      if (inserted.length === 0) {
+        throw new ConflictException("Access changed while saving. Please try again.");
       }
       const row = await tx.entitlement.findUniqueOrThrow({ where: { id: inserted[0]!.id } });
       await this.audit.record(tx, {
