@@ -11,6 +11,7 @@ import {
 } from "../src/courses/course-api";
 import { instructorApi } from "../src/instructors/instructor-api";
 import { lessonApi, staffLessonApi } from "../src/lessons/lesson-api";
+import { splitLessonText } from "../src/lessons/steps";
 import { sessionStore } from "../src/session/session-store";
 import { GOOD_PASSWORD, makeAdmin, realFetch, uniqueEmail, waitForToken } from "./helpers";
 
@@ -106,7 +107,16 @@ describe("Lessons against the real API", () => {
 
     // Draft courses are invisible to the public.
     expect((await failure(lessonApi.outline(made.id))).kind).toBe("not_found");
+    // Paragraphs survive the round trip through the real API, so the reader can split them into steps.
+    const written = "First idea.\r\n\r\nSecond idea.\n \n\n<b>Third</b> idea.\n";
+    await staffLessonApi.update(made.id, intro.id, { expectedVersion: 1, body: written });
     await staffCourseApi.publish(made.id);
+    expect(splitLessonText((await lessonApi.get(made.id, intro.id)).body)).toEqual([
+      "First idea.",
+      "Second idea.",
+      "<b>Third</b> idea.",
+    ]);
+    await staffLessonApi.update(made.id, intro.id, { expectedVersion: 2, body: "Free intro text" });
 
     const outline = await lessonApi.outline(made.id);
     expect(outline.items.map((l) => [l.title, l.position, l.isPreview])).toEqual([

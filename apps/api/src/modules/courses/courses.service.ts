@@ -15,6 +15,7 @@ import type { Prisma } from "../../generated/prisma/client.js";
 import { buildPage, decodeCursor } from "../../pagination/cursor.js";
 import { ValidationFailed } from "../../platform/zod.pipe.js";
 import { AuditService, GrantsService } from "../access/index.js";
+import { EntitlementsService } from "../entitlements/index.js";
 
 type Row = Prisma.CourseGetPayload<object>;
 type Tx = Prisma.TransactionClient;
@@ -78,6 +79,7 @@ export class CoursesService {
     @Inject(PrismaService) private readonly db: PrismaService,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(GrantsService) private readonly grants: GrantsService,
+    @Inject(EntitlementsService) private readonly entitlements: EntitlementsService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -300,17 +302,32 @@ export class CoursesService {
     ]);
   }
 
-  async getPublished(id: string): Promise<PublicCourseDetail> {
-    const row = await this.db.course.findFirst({ where: { id, status: "published" } });
-    // Drafts and unknown ids look the same, so a draft's existence is not revealed.
-    if (!row) throw new NotFoundException("Course not found.");
+  /**
+   * A published course, or (for a signed-in owner) a course that was unpublished since they got
+   * access. Drafts and unknown ids look the same to everyone else.
+   */
+  async getPublished(id: string, viewerId?: string): Promise<PublicCourseDetail> {
+    const row = await this.db.course.findUnique({ where: { id } });
+    const owner = viewerId !== undefined ? await this.entitlements.hasActive(viewerId, id) : false;
+    if (!row || (row.status !== "published" && !owner))
+      throw new NotFoundException("Course not found.");
     const [counts] = await this.db.$queryRaw<{ total: bigint; previews: bigint }[]>`
       SELECT count(*) AS total, count(*) FILTER (WHERE is_preview) AS previews
       FROM lessons WHERE course_id = ${id}::uuid`;
+    const onSale = row.status === "published";
     return {
-      ...toPublic(row),
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      level: row.level,
+      priceCents: row.priceCents,
+      currency: "USD",
+      coverTone: row.coverTone,
+      publishedAt: row.publishedAt ? iso(row.publishedAt) : null,
       lessonCount: Number(counts?.total ?? 0),
       previewCount: Number(counts?.previews ?? 0),
+      enrolled: owner,
+      onSale,
     };
   }
 

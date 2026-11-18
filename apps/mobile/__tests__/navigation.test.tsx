@@ -25,6 +25,11 @@ jest.mock("../src/courses/course-api", () => ({
   },
 }));
 
+jest.mock("../src/entitlements/entitlement-api", () => ({
+  myCoursesApi: { list: jest.fn(async () => ({ items: [], nextCursor: null })) },
+  staffEntitlementApi: {},
+}));
+
 const app = "./app";
 
 beforeEach(() => {
@@ -161,7 +166,7 @@ describe("placeholder screens", () => {
     await renderRouter(app, { initialUrl: "/home" });
     expect(await screen.findByText("No courses yet")).toBeTruthy();
     await act(async () => router.navigate("/courses"));
-    expect(screen.getByText("You have not enrolled in any courses")).toBeTruthy();
+    expect(await screen.findByText("You have not enrolled in any courses yet")).toBeTruthy();
     await act(async () => router.navigate("/profile"));
     await fireEvent.press(screen.getByRole("button", { name: "Sign out" }));
     expect(screen).toHavePathname("/sign-in");

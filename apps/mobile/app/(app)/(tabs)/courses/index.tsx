@@ -1,17 +1,3 @@
-import { Screen, Text } from "../../../../src/ui";
-import { StateView } from "../../../../src/state/StateView";
+import { MyCoursesScreen } from "../../../../src/entitlements/screens/MyCoursesScreen";
 
-export default function MyCourses() {
-  return (
-    <Screen>
-      <Text variant="title" accessibilityRole="header">
-        My Courses
-      </Text>
-      <StateView
-        state="empty"
-        title="You have not enrolled in any courses"
-        message="Courses you purchase will appear here."
-      />
-    </Screen>
-  );
-}
+export default MyCoursesScreen;

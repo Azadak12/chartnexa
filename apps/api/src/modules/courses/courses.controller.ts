@@ -30,7 +30,14 @@ import { ApiErrors, ApiZodBody } from "../../platform/openapi-helpers.js";
 import { ZodPipe } from "../../platform/zod.pipe.js";
 import type { FastifyRequest } from "fastify";
 import { AuthorizationService, RequirePermission } from "../access/index.js";
-import { Ctx, CurrentUser, type AuthContext, type RequestCtx } from "../identity/index.js";
+import {
+  Ctx,
+  CurrentUser,
+  MaybeUser,
+  OptionalAuthentication,
+  type AuthContext,
+  type RequestCtx,
+} from "../identity/index.js";
 import { CoursesService } from "./courses.service.js";
 
 const idPipe = () => new ZodPipe(z.uuid());
@@ -54,10 +61,17 @@ export class CoursesController {
   }
 
   @Get(":id")
-  @ApiOperation({ summary: "Open one published course (anyone). Drafts answer 404." })
+  @OptionalAuthentication()
+  @ApiOperation({
+    summary:
+      "Open one published course (anyone). Drafts answer 404, except for a signed-in owner of an unpublished course.",
+  })
   @ApiErrors(400, 404)
-  get(@Param("id", idPipe()) id: string): Promise<PublicCourseDetail> {
-    return this.courses.getPublished(id);
+  get(
+    @Param("id", idPipe()) id: string,
+    @MaybeUser() viewer: AuthContext | undefined,
+  ): Promise<PublicCourseDetail> {
+    return this.courses.getPublished(id, viewer?.userId);
   }
 }
 

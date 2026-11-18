@@ -43,6 +43,7 @@ model User {
   tokens   OneTimeToken[]
   roles    UserRole[]
   grants   InstructorGrant[]
+  entitlements Entitlement[]
 
   @@map("users")
 }
@@ -176,6 +177,7 @@ model Course {
   grants InstructorGrant[]
   lessons Lesson[]
   lessonKeys LessonCreateKey[]
+  entitlements Entitlement[]
 
   @@index([updatedAt(sort: Desc), id(sort: Desc)])
   @@map("courses")
@@ -241,4 +243,27 @@ model LessonCreateKey {
   @@id([courseId, key])
   @@index([createdAt])
   @@map("lesson_create_keys")
+}
+
+/// One person's access to one course (ADR-0006). The status, source and reason CHECKs and the
+/// partial unique index (one active row per user and course) are in the migration.
+model Entitlement {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  courseId     String    @map("course_id") @db.Uuid
+  /// Only admin_grant for now; payments add stripe, apple and google.
+  source       String
+  /// active or revoked. Revoked rows stay as history.
+  status       String    @default("active")
+  grantReason  String    @map("grant_reason")
+  grantedBy    String?   @map("granted_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy    String?   @map("revoked_by") @db.Uuid
+  revokeReason String?   @map("revoke_reason")
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@map("entitlements")
 }

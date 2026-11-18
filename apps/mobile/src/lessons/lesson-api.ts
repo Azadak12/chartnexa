@@ -11,7 +11,7 @@ import {
   type UpdateLessonRequest,
 } from "@chartnexa/api-contracts";
 import { z } from "zod";
-import { apiFetch } from "../api/client";
+import { viewerFetch } from "../api/viewer-fetch";
 import { AppError, messageFor } from "../api/errors";
 import { authedFetch } from "../auth/authed-fetch";
 
@@ -26,12 +26,12 @@ const enc = encodeURIComponent;
 /** Public: the outline of a published course, and the text of free-preview lessons only. */
 export const lessonApi = {
   async outline(courseId: string): Promise<LessonOutline> {
-    return check(lessonOutlineSchema, await apiFetch(`/courses/${enc(courseId)}/lessons`));
+    return check(lessonOutlineSchema, await viewerFetch(`/courses/${enc(courseId)}/lessons`));
   },
   async get(courseId: string, lessonId: string): Promise<PublicLesson> {
     return check(
       publicLessonSchema,
-      await apiFetch(`/courses/${enc(courseId)}/lessons/${enc(lessonId)}`),
+      await viewerFetch(`/courses/${enc(courseId)}/lessons/${enc(lessonId)}`),
     );
   },
 };

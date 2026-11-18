@@ -56,8 +56,14 @@ export const publicCourseSchema = z.object({
 
 /** The course page: the public course plus how many lessons it has. */
 export const publicCourseDetailSchema = publicCourseSchema.extend({
+  /** Null when an owner opens a course that has since been unpublished. */
+  publishedAt: z.string().nullable(),
   lessonCount: z.number().int().min(0),
   previewCount: z.number().int().min(0),
+  /** True for a signed-in person with an active entitlement; false for everyone else. */
+  enrolled: z.boolean().default(false),
+  /** False only when an owner opens a course that has since been unpublished. */
+  onSale: z.boolean().default(true),
 });
 
 export const publicCourseSummarySchema = publicCourseSchema.omit({ description: true }).extend({
@@ -92,7 +98,7 @@ export type CourseStatus = z.infer<typeof courseStatusSchema>;
 export type CreateCourseRequest = z.input<typeof createCourseRequestSchema>;
 export type UpdateCourseRequest = z.input<typeof updateCourseRequestSchema>;
 export type PublicCourse = z.infer<typeof publicCourseSchema>;
-export type PublicCourseDetail = z.infer<typeof publicCourseDetailSchema>;
+export type PublicCourseDetail = z.output<typeof publicCourseDetailSchema>;
 export type PublicCourseSummary = z.infer<typeof publicCourseSummarySchema>;
 export type StaffCourse = z.infer<typeof staffCourseSchema>;
 export type CatalogQuery = z.infer<typeof catalogQuerySchema>;
