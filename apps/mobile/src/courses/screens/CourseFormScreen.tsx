@@ -24,6 +24,7 @@ import { ConfirmDialog } from "../../auth/ConfirmDialog";
 import {
   canCreateCourses,
   canAuthorLessons,
+  canManageEnrollments,
   canManageCourses,
   canPublishCourse,
   fetchAccess,
@@ -126,6 +127,7 @@ export function CourseFormScreen() {
       course={editing ? existing.data : undefined}
       canPublish={editing && canPublishCourse(access.data, String(id))}
       canLessons={editing && canAuthorLessons(access.data, String(id))}
+      canStudents={editing && canManageEnrollments(access.data)}
       onSaved={() => qc.invalidateQueries({ queryKey: ["staff-courses"] })}
     />
   );
@@ -135,11 +137,13 @@ function Form({
   course,
   canPublish,
   canLessons,
+  canStudents,
   onSaved,
 }: {
   course: StaffCourse | undefined;
   canPublish: boolean;
   canLessons: boolean;
+  canStudents: boolean;
   onSaved: () => unknown;
 }) {
   const router = useRouter();
@@ -360,6 +364,13 @@ function Form({
           label="Lessons"
           variant="secondary"
           onPress={() => router.push(`/manage/${course.id}/lessons`)}
+        />
+      ) : null}
+      {course && canStudents ? (
+        <Button
+          label="Students"
+          variant="secondary"
+          onPress={() => router.push(`/manage/${course.id}/students`)}
         />
       ) : null}
       <Button label="Back" variant="tertiary" onPress={() => router.back()} />

@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { LESSON_ERROR_CODES } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
@@ -15,6 +17,18 @@ export function LessonReaderScreen() {
     queryFn: () => lessonApi.get(String(id), String(lessonId)),
     retry: shouldRetry,
   });
+  const qc = useQueryClient();
+  const e = query.status === "error" ? query.error : null;
+  const lostAccess =
+    isAppError(e) && e.kind === "forbidden" && e.code === LESSON_ERROR_CODES.enrollmentRequired;
+  // The course page must stop showing this person as enrolled.
+  useEffect(() => {
+    if (lostAccess) {
+      void qc.invalidateQueries({ queryKey: ["course", id] });
+      void qc.invalidateQueries({ queryKey: ["lessons", id] });
+      void qc.invalidateQueries({ queryKey: ["my-courses"] });
+    }
+  }, [lostAccess, qc, id]);
   const back = () => (router.canGoBack() ? router.back() : router.replace(`/course/${id}`));
 
   if (query.status === "pending") {
@@ -25,7 +39,19 @@ export function LessonReaderScreen() {
     );
   }
   if (query.status === "error") {
-    const e = query.error;
+    if (lostAccess) {
+      return (
+        <Screen>
+          <StateView
+            state="empty"
+            title="You no longer have access to this lesson"
+            message="Your access to this course has ended. If you think this is a mistake, contact the academy."
+            actionLabel="Back to course"
+            onAction={back}
+          />
+        </Screen>
+      );
+    }
     // A deleted or unpublished lesson, or one that is not a free preview (403), are all "gone" here.
     if (isAppError(e) && (e.kind === "not_found" || e.kind === "forbidden")) {
       return (

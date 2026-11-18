@@ -11,12 +11,18 @@ import { Button, BottomSheet, Skeleton, Text } from "../../ui";
 import { lessonApi } from "../lesson-api";
 
 /** The curriculum on the course page. It fails on its own: the rest of the page stays usable. */
-export function LessonOutlineSection({ courseId }: { courseId: string }) {
+export function LessonOutlineSection({
+  courseId,
+  enrolled = false,
+}: {
+  courseId: string;
+  enrolled?: boolean;
+}) {
   const router = useRouter();
   const [locked, setLocked] = useState<LessonOutlineItem | null>(null);
   const openerRef = useRef(null);
   const query = useQuery({
-    queryKey: ["lessons", courseId],
+    queryKey: ["lessons", courseId, enrolled],
     queryFn: () => lessonApi.outline(courseId),
     retry: shouldRetry,
   });
@@ -49,10 +55,14 @@ export function LessonOutlineSection({ courseId }: { courseId: string }) {
               key={l.id}
               testID={`lesson-${l.id}`}
               accessibilityRole="button"
-              accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : "locked"}`}
-              accessibilityHint={l.isPreview ? "Opens the lesson" : "Explains how to unlock it"}
+              accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}`}
+              accessibilityHint={
+                l.isPreview || enrolled ? "Opens the lesson" : "Explains how to unlock it"
+              }
               onPress={() =>
-                l.isPreview ? router.push(`/course/${courseId}/lesson/${l.id}`) : setLocked(l)
+                l.isPreview || enrolled
+                  ? router.push(`/course/${courseId}/lesson/${l.id}`)
+                  : setLocked(l)
               }
               style={styles.row}
             >
@@ -61,8 +71,8 @@ export function LessonOutlineSection({ courseId }: { courseId: string }) {
               </Text>
               <View style={{ flex: 1, gap: spacing.xs }}>
                 <Text variant="body">{l.title}</Text>
-                <Text variant="caption" tone={l.isPreview ? "link" : "muted"}>
-                  {l.isPreview ? "Free preview" : "Locked"}
+                <Text variant="caption" tone={l.isPreview || enrolled ? "link" : "muted"}>
+                  {l.isPreview ? "Free preview" : enrolled ? "Included" : "Locked"}
                 </Text>
               </View>
             </Pressable>

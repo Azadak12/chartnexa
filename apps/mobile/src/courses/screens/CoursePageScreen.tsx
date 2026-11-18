@@ -77,13 +77,28 @@ export function CoursePageScreen() {
           {formatPrice(c.priceCents)}
         </Text>
       </View>
-      <Banner
-        kind="info"
-        message="Enrollment is coming soon. You will be able to buy this course here."
-        testID="enroll-notice"
-      />
+      {c.enrolled ? (
+        <>
+          <Banner
+            kind="success"
+            message="You are enrolled in this course."
+            testID="enrolled-notice"
+          />
+          {c.onSale ? null : (
+            <Text variant="caption" tone="muted" testID="not-on-sale">
+              This course is not currently on sale. You keep your access.
+            </Text>
+          )}
+        </>
+      ) : (
+        <Banner
+          kind="info"
+          message="Enrollment is coming soon. You will be able to buy this course here."
+          testID="enroll-notice"
+        />
+      )}
       {c.description ? <Text>{c.description}</Text> : null}
-      <LessonOutlineSection courseId={c.id} />
+      <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} />
       <Button label="Back to courses" variant="secondary" onPress={goHome} />
     </Screen>
   );

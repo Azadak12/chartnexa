@@ -16,6 +16,7 @@ import { z } from "zod";
 import { apiFetch } from "../api/client";
 import { AppError, messageFor } from "../api/errors";
 import { authedFetch } from "../auth/authed-fetch";
+import { viewerFetch } from "../api/viewer-fetch";
 
 function check<T>(schema: z.ZodType<T>, body: unknown): T {
   const parsed = schema.safeParse(body);
@@ -40,7 +41,7 @@ export const courseApi = {
     return check(pageOf(publicCourseSummarySchema), await apiFetch(`/courses${query({ ...q })}`));
   },
   async get(id: string): Promise<PublicCourseDetail> {
-    return check(publicCourseDetailSchema, await apiFetch(`/courses/${encodeURIComponent(id)}`));
+    return check(publicCourseDetailSchema, await viewerFetch(`/courses/${encodeURIComponent(id)}`));
   },
 };
 
@@ -111,3 +112,7 @@ export const isAdmin = (a: AccessResponse | undefined): boolean => !!a && a.role
 export const canAuthorLessons = (a: AccessResponse | undefined, courseId: string): boolean =>
   has(a, "lesson:upload") ||
   grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("lesson:upload"));
+
+/** Granting and ending access to courses (Admins and Managers). */
+export const canManageEnrollments = (a: AccessResponse | undefined): boolean =>
+  has(a, "enrollments:manage");

@@ -11,12 +11,12 @@
 
 ## 2. App
 
-- [ ] 2.1 Build My Courses, the enrolled course page and the lesson reader's lost-access state; verify component tests per scenario in `mobile-my-courses` (loading, empty, error, offline, paging, scroll memory, unpublished label, owner opening a locked lesson, access lost mid-read).
-- [ ] 2.2 Build the staff Students screen, grant form and revoke dialog; verify component tests for grant, repeat grant, unknown and ineligible email, typed text kept, revoke confirm and cancel, no-access state, retry without duplicate, and accessibility labels and announcements.
+- [x] 2.1 Build My Courses, the enrolled course page and the lesson reader's lost-access state; verify component tests per scenario in `mobile-my-courses` (loading, empty, error, offline, paging, scroll memory, unpublished label, owner opening a locked lesson, access lost mid-read).
+- [x] 2.2 Build the staff Students screen, grant form and revoke dialog; verify component tests for grant, repeat grant, unknown and ineligible email, typed text kept, revoke confirm and cancel, no-access state, retry without duplicate, and accessibility labels and announcements.
 
 ## 3. Integration and closing
 
-- [ ] 3.1 Add contract tests against the real API: staff grants, student reads a locked lesson and sees the course in My Courses, staff revoke, the same token loses access on its next request, Instructor and Student refused on staff routes.
+- [x] 3.1 Add contract tests against the real API: staff grants, student reads a locked lesson and sees the course in My Courses, staff revoke, the same token loses access on its next request, Instructor and Student refused on staff routes.
 - [ ] 3.2 Run mutation checks on the permission, the entitlement check in lesson reads, the unique index and the optional-auth guard; record results.
 - [ ] 3.3 Update READMEs and the manual device checklist, record R15 to R17 once the owner answers, and write verification evidence listing what ran and what was not verified on devices.
 - [ ] 3.4 Run the full checks and `openspec validate entitlements-core`; after review and merge, archive with `openspec archive`.
