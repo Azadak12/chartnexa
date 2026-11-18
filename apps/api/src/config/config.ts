@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DEV_MFA_KEY, parseKey } from "../modules/mfa/secret-box.js";
 
 export const CONFIG = Symbol("CONFIG");
 
@@ -17,6 +18,12 @@ const schema = z.object({
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(600),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   SESSION_MAX_DAYS: z.coerce.number().int().min(1).max(365).default(90),
+  /** 32 bytes, base64. Protects stored authenticator secrets. Required in production. */
+  MFA_ENCRYPTION_KEY: z.string().min(1).optional(),
+  MFA_CHALLENGE_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(300),
+  MFA_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
+  RL_MFA_USER_MAX: z.coerce.number().int().min(1).default(10),
+  RL_MFA_WINDOW_SECONDS: z.coerce.number().int().min(1).default(900),
   MAILER_DRIVER: z.enum(["dev", "memory"]).default("dev"),
   APP_LINK_BASE: z.string().min(1).default("chartnexa://"),
   TRUST_PROXY: z
@@ -35,6 +42,23 @@ const schema = z.object({
 });
 
 const checked = schema.superRefine((c, ctx) => {
+  if (c.MFA_ENCRYPTION_KEY !== undefined && parseKey(c.MFA_ENCRYPTION_KEY) === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["MFA_ENCRYPTION_KEY"],
+      message: "must be 32 random bytes encoded as base64",
+    });
+  }
+  if (
+    c.NODE_ENV === "production" &&
+    (c.MFA_ENCRYPTION_KEY === undefined || c.MFA_ENCRYPTION_KEY === DEV_MFA_KEY)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["MFA_ENCRYPTION_KEY"],
+      message: "a real encryption key is required in production",
+    });
+  }
   // Only dev and memory senders exist today, so production is rejected until a real provider is added.
   if (c.NODE_ENV === "production" && (c.MAILER_DRIVER === "dev" || c.MAILER_DRIVER === "memory")) {
     ctx.addIssue({

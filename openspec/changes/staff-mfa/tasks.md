@@ -2,17 +2,17 @@
 
 ## 1. Server foundations
 
-- [ ] 1.1 Check `otpauth` (license, Node 26, size, install scripts) and write a thin `totp.ts` around it (or Node `crypto` if it fails); verify unit tests against the RFC 6238 test vectors, steps t-1 and t+1 accepted, t-2 refused, wrong length refused, and the `otpauth://` URI format.
-- [ ] 1.2 Add the encryption helper and config (`MFA_ENCRYPTION_KEY`, limits, challenge lifetime) with production refusal of the development key; verify tests for round trip, tampering detection, wrong key, a fresh nonce each time, and that production start fails without a real key.
-- [ ] 1.3 Add the three tables and constraints as a migration with reviewed `down.sql` and the one-time session revocation for current Admins and Managers; verify `pnpm migrate:roundtrip` and tests that the database refuses a second unused challenge per person and kind, a bad kind, attempts out of range, and an orphan row, and that the revocation ends only admin and manager sessions.
+- [x] 1.1 Check `otpauth` (license, Node 26, size, install scripts) and write a thin `totp.ts` around it (or Node `crypto` if it fails); verify unit tests against the RFC 6238 test vectors, steps t-1 and t+1 accepted, t-2 refused, wrong length refused, and the `otpauth://` URI format.
+- [x] 1.2 Add the encryption helper and config (`MFA_ENCRYPTION_KEY`, limits, challenge lifetime) with production refusal of the development key; verify tests for round trip, tampering detection, wrong key, a fresh nonce each time, and that production start fails without a real key.
+- [x] 1.3 Add the three tables and constraints as a migration with reviewed `down.sql` and the one-time session revocation for current Admins and Managers; verify `pnpm migrate:roundtrip` and tests that the database refuses a second unused challenge per person and kind, a bad kind, attempts out of range, and an orphan row, and that the revocation ends only admin and manager sessions.
 
 ## 2. Server behavior
 
-- [ ] 2.1 Add the contracts (login response union, verify, setup, recovery regenerate, reset) to `packages/api-contracts`; verify unit tests for each shape, 6-digit and recovery-code formats, and that password-only responses still parse.
-- [ ] 2.2 Implement the MFA service and the gate in login (challenge creation, verify with replay protection, attempts and per-person limits, generic failures); verify integration tests for every scenario in `staff-mfa` under "cannot get a session", "challenges", and "valid TOTP", including simultaneous codes, expiry, reuse, burn after 5, disabled and role-removed between steps, and no tokens at any failure.
-- [ ] 2.3 Implement enrollment (start and complete) and recovery codes (use, regenerate); verify tests for abandoned setup, already enrolled, 10 codes once, one-time use, reuse refusal, constant-time path, and regenerate invalidating the old set.
-- [ ] 2.4 Implement the Admin reset, session ending on promotion, the deletion hook and the operator `--reset-mfa`; verify tests for Admin only, self refused, Manager and Instructor refused, sessions ended, setup required after reset, promotion ending sessions, account deletion removing credentials, and the operator command including its audit record.
-- [ ] 2.5 Prove no secrets leak: tests that logs, audit rows and error bodies never contain codes, secrets, challenge tokens or recovery codes across all flows; update the OpenAPI route check in CI and verify it fails when a route is removed.
+- [x] 2.1 Add the contracts (login response union, verify, setup, recovery regenerate, reset) to `packages/api-contracts`; verify unit tests for each shape, 6-digit and recovery-code formats, and that password-only responses still parse.
+- [x] 2.2 Implement the MFA service and the gate in login (challenge creation, verify with replay protection, attempts and per-person limits, generic failures); verify integration tests for every scenario in `staff-mfa` under "cannot get a session", "challenges", and "valid TOTP", including simultaneous codes, expiry, reuse, burn after 5, disabled and role-removed between steps, and no tokens at any failure.
+- [x] 2.3 Implement enrollment (start and complete) and recovery codes (use, regenerate); verify tests for abandoned setup, already enrolled, 10 codes once, one-time use, reuse refusal, constant-time path, and regenerate invalidating the old set.
+- [x] 2.4 Implement the Admin reset, session ending on promotion, the deletion hook and the operator `--reset-mfa`; verify tests for Admin only, self refused, Manager and Instructor refused, sessions ended, setup required after reset, promotion ending sessions, account deletion removing credentials, and the operator command including its audit record.
+- [x] 2.5 Prove no secrets leak: tests that logs, audit rows and error bodies never contain codes, secrets, challenge tokens or recovery codes across all flows; update the OpenAPI route check in CI and verify it fails when a route is removed.
 
 ## 3. App
 

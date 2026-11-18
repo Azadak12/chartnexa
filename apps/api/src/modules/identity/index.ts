@@ -16,3 +16,7 @@ export {
   type RequestCtx,
 } from "./http/request-context.js";
 export { AccountDeletionHooks, type DeletionHook } from "./accounts/deletion-hooks.js";
+export { MFA_GATE, type MfaGate } from "./mfa-gate.js";
+export { PasswordService } from "./password/password.service.js";
+export { SessionsService } from "./sessions/sessions.service.js";
+export { hashToken, newOpaqueToken } from "./tokens/token-util.js";

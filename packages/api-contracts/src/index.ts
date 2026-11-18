@@ -27,3 +27,4 @@ export * from "./grants.js";
 export * from "./lessons.js";
 export * from "./entitlements.js";
 export * from "./progress.js";
+export * from "./mfa.js";

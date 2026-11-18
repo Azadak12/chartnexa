@@ -513,10 +513,14 @@ describe("grants end with the role", () => {
     expect(await activeGrants(ins.id)).toHaveLength(0);
     expect((await assign(h, admin, ins.id, "instructor")).statusCode).toBe(200);
     expect(await activeGrants(ins.id)).toHaveLength(0);
+    // Becoming a Manager ended the old session, so the person signs in again as an Instructor.
+    const old = await h.call("GET", "/me/access", { token: ins.accessToken });
+    expect(old.statusCode).toBe(401);
+    const again = (await h.login(ins.email, ins.password)).json() as { accessToken: string };
     expect(
       (
         await h.call("POST", "/staff/courses", {
-          token: ins.accessToken,
+          token: again.accessToken,
           body: {
             title: "No grant",
             description: "",

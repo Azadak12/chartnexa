@@ -118,6 +118,13 @@ export class RolesService {
       await tx.userRole.create({
         data: { userId: targetId, role, grantedBy: actor.userId, reason },
       });
+      // New Managers and Admins sign in again, through the second step.
+      if (role === "manager" || role === "admin") {
+        await tx.session.updateMany({
+          where: { userId: targetId, revokedAt: null },
+          data: { revokedAt: now, revokedReason: "staff_role_assigned" },
+        });
+      }
       await tx.user.update({ where: { id: targetId }, data: { authzVersion: { increment: 1 } } });
       await this.audit.record(tx, {
         actorKind: "user",

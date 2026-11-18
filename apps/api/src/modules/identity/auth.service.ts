@@ -1,9 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import type { LoginRequest, TokenPair } from "@chartnexa/api-contracts";
+import { Inject, Injectable, Optional, UnauthorizedException } from "@nestjs/common";
+import type { LoginRequest, LoginResponse } from "@chartnexa/api-contracts";
 import { CONFIG, type AppConfig } from "../../config/config.js";
 import { PrismaService } from "../../database/prisma.service.js";
 import { RateLimiterService } from "../rate-limit/index.js";
 import { logEvent, type RequestCtx } from "./http/request-context.js";
+import { MFA_GATE, type MfaGate } from "./mfa-gate.js";
 import { PasswordService } from "./password/password.service.js";
 import { SessionsService } from "./sessions/sessions.service.js";
 import { hashEmailForKey } from "./tokens/token-util.js";
@@ -18,9 +19,10 @@ export class AuthService {
     @Inject(SessionsService) private readonly sessions: SessionsService,
     @Inject(RateLimiterService) private readonly limiter: RateLimiterService,
     @Inject(CONFIG) private readonly config: AppConfig,
+    @Optional() @Inject(MFA_GATE) private readonly mfa?: MfaGate,
   ) {}
 
-  async login(input: LoginRequest, ctx: RequestCtx): Promise<TokenPair> {
+  async login(input: LoginRequest, ctx: RequestCtx): Promise<LoginResponse> {
     const emailKey = `login:email:${hashEmailForKey(input.email)}`;
     const ipKey = `login:ip:${ctx.ip}`;
     const window = this.config.RL_LOGIN_WINDOW_SECONDS;
@@ -47,6 +49,12 @@ export class AuthService {
         where: { id: user.id },
         data: { passwordHash: await this.passwords.hash(input.password) },
       });
+    }
+    // Admins and Managers must pass a second step before any session exists.
+    const challenge = await this.mfa?.challengeFor(user.id, ctx);
+    if (challenge) {
+      logEvent(ctx, "auth.login.mfa_challenge", { userId: user.id, outcome: challenge.status });
+      return challenge;
     }
     const pair = await this.sessions.createSession(user.id, input.deviceLabel ?? ctx.deviceLabel);
     logEvent(ctx, "auth.login.success", { userId: user.id, sessionId: pair.sessionId });

@@ -21,6 +21,13 @@ import { AccessTokenService } from "./tokens/access-token.service.js";
     OptionalAuthGuard,
     AccountDeletionHooks,
   ],
-  exports: [AuthGuard, OptionalAuthGuard, AccessTokenService, AccountDeletionHooks],
+  exports: [
+    AuthGuard,
+    OptionalAuthGuard,
+    AccessTokenService,
+    AccountDeletionHooks,
+    PasswordService,
+    SessionsService,
+  ],
 })
 export class IdentityModule {}

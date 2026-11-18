@@ -45,6 +45,9 @@ model User {
   grants   InstructorGrant[]
   entitlements Entitlement[]
   completions  LessonCompletion[]
+  mfaCredential MfaCredential?
+  mfaRecoveryCodes MfaRecoveryCode[]
+  mfaChallenges MfaChallenge[]
 
   @@map("users")
 }
@@ -285,4 +288,56 @@ model LessonCompletion {
   @@id([userId, lessonId])
   @@index([userId, courseId])
   @@map("lesson_completions")
+}
+
+/// A staff member's authenticator secret, encrypted with MFA_ENCRYPTION_KEY. A row exists only
+/// once the first code was proven, so a row means two-step sign-in is on.
+model MfaCredential {
+  userId           String   @id @map("user_id") @db.Uuid
+  secretCiphertext String   @map("secret_ciphertext")
+  secretIv         String   @map("secret_iv")
+  secretTag        String   @map("secret_tag")
+  enabledAt        DateTime @default(now()) @map("enabled_at") @db.Timestamptz(6)
+  /// The latest time step whose code was accepted; the same step can never be used twice.
+  lastUsedStep     BigInt   @default(0) @map("last_used_step")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("mfa_credentials")
+}
+
+/// One-time codes for a lost phone. Only a hash is stored.
+model MfaRecoveryCode {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash")
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, codeHash])
+  @@map("mfa_recovery_codes")
+}
+
+/// The step between a correct password and a session. Only a hash of the token is stored; a setup
+/// challenge also holds the not-yet-proven secret (encrypted). The CHECKs and the one-unused-per-
+/// person-and-kind partial unique index are in the migration.
+model MfaChallenge {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  kind              String
+  tokenHash         String    @unique @map("token_hash")
+  pendingCiphertext String?   @map("pending_ciphertext")
+  pendingIv         String?   @map("pending_iv")
+  pendingTag        String?   @map("pending_tag")
+  attempts          Int       @default(0)
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt            DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([expiresAt])
+  @@map("mfa_challenges")
 }

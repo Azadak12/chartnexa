@@ -9,6 +9,7 @@ import {
   verifyEmailRequestSchema,
   type ForgotPasswordRequest,
   type LoginRequest,
+  type LoginResponse,
   type RefreshRequest,
   type RegisterRequest,
   type ResetPasswordRequest,
@@ -60,13 +61,16 @@ export class AuthController {
 
   @Post("login")
   @HttpCode(200)
-  @ApiOperation({ summary: "Log in with email and password" })
+  @ApiOperation({
+    summary:
+      "Log in with email and password. Admins and Managers get a challenge for the second step instead of tokens",
+  })
   @ApiZodBody(loginRequestSchema)
   @ApiErrors(400, 401, 429)
   login(
     @Body(new ZodPipe(loginRequestSchema)) body: LoginRequest,
     @Ctx() ctx: RequestCtx,
-  ): Promise<TokenPair> {
+  ): Promise<LoginResponse> {
     return this.auth.login(body, ctx);
   }
 
