@@ -23,7 +23,7 @@ pnpm check
 Never commit real secrets. Use `.env` locally (git-ignored); only `.env.example` with placeholders is tracked. A pre-commit hook and CI run `secretlint`. Use development and sandbox credentials only.
 
 ## Dependency audit
-`pnpm audit:deps` fails on high or critical advisories. If a fix is not yet available, record an exception with an owner and expiry date in the pull request.
+`pnpm audit:deps` fails on high or critical advisories. If a fix is not yet available, record an exception with an owner and expiry date in the pull request. Active exceptions live in `pnpm-workspace.yaml` under `auditConfig` with a comment explaining why and when to remove them.
 
 ## Workflow
 Changes follow OpenSpec: proposal, spec, design, tasks, review, implementation, verification, archive. See `CLAUDE.md`.

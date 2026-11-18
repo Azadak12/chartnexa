@@ -9,3 +9,11 @@ allowBuilds:
   "@scarf/scarf": false
   "@parcel/watcher": false
 engineStrict: true
+# Audit exception (owner: project maintainers, review by 2026-12-18).
+# GHSA-fc5q-39xc-vjpf: picomatch ReDoS (high), no patched version exists yet. It is reached only
+# through build and test tooling (Metro, Jest, secretlint) that runs on developer and CI machines
+# with trusted input; it is not part of the shipped app or the API runtime. Remove this entry as
+# soon as a patched picomatch is available.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
