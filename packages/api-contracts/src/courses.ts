@@ -54,6 +54,12 @@ export const publicCourseSchema = z.object({
   publishedAt: z.string(),
 });
 
+/** The course page: the public course plus how many lessons it has. */
+export const publicCourseDetailSchema = publicCourseSchema.extend({
+  lessonCount: z.number().int().min(0),
+  previewCount: z.number().int().min(0),
+});
+
 export const publicCourseSummarySchema = publicCourseSchema.omit({ description: true }).extend({
   /** First part of the description for cards. */
   summary: z.string(),
@@ -86,6 +92,7 @@ export type CourseStatus = z.infer<typeof courseStatusSchema>;
 export type CreateCourseRequest = z.input<typeof createCourseRequestSchema>;
 export type UpdateCourseRequest = z.input<typeof updateCourseRequestSchema>;
 export type PublicCourse = z.infer<typeof publicCourseSchema>;
+export type PublicCourseDetail = z.infer<typeof publicCourseDetailSchema>;
 export type PublicCourseSummary = z.infer<typeof publicCourseSummarySchema>;
 export type StaffCourse = z.infer<typeof staffCourseSchema>;
 export type CatalogQuery = z.infer<typeof catalogQuerySchema>;
