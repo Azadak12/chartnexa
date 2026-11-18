@@ -12,6 +12,7 @@ import { QueryStateView } from "../../state/StateView";
 import { status as statusColors } from "../../theme";
 import { BottomSheet, Banner, Button, Card, Screen, Text, useSubmitOnce } from "../../ui";
 import { accountApi } from "../account-api";
+import { mfaApi } from "../mfa-api";
 import { formMessage } from "../errors-ui";
 import { SIGNED_OUT_OFFLINE_NOTICE, sessionManager } from "../session-manager";
 import { VerifyNotice } from "../VerifyNotice";
@@ -75,6 +76,11 @@ export function ProfileScreen() {
   const router = useRouter();
   const query = useQuery({ queryKey: ["me"], queryFn: accountApi.me });
   const access = useQuery({ queryKey: ["access"], queryFn: fetchAccess });
+  // Only Admins and Managers see two-step settings; the server decides who needs it.
+  const staffAccess =
+    canManageInstructors(access.data) ||
+    (access.data?.roles ?? []).some((r) => r === "admin" || r === "manager");
+  const mfa = useQuery({ queryKey: ["mfa"], queryFn: mfaApi.status, enabled: staffAccess });
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const editRef = useRef(null);
@@ -122,6 +128,13 @@ export function ProfileScreen() {
                 label="Instructor permissions"
                 variant="secondary"
                 onPress={() => router.push("/profile/instructors")}
+              />
+            ) : null}
+            {mfa.data?.required ? (
+              <Button
+                label={`Two-step sign-in: ${mfa.data.enabled ? "On" : "Off"}`}
+                variant="secondary"
+                onPress={() => router.push("/profile/two-step")}
               />
             ) : null}
             <Button

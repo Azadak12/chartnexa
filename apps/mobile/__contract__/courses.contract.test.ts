@@ -9,7 +9,15 @@ import {
   staffCourseApi,
 } from "../src/courses/course-api";
 import { sessionStore } from "../src/session/session-store";
-import { GOOD_PASSWORD, makeAdmin, realFetch, uniqueEmail, waitForToken } from "./helpers";
+import {
+  GOOD_PASSWORD,
+  loginAny,
+  loginPair,
+  makeAdmin,
+  realFetch,
+  uniqueEmail,
+  waitForToken,
+} from "./helpers";
 
 const secure = SecureStore as unknown as { __reset: () => void };
 
@@ -29,7 +37,7 @@ async function signInNew(role: "admin" | "student") {
   await authHttp.register({ email, password: GOOD_PASSWORD });
   await authHttp.verifyEmail(await waitForToken(email, "Verify your ChartNexa email"));
   if (role === "admin") makeAdmin(email);
-  await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+  await sessionManager.signIn(await loginAny(email, GOOD_PASSWORD));
   return email;
 }
 

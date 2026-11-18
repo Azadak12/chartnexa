@@ -10,6 +10,7 @@ import { useSession } from "../../session/session-store";
 import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
 import { authHttp } from "../auth-http";
 import { formMessage } from "../errors-ui";
+import { mfaFlow } from "../mfa-flow";
 import { sessionManager } from "../session-manager";
 
 export function SignInScreen() {
@@ -40,8 +41,17 @@ export function SignInScreen() {
   const { run, pending } = useSubmitOnce(async (values: { email: string; password: string }) => {
     setMessage(null);
     try {
-      const pair = await authHttp.login(values);
-      await sessionManager.signIn(pair);
+      const result = await authHttp.login(values);
+      if (!("accessToken" in result)) {
+        // Admins and Managers go on to a second step before any session exists.
+        mfaFlow.start(values.email, result);
+        router.push({
+          pathname: result.status === "mfa_setup_required" ? "/two-step-setup" : "/two-step",
+          params: returnTo ? { returnTo } : {},
+        } as never);
+        return;
+      }
+      await sessionManager.signIn(result);
     } catch (e) {
       if (applyServerErrors(e, setError, ["email", "password"])) return;
       if (isAppError(e) && e.kind === "unauthorized") {

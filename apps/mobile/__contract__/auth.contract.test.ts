@@ -5,7 +5,7 @@ import { authedFetch } from "../src/auth/authed-fetch";
 import { sessionManager } from "../src/auth/session-manager";
 import { AppError } from "../src/api/errors";
 import { sessionStore } from "../src/session/session-store";
-import { GOOD_PASSWORD, realFetch, uniqueEmail, waitForToken } from "./helpers";
+import { GOOD_PASSWORD, loginPair, realFetch, uniqueEmail, waitForToken } from "./helpers";
 
 const secure = SecureStore as unknown as {
   __reset: () => void;
@@ -63,7 +63,7 @@ describe("account access against the real API", () => {
 
   it("signs in, stores only the refresh token and reads the account", async () => {
     const email = await newAccount();
-    const pair = await authHttp.login({ email, password: GOOD_PASSWORD });
+    const pair = await loginPair({ email, password: GOOD_PASSWORD });
     await sessionManager.signIn(pair);
     expect(Object.keys(secure.__dump())).toEqual(["chartnexa.session.v1"]);
     expect(secure.__dump()["chartnexa.session.v1"]).not.toContain(pair.accessToken);
@@ -73,9 +73,9 @@ describe("account access against the real API", () => {
 
   it("gives one identical error for a wrong password and an unknown email", async () => {
     const email = await newAccount();
-    const wrong = await failure(authHttp.login({ email, password: "wrong password value" }));
+    const wrong = await failure(loginPair({ email, password: "wrong password value" }));
     const unknown = await failure(
-      authHttp.login({ email: uniqueEmail(), password: "wrong password value" }),
+      loginPair({ email: uniqueEmail(), password: "wrong password value" }),
     );
     expect(wrong.kind).toBe("unauthorized");
     expect(unknown.kind).toBe("unauthorized");
@@ -89,7 +89,7 @@ describe("account access against the real API", () => {
     // Counters use fixed time windows, so on a slow machine the attempts can straddle two
     // windows. Keep failing (up to 15 times) until the wait appears.
     for (let i = 0; i < 15 && last?.kind !== "rate_limited"; i++)
-      last = await failure(authHttp.login({ email, password: "wrong password value" }));
+      last = await failure(loginPair({ email, password: "wrong password value" }));
     expect(last?.kind).toBe("rate_limited");
     expect(last?.retryAfterSeconds).toBeGreaterThan(0);
     expect(last?.message).toMatch(/wait about/);
@@ -99,7 +99,7 @@ describe("account access against the real API", () => {
 describe("sessions against the real API", () => {
   it("rotates the refresh token on renewal and ends the session if an old one is replayed", async () => {
     const email = await newAccount();
-    const first = await authHttp.login({ email, password: GOOD_PASSWORD });
+    const first = await loginPair({ email, password: GOOD_PASSWORD });
     await sessionManager.signIn(first);
     expect(await sessionManager.renew()).toBe("ok");
     expect((await accountApi.me()).email).toBe(email);
@@ -115,7 +115,7 @@ describe("sessions against the real API", () => {
 
   it("renews once and repeats the request after a 401", async () => {
     const email = await newAccount();
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     sessionManager._setAccessTokenForTests("not-a-valid-token", 600_000);
     const me = await accountApi.me();
     expect(me.email).toBe(email);
@@ -124,7 +124,7 @@ describe("sessions against the real API", () => {
 
   it("restores a stored session at launch and rejects it after sign out", async () => {
     const email = await newAccount();
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     const stored = secure.__dump()["chartnexa.session.v1"] as string;
 
     sessionManager._resetForTests();
@@ -144,8 +144,8 @@ describe("sessions against the real API", () => {
 
   it("lists sessions, marks this device and ends another", async () => {
     const email = await newAccount();
-    const other = await authHttp.login({ email, password: GOOD_PASSWORD });
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    const other = await loginPair({ email, password: GOOD_PASSWORD });
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     const list = await accountApi.listSessions();
     expect(list).toHaveLength(2);
     expect(list.filter((s) => s.current)).toHaveLength(1);
@@ -161,8 +161,8 @@ describe("sessions against the real API", () => {
 describe("account management against the real API", () => {
   it("changes the password: a wrong current password is a field error that keeps the session, success ends other sessions", async () => {
     const email = await newAccount();
-    const other = await authHttp.login({ email, password: GOOD_PASSWORD });
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    const other = await loginPair({ email, password: GOOD_PASSWORD });
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
 
     const wrong = await failure(
       accountApi.changePassword({
@@ -181,43 +181,41 @@ describe("account management against the real API", () => {
     expect(sessionStore.get()).toBe("signed-in");
     expect(await accountApi.listSessions()).toHaveLength(1);
     expect((await failure(authHttp.refresh(other.refreshToken))).kind).toBe("unauthorized");
-    await expect(
-      authHttp.login({ email, password: "a brand new passphrase" }),
-    ).resolves.toBeTruthy();
+    await expect(loginPair({ email, password: "a brand new passphrase" })).resolves.toBeTruthy();
   });
 
   it("updates the display name", async () => {
     const email = await newAccount();
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     const me = await accountApi.updateProfile({ displayName: "Ann Contract" });
     expect(me.displayName).toBe("Ann Contract");
   });
 
   it("signs out everywhere", async () => {
     const email = await newAccount();
-    const other = await authHttp.login({ email, password: GOOD_PASSWORD });
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    const other = await loginPair({ email, password: GOOD_PASSWORD });
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     await accountApi.logoutEverywhere();
     expect((await failure(authHttp.refresh(other.refreshToken))).kind).toBe("unauthorized");
   });
 
   it("deletes the account only with the right password, and the session survives a wrong one", async () => {
     const email = await newAccount();
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     const wrong = await failure(accountApi.deleteAccount({ password: "not my password" }));
     expect(wrong.fields.map((f) => f.field)).toEqual(["password"]);
     expect(sessionStore.get()).toBe("signed-in");
 
     await accountApi.deleteAccount({ password: GOOD_PASSWORD });
     await sessionManager.clearAfterServerEnd("Your account was deleted.");
-    expect((await failure(authHttp.login({ email, password: GOOD_PASSWORD }))).kind).toBe(
+    expect((await failure(loginPair({ email, password: GOOD_PASSWORD }))).kind).toBe(
       "unauthorized",
     );
   });
 
   it("resends the verification email for an unverified account", async () => {
     const email = await newAccount(false);
-    await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+    await sessionManager.signIn(await loginPair({ email, password: GOOD_PASSWORD }));
     expect((await accountApi.me()).emailVerified).toBe(false);
     await accountApi.resendVerification();
     const token = await waitForToken(email, "Verify your ChartNexa email");
@@ -229,7 +227,7 @@ describe("account management against the real API", () => {
 describe("password recovery against the real API", () => {
   it("resets from the emailed code, rejects a weak password without using the code, and ends sessions", async () => {
     const email = await newAccount();
-    const old = await authHttp.login({ email, password: GOOD_PASSWORD });
+    const old = await loginPair({ email, password: GOOD_PASSWORD });
     await authHttp.forgotPassword({ email });
     const token = await waitForToken(email, "Reset your ChartNexa password");
 
@@ -238,9 +236,7 @@ describe("password recovery against the real API", () => {
 
     await authHttp.resetPassword({ token, newPassword: "a brand new passphrase" });
     expect((await failure(authHttp.refresh(old.refreshToken))).kind).toBe("unauthorized");
-    await expect(
-      authHttp.login({ email, password: "a brand new passphrase" }),
-    ).resolves.toBeTruthy();
+    await expect(loginPair({ email, password: "a brand new passphrase" })).resolves.toBeTruthy();
 
     const reused = await failure(
       authHttp.resetPassword({ token, newPassword: "yet another passphrase" }),

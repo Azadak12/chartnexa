@@ -9,7 +9,13 @@ import { useSession } from "../../src/session/session-store";
 export default function PublicLayout() {
   const { status } = useSession();
   const segments = useSegments();
-  const onSignIn = segments[segments.length - 1] === "sign-in";
+  // The two-step screens finish a sign-in, so they too decide where the person goes next.
+  const last = segments[segments.length - 1];
+  const onSignIn =
+    last === "sign-in" ||
+    last === "two-step" ||
+    last === "two-step-setup" ||
+    last === "recovery-codes";
   if (status === "restoring") return null;
   if (status === "signed-in" && !onSignIn) return <Redirect href={HOME_ROUTE} />;
   return <Stack screenOptions={{ headerShown: false }} />;

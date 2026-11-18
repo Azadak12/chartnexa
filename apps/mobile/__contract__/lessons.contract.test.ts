@@ -13,7 +13,15 @@ import { instructorApi } from "../src/instructors/instructor-api";
 import { lessonApi, staffLessonApi } from "../src/lessons/lesson-api";
 import { splitLessonText } from "../src/lessons/steps";
 import { sessionStore } from "../src/session/session-store";
-import { GOOD_PASSWORD, makeAdmin, realFetch, uniqueEmail, waitForToken } from "./helpers";
+import {
+  GOOD_PASSWORD,
+  loginAny,
+  loginPair,
+  makeAdmin,
+  realFetch,
+  uniqueEmail,
+  waitForToken,
+} from "./helpers";
 
 const secure = SecureStore as unknown as { __reset: () => void };
 
@@ -33,7 +41,7 @@ async function signInAs(email: string): Promise<void> {
   secure.__reset();
   sessionManager._resetForTests();
   sessionStore.set("signed-out");
-  await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+  await sessionManager.signIn(await loginAny(email, GOOD_PASSWORD));
 }
 const failure = async (p: Promise<unknown>): Promise<AppError> => {
   try {

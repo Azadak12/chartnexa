@@ -16,9 +16,9 @@
 
 ## 3. App
 
-- [ ] 3.1 Build the code screen, recovery-code option, expired and burned challenge handling in the sign-in flow; verify component tests for every scenario in `mobile-staff-mfa` under sign-in, including double submit, wrong code, focus and announcements.
-- [ ] 3.2 Build enrollment (key with groups, copy, open authenticator, first code) and the recovery-codes screen with acknowledgement and leave warning; verify component tests for each scenario, including no authenticator installed and leaving early.
-- [ ] 3.3 Add the Profile rows and regenerate flow for staff only; verify tests for Admin, Manager, Instructor and Student.
+- [x] 3.1 Build the code screen, recovery-code option, expired and burned challenge handling in the sign-in flow; verify component tests for every scenario in `mobile-staff-mfa` under sign-in, including double submit, wrong code, focus and announcements.
+- [x] 3.2 Build enrollment (key with groups, copy, open authenticator, first code) and the recovery-codes screen with acknowledgement and leave warning; verify component tests for each scenario, including no authenticator installed and leaving early.
+- [x] 3.3 Add the Profile rows and regenerate flow for staff only; verify tests for Admin, Manager, Instructor and Student.
 
 ## 4. Closing
 

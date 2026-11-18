@@ -12,7 +12,15 @@ import { myCoursesApi, staffEntitlementApi } from "../src/entitlements/entitleme
 import { instructorApi } from "../src/instructors/instructor-api";
 import { lessonApi, staffLessonApi } from "../src/lessons/lesson-api";
 import { sessionStore } from "../src/session/session-store";
-import { GOOD_PASSWORD, makeAdmin, realFetch, uniqueEmail, waitForToken } from "./helpers";
+import {
+  GOOD_PASSWORD,
+  loginAny,
+  loginPair,
+  makeAdmin,
+  realFetch,
+  uniqueEmail,
+  waitForToken,
+} from "./helpers";
 
 const secure = SecureStore as unknown as { __reset: () => void };
 
@@ -32,7 +40,7 @@ async function signInAs(email: string): Promise<void> {
   secure.__reset();
   sessionManager._resetForTests();
   sessionStore.set("signed-out");
-  await sessionManager.signIn(await authHttp.login({ email, password: GOOD_PASSWORD }));
+  await sessionManager.signIn(await loginAny(email, GOOD_PASSWORD));
 }
 const failure = async (p: Promise<unknown>): Promise<AppError> => {
   try {
@@ -86,7 +94,7 @@ describe("Entitlements against the real API", () => {
     const student = await instructorApi.lookup(studentEmail);
 
     // The student's session starts before any access exists.
-    const studentLogin = await authHttp.login({ email: studentEmail, password: GOOD_PASSWORD });
+    const studentLogin = await loginPair({ email: studentEmail, password: GOOD_PASSWORD });
     const lockedPath = `/courses/${made.id}/lessons/${locked.id}`;
     expect((await withToken(studentLogin.accessToken, lockedPath)).status).toBe(403);
     await signInAs(studentEmail);

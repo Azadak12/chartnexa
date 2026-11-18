@@ -1,7 +1,15 @@
 import {
+  loginResponseSchema,
+  mfaSetupCompleteResponseSchema,
+  mfaSetupStartResponseSchema,
+  mfaSignInResponseSchema,
   tokenPairSchema,
   type ForgotPasswordRequest,
   type LoginRequest,
+  type LoginResponse,
+  type MfaSetupCompleteResponse,
+  type MfaSetupStartResponse,
+  type MfaSignInResponse,
   type RegisterRequest,
   type ResetPasswordRequest,
   type TokenPair,
@@ -22,8 +30,41 @@ export const authHttp = {
     await apiFetch("/auth/register", { method: "POST", body });
   },
 
-  async login(body: LoginRequest): Promise<TokenPair> {
-    return parsePair(await apiFetch("/auth/login", { method: "POST", body }));
+  /** Tokens for most people; a challenge for Admins and Managers, who need a second step. */
+  async login(body: LoginRequest): Promise<LoginResponse> {
+    const parsed = loginResponseSchema.safeParse(
+      await apiFetch("/auth/login", { method: "POST", body }),
+    );
+    if (!parsed.success) throw new AppError("unknown", messageFor("unknown"), null, null);
+    return parsed.data;
+  },
+
+  /** The second step: an authenticator code or a recovery code. */
+  async verifyMfa(body: { challengeToken: string; code: string }): Promise<MfaSignInResponse> {
+    const parsed = mfaSignInResponseSchema.safeParse(
+      await apiFetch("/auth/mfa/verify", { method: "POST", body }),
+    );
+    if (!parsed.success) throw new AppError("unknown", messageFor("unknown"), null, null);
+    return parsed.data;
+  },
+
+  async startMfaSetup(challengeToken: string): Promise<MfaSetupStartResponse> {
+    const parsed = mfaSetupStartResponseSchema.safeParse(
+      await apiFetch("/auth/mfa/setup/start", { method: "POST", body: { challengeToken } }),
+    );
+    if (!parsed.success) throw new AppError("unknown", messageFor("unknown"), null, null);
+    return parsed.data;
+  },
+
+  async completeMfaSetup(body: {
+    challengeToken: string;
+    code: string;
+  }): Promise<MfaSetupCompleteResponse> {
+    const parsed = mfaSetupCompleteResponseSchema.safeParse(
+      await apiFetch("/auth/mfa/setup/complete", { method: "POST", body }),
+    );
+    if (!parsed.success) throw new AppError("unknown", messageFor("unknown"), null, null);
+    return parsed.data;
   },
 
   async refresh(refreshToken: string): Promise<TokenPair> {

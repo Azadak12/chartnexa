@@ -1,7 +1,10 @@
+import { createHmac } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { request } from "node:http";
 import { join } from "node:path";
+import type { TokenPair } from "@chartnexa/api-contracts";
+import { authHttp } from "../src/auth/auth-http";
 
 /** A minimal fetch over node:http, because the React Native test setup replaces global fetch. */
 export function realFetch(
@@ -111,4 +114,94 @@ export function makeAdmin(email: string): void {
     },
   );
   if (r.status !== 0) throw new Error(`admin bootstrap failed: ${r.stdout}${r.stderr}`);
+}
+
+// --- two-step sign-in for Admins and Managers -------------------------------------------------
+
+const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+function base32Decode(input: string): Buffer {
+  let bits = 0;
+  let value = 0;
+  const out: number[] = [];
+  for (const ch of input.replace(/=+$/, "")) {
+    value = (value << 5) | B32.indexOf(ch);
+    bits += 5;
+    if (bits >= 8) {
+      out.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(out);
+}
+
+/** RFC 6238: SHA-1, 6 digits, 30-second steps. Independent of the server's implementation. */
+export function totpCode(secretBase32: string, step: number): string {
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(step));
+  const mac = createHmac("sha1", base32Decode(secretBase32)).update(counter).digest();
+  const offset = (mac[mac.length - 1] as number) & 15;
+  const bin =
+    (((mac[offset] as number) & 127) << 24) |
+    (((mac[offset + 1] as number) & 255) << 16) |
+    (((mac[offset + 2] as number) & 255) << 8) |
+    ((mac[offset + 3] as number) & 255);
+  return String(bin % 1_000_000).padStart(6, "0");
+}
+export const currentStep = (): number => Math.floor(Date.now() / 30_000);
+
+interface Enrolled {
+  secret: string;
+  recoveryCodes: string[];
+  lastStep: number;
+}
+const enrolled = new Map<string, Enrolled>();
+
+/** Signs in a person who does not need a second step, and fails loudly if one is asked for. */
+export async function loginPair(body: { email: string; password: string }): Promise<TokenPair> {
+  const result = await authHttp.login(body);
+  if (!("accessToken" in result)) throw new Error("A second sign-in step was asked for");
+  return result;
+}
+
+/**
+ * Signs in anyone. Admins and Managers go through the real second step: the first time they
+ * enroll; after that a recovery code is used for each sign-in (a code cannot be used twice, and
+ * waiting for a new 30-second step would make the suite slow), and a fresh authenticator code
+ * once the recovery codes run out.
+ */
+export async function loginAny(email: string, password: string): Promise<TokenPair> {
+  const result = await authHttp.login({ email, password });
+  if ("accessToken" in result) return result;
+  const known = enrolled.get(email);
+  if (result.status === "mfa_setup_required") {
+    const start = await authHttp.startMfaSetup(result.challengeToken);
+    const step = currentStep();
+    const done = await authHttp.completeMfaSetup({
+      challengeToken: result.challengeToken,
+      code: totpCode(start.secret, step),
+    });
+    const { recoveryCodes, ...pair } = done;
+    enrolled.set(email, { secret: start.secret, recoveryCodes, lastStep: step });
+    return pair;
+  }
+  if (!known) throw new Error(`No second step recorded for ${email}`);
+  const recovery = known.recoveryCodes.shift();
+  if (recovery) {
+    const { recoveryCodesRemaining: _remaining, ...pair } = await authHttp.verifyMfa({
+      challengeToken: result.challengeToken,
+      code: recovery,
+    });
+    return pair;
+  }
+  // No recovery codes left: use the next authenticator step, waiting if it is not valid yet.
+  const step = Math.max(currentStep(), known.lastStep + 1);
+  if (step > currentStep() + 1) {
+    await new Promise((r) => setTimeout(r, (step - 1) * 30_000 - Date.now() + 200));
+  }
+  known.lastStep = step;
+  const { recoveryCodesRemaining: _remaining, ...pair } = await authHttp.verifyMfa({
+    challengeToken: result.challengeToken,
+    code: totpCode(known.secret, step),
+  });
+  return pair;
 }
