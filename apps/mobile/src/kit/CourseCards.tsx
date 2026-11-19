@@ -1,21 +1,68 @@
 import { memo } from "react";
-import { Pressable, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { Pressable, useWindowDimensions, View } from "react-native";
+import { NO_RATING } from "@chartnexa/api-contracts";
 import type { PublicCourseSummary } from "@chartnexa/api-contracts";
 import { LEVEL_LABEL } from "../courses/CourseCard";
-import { RatingSummary, ratingText as ratingWords } from "../reviews/RatingSummary";
+import { ratingText as ratingWords } from "../reviews/RatingSummary";
 import { formatPrice } from "../courses/money";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { Text } from "../ui";
 import { CourseThumbnail } from "./CourseThumbnail";
 
+const ratingA11y = (r: PublicCourseSummary["rating"]): string => {
+  const t = ratingWords(r);
+  return t === "No reviews yet" ? t : `Rated ${t}`;
+};
 const label = (c: PublicCourseSummary) =>
   `${c.title}, ${LEVEL_LABEL[c.level]}${c.instructor ? `, by ${c.instructor.displayName}` : ""}, ${formatPrice(c.priceCents)}, ${ratingWords(c.rating)}`;
 
-function Meta({ c }: { c: PublicCourseSummary }) {
-  return <RatingSummary rating={c.rating} testID={`rating-${c.id}`} />;
+/** One star and the average with the count: short enough to share a row on a 320dp phone. */
+function Rating({ c }: { c: PublicCourseSummary }) {
+  const r = c.rating ?? NO_RATING;
+  const none = r.count === 0 || r.average === null;
+  return (
+    <View
+      accessible
+      accessibilityLabel={ratingA11y(c.rating)}
+      testID={`rating-${c.id}`}
+      style={{ flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 }}
+    >
+      <Feather
+        name="star"
+        size={13}
+        color={none ? neutrals.muted : colors.blue}
+        accessible={false}
+      />
+      <Text variant="caption" tone="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
+        {none ? "No reviews yet" : `${(r.average ?? 0).toFixed(1)} (${r.count})`}
+      </Text>
+    </View>
+  );
 }
 
-/** A compact list card: small thumbnail, title, instructor, level, rating and price. */
+/** The price always has a row of its own, so no neighbour can push it off the card or overlap it. */
+function PriceRow({ c }: { c: PublicCourseSummary }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <Text variant="bodyStrong" style={{ flexShrink: 0 }} testID={`price-${c.id}`}>
+        {formatPrice(c.priceCents)}
+      </Text>
+      <Feather name="chevron-right" size={18} color={neutrals.muted} accessible={false} />
+    </View>
+  );
+}
+
+/** Thumbnail width follows the screen so the text column keeps room on a 320dp phone. */
+export function thumbWidth(screenWidth: number): number {
+  return screenWidth < 360 ? 84 : screenWidth < 400 ? 96 : 108;
+}
+
+/**
+ * A responsive list card. The text column is flexible (`flex: 1`, `minWidth: 0`), titles are
+ * limited to two lines, the rating wraps under the level when space is short, and the price sits
+ * on its own row. Nothing has a fixed width except the thumbnail, which is a fraction of the screen.
+ */
 export const CourseCard = memo(function CourseCard({
   course: c,
   onPress,
@@ -23,6 +70,7 @@ export const CourseCard = memo(function CourseCard({
   course: PublicCourseSummary;
   onPress: () => void;
 }) {
+  const { width } = useWindowDimensions();
   return (
     <Pressable
       accessibilityRole="button"
@@ -31,16 +79,24 @@ export const CourseCard = memo(function CourseCard({
       testID={`course-${c.id}`}
       style={({ pressed }) => ({
         flexDirection: "row",
+        alignItems: "flex-start",
         gap: spacing.md,
         padding: spacing.sm,
+        minHeight: 96,
         borderRadius: radii.card,
         borderWidth: 1,
         borderColor: neutrals.divider,
         backgroundColor: pressed ? neutrals.surface : colors.white,
       })}
     >
-      <CourseThumbnail tone={c.coverTone} thumbnailUrl={c.thumbnailUrl} width={112} />
-      <View style={{ flex: 1, gap: 2, justifyContent: "center" }}>
+      <View style={{ flexShrink: 0 }}>
+        <CourseThumbnail
+          tone={c.coverTone}
+          thumbnailUrl={c.thumbnailUrl}
+          width={thumbWidth(width)}
+        />
+      </View>
+      <View style={{ flex: 1, minWidth: 0, gap: 3 }} testID={`card-body-${c.id}`}>
         {c.categoryName ? (
           <Text variant="caption" tone="link" numberOfLines={1}>
             {c.categoryName}
@@ -51,19 +107,24 @@ export const CourseCard = memo(function CourseCard({
         </Text>
         {c.instructor ? (
           <Text variant="caption" tone="muted" numberOfLines={1}>
-            {c.instructor.displayName} · {LEVEL_LABEL[c.level]}
+            {c.instructor.displayName}
           </Text>
-        ) : (
-          <Text variant="caption" tone="muted">
+        ) : null}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            alignItems: "center",
+            columnGap: spacing.sm,
+            rowGap: 2,
+          }}
+        >
+          <Text variant="caption" tone="muted" numberOfLines={1}>
             {LEVEL_LABEL[c.level]}
           </Text>
-        )}
-        <View
-          style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
-        >
-          <Meta c={c} />
-          <Text variant="bodyStrong">{formatPrice(c.priceCents)}</Text>
+          <Rating c={c} />
         </View>
+        <PriceRow c={c} />
       </View>
     </Pressable>
   );
@@ -108,17 +169,8 @@ export const FeaturedCourseCard = memo(function FeaturedCourseCard({
           {c.instructor ? `${c.instructor.displayName} · ` : ""}
           {LEVEL_LABEL[c.level]}
         </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: spacing.xs,
-          }}
-        >
-          <Meta c={c} />
-          <Text variant="bodyStrong">{formatPrice(c.priceCents)}</Text>
-        </View>
+        <Rating c={c} />
+        <PriceRow c={c} />
       </View>
     </Pressable>
   );

@@ -12,11 +12,11 @@ import { AppHeader } from "../kit/AppHeader";
 import { CourseThumbnail } from "../kit/CourseThumbnail";
 import { LoadingSkeleton } from "../kit/Feedback";
 import { ProgressRing } from "../kit/ProgressRing";
-import { ChartCard } from "../lab/ChartCard";
+import { MarketPreviewCard } from "../lab/MarketPreviewCard";
 import { NextLiveCard } from "../live/NextLiveCard";
 import { continueApi } from "../progress/continue-api";
 import { colors, neutrals, radii, spacing } from "../theme";
-import { Button, Screen, Text } from "../ui";
+import { Screen, Text } from "../ui";
 
 /** "Good morning, Sam": time of day from the phone's clock. */
 export function greetingFor(name: string | null | undefined, now = new Date()): string {
@@ -67,12 +67,7 @@ export function HomeScreen() {
       />
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
-      <ChartCard compact />
-      <Button
-        label="Open the Learning Lab"
-        variant="secondary"
-        onPress={() => router.push("/lab")}
-      />
+      <MarketPreviewCard />
 
       {r ? (
         <View style={{ gap: spacing.sm }} testID="continue-learning">
@@ -123,8 +118,6 @@ export function HomeScreen() {
         </View>
       ) : null}
 
-      <NextLiveCard />
-
       <View style={{ gap: spacing.sm }}>
         <View
           style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
@@ -167,7 +160,7 @@ export function HomeScreen() {
       {cats.length > 0 ? (
         <View style={{ gap: spacing.sm }} testID="category-shortcuts">
           <Text variant="heading" accessibilityRole="header">
-            Browse by topic
+            Trading Categories
           </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
             {cats.map((c) => (
@@ -194,6 +187,8 @@ export function HomeScreen() {
           </View>
         </View>
       ) : null}
+
+      <NextLiveCard />
     </Screen>
   );
 }

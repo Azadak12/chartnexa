@@ -81,14 +81,18 @@ describe("catalog in Explore", () => {
     await waitFor(() => expect(api.list).toHaveBeenCalledWith({ q: "greeks" }));
     expect(await screen.findByText("Options Greeks")).toBeTruthy();
 
-    await fireEvent.press(screen.getByRole("button", { name: "Advanced" }));
+    await fireEvent.press(screen.getByTestId("filters-button"));
+    await fireEvent.press(screen.getByRole("radio", { name: "Advanced" }));
+    // Choosing only changes the draft; the list changes on Apply.
+    expect(api.list).not.toHaveBeenCalledWith({ q: "greeks", level: "advanced" });
+    await fireEvent.press(screen.getByRole("button", { name: "Apply Filters" }));
     await waitFor(() => expect(api.list).toHaveBeenCalledWith({ q: "greeks", level: "advanced" }));
-    expect(screen.getByRole("button", { name: "Advanced" }).props.accessibilityState.selected).toBe(
-      true,
-    );
-    expect(
-      screen.getByRole("button", { name: "All levels" }).props.accessibilityState.selected,
-    ).toBe(false);
+    // The applied filter shows as a removable chip and in the button's label.
+    expect(screen.getByRole("button", { name: "Remove filter Advanced" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Filters, 1 applied" })).toBeTruthy();
+    await fireEvent.press(screen.getByRole("button", { name: "Remove filter Advanced" }));
+    expect(screen.queryByRole("button", { name: "Remove filter Advanced" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Filters" })).toBeTruthy();
   });
 
   it("says nothing matched and offers to clear the search and filters", async () => {
@@ -143,7 +147,9 @@ describe("catalog in Explore", () => {
   it("remembers search text and level after opening a course and going back", async () => {
     await renderRouter(app, { initialUrl: "/explore" });
     await screen.findByTestId("course-c1");
-    await fireEvent.press(screen.getByRole("button", { name: "Intermediate" }));
+    await fireEvent.press(screen.getByTestId("filters-button"));
+    await fireEvent.press(screen.getByRole("radio", { name: "Intermediate" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Apply Filters" }));
     api.list.mockResolvedValue(page([course(7, { level: "intermediate" })]));
     await type("Search courses", "price");
     await wait(350);
@@ -152,9 +158,7 @@ describe("catalog in Explore", () => {
     expect(screen).toHavePathname("/course/c7");
     await act(async () => router.back());
     expect(screen).toHavePathname("/explore");
-    expect(
-      screen.getByRole("button", { name: "Intermediate" }).props.accessibilityState.selected,
-    ).toBe(true);
+    expect(screen.getByRole("button", { name: "Remove filter Intermediate" })).toBeTruthy();
     expect(screen.getByLabelText("Search courses").props.value).toBe("price");
   });
 });

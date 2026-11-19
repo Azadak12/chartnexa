@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ReactNode, type RefObject } from "react";
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { focusElement } from "./focus";
@@ -49,15 +49,18 @@ export function BottomSheet({ visible, onDismiss, title, children, openerRef }: 
           accessibilityRole="button"
           accessibilityLabel="Close"
         />
-        <SafeAreaView edges={["bottom"]} style={styles.sheet} testID="bottom-sheet">
-          <View style={styles.header}>
-            <Text variant="subheading" accessibilityRole="header" style={styles.title}>
-              {title}
-            </Text>
-            <IconButton icon="x" accessibilityLabel={`Close ${title}`} onPress={dismissTop} />
-          </View>
-          <View style={styles.content}>{children}</View>
-        </SafeAreaView>
+        {/* Padding lifts the sheet above the keyboard so its buttons stay reachable. */}
+        <KeyboardAvoidingView behavior="padding">
+          <SafeAreaView edges={["bottom"]} style={styles.sheet} testID="bottom-sheet">
+            <View style={styles.header}>
+              <Text variant="subheading" accessibilityRole="header" style={styles.title}>
+                {title}
+              </Text>
+              <IconButton icon="x" accessibilityLabel={`Close ${title}`} onPress={dismissTop} />
+            </View>
+            <View style={styles.content}>{children}</View>
+          </SafeAreaView>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

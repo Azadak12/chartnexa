@@ -1,23 +1,53 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, View } from "react-native";
-import { COURSE_LEVELS } from "@chartnexa/api-contracts";
+import { Feather } from "@expo/vector-icons";
+import { FlatList, Pressable, View } from "react-native";
+import type { CourseLevel } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { categoryApi } from "../../categories/category-api";
 import { EmptyState, ErrorState, LoadingSkeleton } from "../../kit/Feedback";
 import { CourseCard } from "../../kit/CourseCards";
+import { FilterSheet } from "../../kit/FilterSheet";
 import { SearchBar } from "../../kit/SearchBar";
 import { useRestorableScroll, useScreenMemoryState } from "../../navigation/screen-memory";
-import { spacing } from "../../theme";
-import { Chip, Screen, Skeleton, Text } from "../../ui";
+import { colors, neutrals, radii, spacing } from "../../theme";
+import { Screen, Skeleton, Text } from "../../ui";
 import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 
 const SEARCH_DELAY_MS = 350;
+
+/** A small chip for an applied filter, with a button to remove just that one. */
+function RemovableChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Remove filter ${label}`}
+      onPress={onRemove}
+      hitSlop={6}
+      testID={`chip-${label}`}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        minHeight: 32,
+        paddingLeft: spacing.md,
+        paddingRight: spacing.sm,
+        borderRadius: radii.pill,
+        backgroundColor: colors.blueTint,
+      }}
+    >
+      <Text variant="caption" tone="link" numberOfLines={1} style={{ flexShrink: 1 }}>
+        {label}
+      </Text>
+      <Feather name="x" size={14} color={colors.blue} accessible={false} />
+    </Pressable>
+  );
+}
 interface Filters {
   q: string;
-  level: (typeof COURSE_LEVELS)[number] | null;
+  level: CourseLevel | null;
   category: string | null;
 }
 
@@ -31,6 +61,7 @@ export function ExploreScreen() {
     category: null,
   });
   const [text, setText] = useState(filters.q);
+  const [sheet, setSheet] = useState(false);
   const scroll = useRestorableScroll("catalog:list");
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoryApi.list });
 
@@ -72,47 +103,70 @@ export function ExploreScreen() {
     setFilters({ q: "", level: null, category: null });
   };
 
+  const levelName = level ? LEVEL_LABEL[level] : null;
+  const categoryName = category
+    ? ((categories.data ?? []).find((c) => c.id === category)?.name ?? "Category")
+    : null;
+  const activeCount = (level ? 1 : 0) + (category ? 1 : 0);
+  const count = query.status === "success" ? items.length : null;
+
   const header = (
-    <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
+    <View style={{ gap: spacing.sm, paddingBottom: spacing.md }}>
       <Text variant="title" accessibilityRole="header">
-        Explore
+        Explore Courses
       </Text>
-      <SearchBar value={text} onChangeText={setText} />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-        <Chip
-          label="All levels"
-          selected={level === null}
-          onPress={() => setFilters({ ...filters, level: null })}
-        />
-        {COURSE_LEVELS.map((l) => (
-          <Chip
-            key={l}
-            label={LEVEL_LABEL[l]}
-            selected={level === l}
-            onPress={() => setFilters({ ...filters, level: l })}
-          />
-        ))}
-      </View>
-      {withCourses.length > 0 ? (
-        <View
-          style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}
-          testID="category-filter"
-        >
-          <Chip
-            label="All topics"
-            selected={category === null}
-            onPress={() => setFilters({ ...filters, category: null })}
-          />
-          {withCourses.map((c) => (
-            <Chip
-              key={c.id}
-              label={c.name}
-              selected={category === c.id}
-              onPress={() => setFilters({ ...filters, category: c.id })}
-            />
-          ))}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <SearchBar value={text} onChangeText={setText} />
         </View>
-      ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={activeCount > 0 ? `Filters, ${activeCount} applied` : "Filters"}
+          onPress={() => setSheet(true)}
+          testID="filters-button"
+          style={{
+            minHeight: 48,
+            minWidth: 48,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            paddingHorizontal: spacing.md,
+            borderRadius: radii.control,
+            borderWidth: 1,
+            borderColor: activeCount > 0 ? colors.blue : neutrals.divider,
+            backgroundColor: activeCount > 0 ? colors.blueTint : colors.white,
+          }}
+        >
+          <Feather name="sliders" size={18} color={colors.blue} accessible={false} />
+          <Text variant="bodyStrong" tone="link">
+            Filters{activeCount > 0 ? ` · ${activeCount}` : ""}
+          </Text>
+        </Pressable>
+      </View>
+      <View
+        style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing.sm }}
+      >
+        {count !== null ? (
+          <Text variant="caption" tone="muted" testID="result-count">
+            {count}
+            {query.hasNextPage ? "+" : ""}{" "}
+            {count === 1 && !query.hasNextPage ? "course" : "courses"}
+          </Text>
+        ) : null}
+        {levelName ? (
+          <RemovableChip
+            label={levelName}
+            onRemove={() => setFilters({ ...filters, level: null })}
+          />
+        ) : null}
+        {categoryName ? (
+          <RemovableChip
+            label={categoryName}
+            onRemove={() => setFilters({ ...filters, category: null })}
+          />
+        ) : null}
+      </View>
     </View>
   );
 
@@ -144,6 +198,13 @@ export function ExploreScreen() {
 
   return (
     <Screen scroll={false} padded={false}>
+      <FilterSheet
+        visible={sheet}
+        onClose={() => setSheet(false)}
+        value={{ level, category }}
+        categories={withCourses}
+        onApply={(v) => setFilters({ ...filters, level: v.level, category: v.category })}
+      />
       <FlatList
         ref={scroll.ref as never}
         testID="catalog-list"

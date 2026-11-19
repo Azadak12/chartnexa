@@ -81,23 +81,79 @@ beforeEach(async () => {
 describe("catalog topic filter", () => {
   it("shows topics that have courses and filters by the chosen one", async () => {
     await renderRouter(app, { initialUrl: "/explore" });
-    expect(await screen.findByTestId("category-filter")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Forex" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Crypto" })).toBeNull();
-    await fireEvent.press(screen.getByRole("button", { name: "Forex" }));
+    await fireEvent.press(await screen.findByTestId("filters-button"));
+    expect(await screen.findByRole("radio", { name: "Forex" })).toBeTruthy();
+    expect(screen.queryByRole("radio", { name: "Crypto" })).toBeNull();
+    await fireEvent.press(screen.getByRole("radio", { name: "Forex" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Apply Filters" }));
     await waitFor(() =>
       expect(courses.list).toHaveBeenLastCalledWith(expect.objectContaining({ category: "k1" })),
     );
-    expect(screen.getByRole("button", { name: "Forex" }).props.accessibilityState.selected).toBe(
-      true,
-    );
-    await fireEvent.press(screen.getByRole("button", { name: "All topics" }));
-    // The unfiltered list is already cached, so it shows without a new request.
+    expect(screen.getByRole("button", { name: "Remove filter Forex" })).toBeTruthy();
+    // Resetting inside the sheet clears the choice once applied.
+    await fireEvent.press(screen.getByTestId("filters-button"));
+    await fireEvent.press(screen.getByRole("button", { name: "Reset Filters" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Apply Filters" }));
     await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "All topics" }).props.accessibilityState.selected,
-      ).toBe(true),
+      expect(screen.queryByRole("button", { name: "Remove filter Forex" })).toBeNull(),
     );
+  });
+
+  it("keeps the list first: no filter buttons on the page, and the sheet holds radio groups with real categories", async () => {
+    courses.list.mockResolvedValue({
+      items: [
+        {
+          id: "c1",
+          title: "Course 1",
+          level: "beginner",
+          priceCents: 0,
+          currency: "USD",
+          coverTone: "blue",
+          publishedAt: "2026-11-17T00:00:00.000Z",
+        },
+      ],
+      nextCursor: null,
+    });
+    await renderRouter(app, { initialUrl: "/explore" });
+    await screen.findByTestId("course-c1");
+    expect(screen.getByRole("header", { name: "Explore Courses" })).toBeTruthy();
+    expect(screen.getByTestId("result-count").props.children.join("")).toBe("1 course");
+    for (const n of ["Beginner", "Intermediate", "Advanced", "Forex"]) {
+      expect(screen.queryByRole("button", { name: n })).toBeNull();
+      expect(screen.queryByRole("radio", { name: n })).toBeNull();
+    }
+    await fireEvent.press(screen.getByTestId("filters-button"));
+    for (const n of ["All", "Beginner", "Intermediate", "Advanced", "All categories", "Forex"]) {
+      expect(await screen.findByRole("radio", { name: n })).toBeTruthy();
+    }
+    expect(screen.getByRole("radio", { name: "All" }).props.accessibilityState.checked).toBe(true);
+    expect(screen.getByRole("button", { name: "Reset Filters" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Apply Filters" })).toBeTruthy();
+    // Closing without applying changes nothing.
+    await fireEvent.press(screen.getByRole("radio", { name: "Forex" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Close Filters" }));
+    expect(screen.queryByRole("button", { name: "Remove filter Forex" })).toBeNull();
+  });
+
+  it("combines search with filters, says nothing matched, and clears everything in one step", async () => {
+    await renderRouter(app, { initialUrl: "/explore" });
+    await fireEvent.press(await screen.findByTestId("filters-button"));
+    await fireEvent.press(await screen.findByRole("radio", { name: "Advanced" }));
+    await fireEvent.press(screen.getByRole("radio", { name: "Forex" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Apply Filters" }));
+    await fireEvent.changeText(screen.getByLabelText("Search courses"), "zzz");
+    await waitFor(() =>
+      expect(courses.list).toHaveBeenLastCalledWith({
+        q: "zzz",
+        level: "advanced",
+        category: "k1",
+      }),
+    );
+    expect(await screen.findByText("No courses match")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Filters, 2 applied" })).toBeTruthy();
+    await fireEvent.press(screen.getByRole("button", { name: "Clear search and filters" }));
+    expect(screen.queryByRole("button", { name: "Remove filter Advanced" })).toBeNull();
+    expect(screen.getByLabelText("Search courses").props.value).toBe("");
   });
 
   it("still lists courses when categories fail to load", async () => {
@@ -105,7 +161,7 @@ describe("catalog topic filter", () => {
     courses.list.mockResolvedValue({ items: [], nextCursor: null });
     await renderRouter(app, { initialUrl: "/explore" });
     expect(await screen.findByText("No courses yet")).toBeTruthy();
-    expect(screen.queryByTestId("category-filter")).toBeNull();
+    expect(screen.getByTestId("filters-button")).toBeTruthy();
   });
 });
 
