@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { ComponentProps } from "react";
 import { StyleSheet } from "react-native";
 import { renderRouter, screen as routerScreen } from "expo-router/testing-library";
@@ -199,6 +199,36 @@ describe("in the running app", () => {
     expect(await routerScreen.findByRole("header", { name: "My Learning" })).toBeTruthy();
     await fireEvent.press(routerScreen.getByRole("button", { name: "Assignments" }));
     expect(await routerScreen.findByRole("header", { name: "Assignments" })).toBeTruthy();
+  });
+});
+
+describe("tab history", () => {
+  it("Back from a tab returns to the tab you came from, and the bar keeps the right one selected", async () => {
+    const secure = SecureStore as unknown as { __reset: () => void };
+    secure.__reset();
+    clearScreenMemory();
+    sessionManager._resetForTests();
+    sessionStore.set("signed-out");
+    await sessionManager.signIn(pair());
+    (fetchAccess as unknown as jest.Mock).mockResolvedValue({
+      roles: ["student"],
+      permissions: [],
+      courseGrants: [],
+    });
+    const { router } = jest.requireActual("expo-router");
+    await renderRouter("./app", { initialUrl: "/home" });
+    await routerScreen.findByText("Learn");
+    await fireEvent.press(routerScreen.getByRole("button", { name: "Explore" }));
+    expect(routerScreen).toHavePathname("/explore");
+    await fireEvent.press(routerScreen.getByRole("button", { name: "Assignments" }));
+    expect(routerScreen).toHavePathname("/assignments");
+    await act(async () => router.back());
+    expect(routerScreen).toHavePathname("/explore");
+    expect(routerScreen.getByTestId("tab-item-explore").props.accessibilityState.selected).toBe(
+      true,
+    );
+    await act(async () => router.back());
+    expect(routerScreen).toHavePathname("/home");
   });
 });
 

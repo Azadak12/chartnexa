@@ -21,6 +21,7 @@ import { QueryStateView } from "../../state/StateView";
 import { MenuGroup, ProfileMenuRow } from "../../kit/Rows";
 import { colors, spacing, status as statusColors } from "../../theme";
 import { BottomSheet, Banner, Button, Card, Screen, Text, useSubmitOnce } from "../../ui";
+import { demoAccountsEnabled } from "../../dev/demo-accounts";
 import { buildLabel } from "../../api/TestServerSheet";
 import { testServer } from "../../api/test-server";
 import { accountApi } from "../account-api";
@@ -253,6 +254,16 @@ export function ProfileScreen() {
                     last={i === staffRows.length - 1}
                   />
                 ))}
+              </MenuGroup>
+            ) : null}
+            {demoAccountsEnabled() ? (
+              <MenuGroup title="Development">
+                <ProfileMenuRow
+                  icon="users"
+                  label="Demo accounts"
+                  onPress={() => router.push("/demo-accounts")}
+                  last
+                />
               </MenuGroup>
             ) : null}
             {testServer.allowed() ? (

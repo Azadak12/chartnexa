@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { act, fireEvent, renderRouter, screen } from "expo-router/testing-library";
 import { AccessibilityInfo, Text } from "react-native";
 import {
@@ -92,7 +93,6 @@ describe("the card", () => {
     expect(screen.queryByTestId("preview-candle-6")).toBeNull();
 
     // Leaving the screen clears the reveal timer; nothing keeps drawing in the background.
-    const { router } = require("expo-router");
     await act(async () => router.push("/other"));
     expect(jest.getTimerCount()).toBeLessThanOrEqual(idle);
 

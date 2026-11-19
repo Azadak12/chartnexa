@@ -7,29 +7,45 @@
     "base": {
       "node": "26.13.1",
       "pnpm": "12.21.0",
-      "env": { "EXPO_NO_TELEMETRY": "1" }
+      "env": {
+        "EXPO_NO_TELEMETRY": "1"
+      }
     },
     "development": {
       "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
       "environment": "development",
-      "env": { "APP_VARIANT": "development" },
-      "android": { "buildType": "apk" },
-      "ios": { "simulator": false }
+      "env": {
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_DEMO_ACCOUNTS": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
     },
     "preview": {
       "extends": "base",
       "distribution": "internal",
       "environment": "preview",
-      "env": { "APP_VARIANT": "preview" },
-      "android": { "buildType": "apk" }
+      "env": {
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_DEMO_ACCOUNTS": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "extends": "base",
       "distribution": "store",
       "environment": "production",
-      "env": { "APP_VARIANT": "production" },
+      "env": {
+        "APP_VARIANT": "production"
+      },
       "autoIncrement": true
     }
   },

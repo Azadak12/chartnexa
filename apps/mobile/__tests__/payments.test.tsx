@@ -102,17 +102,20 @@ describe("buying a course in test mode", () => {
       .mockRejectedValueOnce(appError("network"))
       .mockImplementation(() => new Promise((r) => (release = r)));
     await renderRouter(app, { initialUrl: "/course/c1" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Buy for $49.00" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Purchase Course · $49.00" }));
     expect(await screen.findByTestId("buy-error")).toBeTruthy();
-    await fireEvent.press(screen.getByRole("button", { name: "Buy for $49.00" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Buy for $49.00" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Purchase Course · $49.00" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Purchase Course · $49.00" }));
     expect(pay.createOrder).toHaveBeenCalledTimes(2);
     expect(pay.createOrder.mock.calls[0][1]).toBe(pay.createOrder.mock.calls[1][1]);
     await act(async () => release(order()));
     expect(
-      await screen.findByText("Test checkout. No real payment is made and no card is needed.", {
-        exact: false,
-      }),
+      await screen.findByText(
+        "Demo mode: this is a simulated test checkout. No real money is charged and no card is needed.",
+        {
+          exact: false,
+        },
+      ),
     ).toBeTruthy();
     expect(screen).toHavePathname("/checkout/o1");
   });
@@ -133,7 +136,7 @@ describe("buying a course in test mode", () => {
     courses.get.mockResolvedValue(course({ enrolled: true, progress: { completed: 0, total: 0 } }));
     await renderRouter(app, { initialUrl: "/course/c1" });
     await screen.findByTestId("enrolled-notice");
-    expect(screen.queryByRole("button", { name: /Buy for/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Purchase Course/ })).toBeNull();
   });
 });
 
@@ -152,6 +155,14 @@ describe("the test checkout", () => {
     expect(announce).toHaveBeenCalledWith("Payment complete. You now have this course.");
     await fireEvent.press(screen.getByRole("button", { name: "Go to the course" }));
     expect(screen).toHavePathname("/course/c1");
+  });
+
+  it("after paying, also leads straight to My Learning", async () => {
+    pay.completeTestCheckout.mockResolvedValue(order({ status: "paid", paidAt: "x" }));
+    await renderRouter(app, { initialUrl: "/checkout/o1" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Pay $49.00 (test)" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Open My Learning" }));
+    expect(screen).toHavePathname("/courses");
   });
 
   it("after a failed payment, Try again starts a fresh checkout", async () => {

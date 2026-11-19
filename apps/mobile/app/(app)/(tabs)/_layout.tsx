@@ -34,6 +34,8 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
+      // Android Back returns to the tab you came from, not always to the first tab.
+      backBehavior="history"
       // Hidden tabs keep their route (a link or the current screen can still be on it) but have no
       // item. href: null would drop the screen when the role loads after the first render.
       tabBar={(props) => <ResponsiveTabBar {...props} meta={meta} />}

@@ -110,7 +110,7 @@ describe("course details", () => {
 
   it("offers the free preview to someone who has not enrolled, and opens it", async () => {
     await renderRouter(app, { initialUrl: "/course/c1" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Watch the free preview" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Watch Preview" }));
     expect(screen).toHavePathname("/course/c1/lesson/l1");
   });
 
@@ -122,7 +122,7 @@ describe("course details", () => {
     await renderRouter(app, { initialUrl: "/course/c1" });
     await screen.findByText("Learn to read charts.");
     await waitFor(() => expect(lessons.outline).toHaveBeenCalled());
-    expect(screen.queryByRole("button", { name: "Watch the free preview" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Watch Preview" })).toBeNull();
   });
 
   it("shows Continue and progress for an enrolled student, with no success banner and no purchase button", async () => {
@@ -138,7 +138,7 @@ describe("course details", () => {
     expect(await screen.findByRole("button", { name: "Continue" })).toBeTruthy();
     expect(screen.getByTestId("enrolled-notice")).toBeTruthy();
     expect(screen.queryByTestId("enroll-notice")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Watch the free preview" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Watch Preview" })).toBeNull();
     await fireEvent.press(screen.getByRole("button", { name: "Continue" }));
     expect(screen).toHavePathname("/course/c1/lesson/l2");
   });

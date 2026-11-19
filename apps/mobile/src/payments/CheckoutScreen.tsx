@@ -90,7 +90,7 @@ export function CheckoutScreen() {
       </Text>
       <Banner
         kind="info"
-        message="Test checkout. No real payment is made and no card is needed."
+        message="Demo mode: this is a simulated test checkout. No real money is charged and no card is needed."
         testID="test-checkout"
       />
       <View style={{ gap: spacing.xs }}>
@@ -127,6 +127,11 @@ export function CheckoutScreen() {
             testID="paid-notice"
           />
           <Button label="Go to the course" onPress={toCourse} />
+          <Button
+            label="Open My Learning"
+            variant="secondary"
+            onPress={() => router.replace("/courses")}
+          />
         </View>
       ) : o.status === "failed" || o.status === "cancelled" ? (
         <View style={{ gap: spacing.sm }}>

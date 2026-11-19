@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { demoAccountsEnabled } from "../../src/dev/demo-accounts";
 import { useSession } from "../../src/session/session-store";
 import { TestServerSection } from "../../src/api/TestServerSheet";
 import { Banner, Button, Screen, Text } from "../../src/ui";
@@ -20,6 +21,14 @@ export default function Welcome() {
         variant="tertiary"
         onPress={() => router.push("/accept-invitation")}
       />
+      {demoAccountsEnabled() ? (
+        <Button
+          label="Demo accounts"
+          variant="secondary"
+          accessibilityHint="Testing only: choose a demo role to sign in as"
+          onPress={() => router.push("/demo-accounts")}
+        />
+      ) : null}
       <TestServerSection />
     </Screen>
   );

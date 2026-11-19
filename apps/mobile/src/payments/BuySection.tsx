@@ -58,7 +58,7 @@ export function BuySection({ courseId, priceCents }: { courseId: string; priceCe
         />
       ) : (
         <Button
-          label={`Buy for ${formatPrice(priceCents)}`}
+          label={`Purchase Course · ${formatPrice(priceCents)}`}
           loading={busy}
           onPress={() => void run()}
         />

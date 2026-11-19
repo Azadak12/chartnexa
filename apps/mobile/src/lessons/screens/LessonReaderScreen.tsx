@@ -17,6 +17,7 @@ import { videoApi } from "../../video/video-api";
 import { CompletionControl } from "../../progress/CompletionControl";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
+import { BackButton } from "../../kit/BackButton";
 import { LessonNeighbours } from "../LessonNeighbours";
 import { relatedToChartLab } from "../lab-link";
 import { clampStep, splitLessonText } from "../steps";
@@ -151,6 +152,7 @@ export function LessonReaderScreen() {
   const last = step === steps.length - 1;
   return (
     <Screen>
+      <BackButton onPress={back} />
       {course.status === "success" ? (
         <Text variant="caption" tone="link" testID="lesson-course" numberOfLines={1}>
           {course.data.title}

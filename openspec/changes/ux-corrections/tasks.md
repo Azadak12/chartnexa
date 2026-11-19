@@ -1,0 +1,10 @@
+- [x] Responsive CourseCard
+- [x] Explore filter bottom sheet, chips, result count
+- [x] Compact animated Home market card
+- [x] Journey wording and My Learning link after purchase
+- [x] Back arrows, tab history
+- [x] Dev-only Demo Accounts hub
+- [x] Tests and API journey verification
+- [ ] CI green on the pull request
+- [ ] Physical Android verification (manual)
+- [ ] Archive after the above

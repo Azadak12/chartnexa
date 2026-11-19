@@ -185,7 +185,7 @@ describe("course page", () => {
     expect(screen.getByTestId("enroll-notice").props.accessibilityLabel).toMatch(
       /Buy this course|free/,
     );
-    expect(await screen.findByRole("button", { name: "Buy for $49.50" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Purchase Course · $49.50" })).toBeTruthy();
     expect(screen.getByText("Test mode: no money is charged.")).toBeTruthy();
     expect(api.get).toHaveBeenCalledWith("c1");
   });

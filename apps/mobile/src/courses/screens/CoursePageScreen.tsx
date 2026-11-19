@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { View } from "react-native";
 import type { PublicCourseDetail } from "@chartnexa/api-contracts";
+import { BackButton } from "../../kit/BackButton";
 import { TabBar } from "../../kit/TabBar";
 import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
@@ -114,6 +115,7 @@ function CourseDetails({
 
   return (
     <Screen>
+      <BackButton onPress={goHome} />
       <CoverBlock tone={c.coverTone} height={200} thumbnailUrl={c.thumbnailUrl} />
       <Text variant="title" accessibilityRole="header">
         {c.title}
@@ -189,7 +191,7 @@ function CourseDetails({
           <BuySection courseId={c.id} priceCents={c.priceCents} />
           {preview ? (
             <Button
-              label="Watch the free preview"
+              label="Watch Preview"
               variant="secondary"
               onPress={() => router.push(`/course/${c.id}/lesson/${preview.id}`)}
             />

@@ -11,14 +11,19 @@ import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
 import { authHttp } from "../auth-http";
 import { formMessage } from "../errors-ui";
 import { mfaFlow } from "../mfa-flow";
+import { demoEmailOrNull } from "../../dev/demo-accounts";
 import { sessionManager } from "../session-manager";
 
 export function SignInScreen() {
   const router = useRouter();
   const { status, notice } = useSession();
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const { returnTo, email: emailParam } = useLocalSearchParams<{
+    returnTo?: string;
+    email?: string;
+  }>();
   const { control, handleSubmit, setError, resetField } = useZodForm(signInSchema, {
-    email: "",
+    // Only the four public demo addresses can be prefilled, and only where demo accounts are on.
+    email: demoEmailOrNull(emailParam) ?? "",
     password: "",
   });
   const [message, setMessage] = useState<string | null>(null);
