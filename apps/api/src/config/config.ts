@@ -24,7 +24,11 @@ const schema = z.object({
   MFA_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
   RL_MFA_USER_MAX: z.coerce.number().int().min(1).default(10),
   RL_MFA_WINDOW_SECONDS: z.coerce.number().int().min(1).default(900),
-  MAILER_DRIVER: z.enum(["dev", "memory"]).default("dev"),
+  MAILER_DRIVER: z.enum(["dev", "memory", "resend"]).default("dev"),
+  /** Needed only when MAILER_DRIVER is "resend". A secret: set it in the environment, never commit it. */
+  RESEND_API_KEY: z.string().min(1).optional(),
+  /** The From address for the "resend" driver, for example "ChartNexa <onboarding@resend.dev>". */
+  MAIL_FROM: z.string().min(3).max(200).optional(),
   /** Where uploaded files live. Only the local-disk driver exists; production refuses it. */
   STORAGE_DRIVER: z.enum(["local"]).default("local"),
   STORAGE_DIR: z.string().min(1).default(".dev-storage"),
@@ -116,6 +120,13 @@ const checked = schema.superRefine((c, ctx) => {
       code: "custom",
       path: ["SCANNER"],
       message: "uploads must be scanned in production; a scanning provider is pending",
+    });
+  }
+  if (c.MAILER_DRIVER === "resend" && (!c.RESEND_API_KEY || !c.MAIL_FROM)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["MAILER_DRIVER"],
+      message: "the resend mail driver needs RESEND_API_KEY and MAIL_FROM",
     });
   }
   // Only dev and memory senders exist today, so production is rejected until a real provider is added.
