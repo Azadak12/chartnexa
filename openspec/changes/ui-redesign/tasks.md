@@ -1,0 +1,8 @@
+- [x] Design tokens and contrast tests
+- [x] UI kit and chart engine, Learning Lab
+- [x] Home, Explore, Course Details, lesson player
+- [x] My Learning, Assignments, Profile
+- [x] Role tab bars, dashboard metrics, instructor assignments hub
+- [ ] CI green on the pull request
+- [ ] Physical-device verification (manual)
+- [ ] Archive after the above

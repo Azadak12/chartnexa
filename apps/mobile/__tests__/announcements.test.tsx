@@ -89,14 +89,16 @@ beforeEach(async () => {
 
 describe("readers", () => {
   it("shows a home shortcut only when something is unread", async () => {
+    // Staff start on their dashboard; the student Home is what has the bell.
+    access.mockResolvedValue({ roles: ["student"], permissions: [], courseGrants: [] });
     await renderRouter(app, { initialUrl: "/home" });
-    await screen.findByText("Courses");
+    await screen.findByTestId("app-header");
     await waitFor(() => expect(spy.unread).toHaveBeenCalled());
     expect(screen.queryByTestId("announcements-banner")).toBeNull();
     await screen.unmount();
     spy.unread.mockResolvedValue(2);
     await renderRouter(app, { initialUrl: "/home" });
-    await fireEvent.press(await screen.findByRole("button", { name: "2 new announcements" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Announcements, 2 new" }));
     expect(screen).toHavePathname("/profile/announcements");
   });
 

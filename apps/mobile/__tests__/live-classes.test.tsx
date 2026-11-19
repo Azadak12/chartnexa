@@ -228,8 +228,9 @@ describe("students", () => {
   });
 
   it("shows the next class on home with its course, and nothing when none is scheduled", async () => {
+    access.mockResolvedValue({ roles: ["student"], permissions: [], courseGrants: [] });
     await renderRouter(app, { initialUrl: "/home" });
-    await screen.findByText("Courses");
+    await screen.findByTestId("app-header");
     await waitFor(() => expect(mine).toHaveBeenCalled());
     expect(screen.queryByTestId("next-live")).toBeNull();
     await screen.unmount();

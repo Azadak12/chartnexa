@@ -136,7 +136,7 @@ describe("rating summaries", () => {
     expect(screen.getByLabelText("Rated 4.5 · 12 reviews")).toBeTruthy();
     await screen.unmount();
 
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByTestId("course-rating")).toBeTruthy();
     expect(screen.getAllByLabelText("Rated 4.5 · 12 reviews").length).toBeGreaterThanOrEqual(1);
   });
@@ -144,7 +144,7 @@ describe("rating summaries", () => {
 
 describe("the reviews list", () => {
   it("lists reviews with stars as words, names and dates", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByTestId("review-r1")).toBeTruthy();
     expect(screen.getByText("Review text 1")).toBeTruthy();
     expect(screen.getByText("2 stars · Student")).toBeTruthy();
@@ -154,14 +154,14 @@ describe("the reviews list", () => {
 
   it("marks the person's own review", async () => {
     api.list.mockResolvedValue(page([review(1, { mine: true })]));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByText("2 stars · Student (you)")).toBeTruthy();
   });
 
   it("says 'No reviews yet' when there are none", async () => {
     courses.get.mockResolvedValue(detail({ rating: { count: 0, average: null } }));
     api.list.mockResolvedValue(page([]));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByTestId("reviews-empty")).toBeTruthy();
   });
 
@@ -170,7 +170,7 @@ describe("the reviews list", () => {
       .mockResolvedValueOnce(page([review(1), review(2)], "cursor-1"))
       .mockResolvedValueOnce(page([review(3), review(4)], "cursor-2"))
       .mockResolvedValueOnce(page([review(5)], null));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     await press("Show more reviews");
     await screen.findByTestId("review-r3");
@@ -184,7 +184,7 @@ describe("the reviews list", () => {
 
   it("fails on its own with Retry and leaves the page usable", async () => {
     api.list.mockRejectedValueOnce(appError("unknown")).mockResolvedValue(page([review(1)]));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByTestId("state-error")).toBeTruthy();
     expect(screen.getByText("Price Action Basics")).toBeTruthy();
     await press("Retry");
@@ -194,7 +194,7 @@ describe("the reviews list", () => {
 
 describe("who sees the review controls", () => {
   it("shows none to someone who does not own the course, and never asks for their review", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     expect(screen.queryByRole("button", { name: "Write a review" })).toBeNull();
     expect(api.mine).not.toHaveBeenCalled();
@@ -202,7 +202,7 @@ describe("who sees the review controls", () => {
 
   it("shows Write a review to an owner who has not reviewed", async () => {
     courses.get.mockResolvedValue(detail({ enrolled: true }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByRole("button", { name: "Write a review" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Delete your review" })).toBeNull();
   });
@@ -210,7 +210,7 @@ describe("who sees the review controls", () => {
   it("shows Edit and Delete to an owner who has reviewed", async () => {
     courses.get.mockResolvedValue(detail({ enrolled: true }));
     api.mine.mockResolvedValue({ review: review(9, { mine: true, rating: 4, body: "Mine" }) });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByRole("button", { name: "Edit your review" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Delete your review" })).toBeTruthy();
   });
@@ -219,7 +219,7 @@ describe("who sees the review controls", () => {
 describe("writing a review", () => {
   const open = async () => {
     courses.get.mockResolvedValue(detail({ enrolled: true }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await fireEvent.press(await screen.findByRole("button", { name: "Write a review" }));
     await screen.findByRole("radio", { name: "5 stars" });
   };
@@ -344,7 +344,7 @@ describe("editing and deleting", () => {
   const openOwn = async () => {
     courses.get.mockResolvedValue(detail({ enrolled: true }));
     api.mine.mockResolvedValue({ review: own });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
   };
 
   it("opens the sheet with the saved rating and text, and saves changes", async () => {

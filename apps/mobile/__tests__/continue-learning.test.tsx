@@ -36,6 +36,7 @@ const item = {
   courseId: "c1",
   courseTitle: "Price Action",
   coverTone: "blue",
+  thumbnailUrl: null,
   completed: 2,
   total: 5,
   nextLessonId: "l3",
@@ -59,9 +60,9 @@ describe("continue learning on home", () => {
     await renderRouter(app, { initialUrl: "/home" });
     expect(await screen.findByTestId("continue-learning")).toBeTruthy();
     expect(screen.getByText("Price Action")).toBeTruthy();
-    expect(screen.getByText("Next: Support and resistance")).toBeTruthy();
+    expect(screen.getByText(/Support and resistance/)).toBeTruthy();
     await fireEvent.press(
-      screen.getByRole("button", { name: "Continue Price Action with Support and resistance" }),
+      screen.getByRole("button", { name: /^Continue Price Action: Support and resistance/ }),
     );
     expect(screen).toHavePathname("/course/c1/lesson/l3");
   });
@@ -69,13 +70,13 @@ describe("continue learning on home", () => {
   it("shows nothing when there is nothing to resume or the request fails", async () => {
     get.mockResolvedValue(null);
     await renderRouter(app, { initialUrl: "/home" });
-    await screen.findByText("Courses");
+    await screen.findByTestId("app-header");
     await waitFor(() => expect(get).toHaveBeenCalled());
     expect(screen.queryByTestId("continue-learning")).toBeNull();
     await screen.unmount();
     get.mockRejectedValue(appError("unknown"));
     await renderRouter(app, { initialUrl: "/home" });
-    await screen.findByText("Courses");
+    await screen.findByTestId("app-header");
     await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
     expect(screen.queryByTestId("continue-learning")).toBeNull();
   });

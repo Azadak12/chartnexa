@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import type { LessonOutlineItem } from "@chartnexa/api-contracts";
+import { StyleSheet, View } from "react-native";
+import type { CourseModule, LessonOutlineItem } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
-import { colors, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
+import { LessonCard, ModuleAccordion } from "../../kit/ModuleAccordion";
+import { colors, neutrals, radii, spacing } from "../../theme";
 import { Button, BottomSheet, Skeleton, Text } from "../../ui";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
@@ -59,55 +60,51 @@ export function LessonOutlineSection({
         </Text>
       ) : (
         <View ref={openerRef} collapsable={false} style={{ gap: spacing.sm }}>
-          {query.data.items.map((l, i, all) => {
-            const modules = query.data.modules ?? [];
-            const startsModule =
-              l.moduleId !== null && (i === 0 || all[i - 1]?.moduleId !== l.moduleId);
-            const mod = startsModule ? modules.find((m) => m.id === l.moduleId) : undefined;
-            const header = mod ? (
-              <Text
-                key={`module-${mod.id}`}
-                variant="subheading"
-                accessibilityRole="header"
-                testID={`module-${mod.id}`}
-                style={{ marginTop: i === 0 ? 0 : spacing.sm }}
+          {groups(query.data.items, query.data.modules ?? []).map((g) => {
+            const rows = g.items.map((l) => {
+              const done = enrolled && completedIds.has(l.id);
+              const open = l.isPreview || enrolled;
+              const word = l.isPreview ? "free preview" : enrolled ? "included" : "locked";
+              return (
+                <LessonCard
+                  key={l.id}
+                  testID={`lesson-${l.id}`}
+                  statusTestID={`completed-${l.id}`}
+                  title={l.title}
+                  position={l.position}
+                  state={done ? "done" : l.isPreview ? "preview" : enrolled ? "open" : "locked"}
+                  statusText={
+                    done
+                      ? "✓ Completed"
+                      : l.isPreview
+                        ? "Free preview"
+                        : enrolled
+                          ? "Included"
+                          : "Locked"
+                  }
+                  label={`Lesson ${l.position}: ${l.title}, ${word}${done ? ", completed" : ""}`}
+                  hint={open ? "Opens the lesson" : "Explains how to unlock it"}
+                  onPress={() =>
+                    open ? router.push(`/course/${courseId}/lesson/${l.id}`) : setLocked(l)
+                  }
+                />
+              );
+            });
+            return g.module ? (
+              <ModuleAccordion
+                key={g.module.id}
+                testID={`module-${g.module.id}`}
+                title={`Module ${g.module.position}: ${g.module.title}`}
+                summary={`${g.items.length} ${g.items.length === 1 ? "lesson" : "lessons"}`}
+                defaultOpen
               >
-                Module {mod.position}: {mod.title}
-              </Text>
-            ) : null;
-            const row = (
-              <Pressable
-                key={l.id}
-                testID={`lesson-${l.id}`}
-                accessibilityRole="button"
-                accessibilityLabel={`Lesson ${l.position}: ${l.title}, ${l.isPreview ? "free preview" : enrolled ? "included" : "locked"}${enrolled && completedIds.has(l.id) ? ", completed" : ""}`}
-                accessibilityHint={
-                  l.isPreview || enrolled ? "Opens the lesson" : "Explains how to unlock it"
-                }
-                onPress={() =>
-                  l.isPreview || enrolled
-                    ? router.push(`/course/${courseId}/lesson/${l.id}`)
-                    : setLocked(l)
-                }
-                style={styles.row}
-              >
-                <Text variant="bodyStrong" style={styles.number}>
-                  {l.position}
-                </Text>
-                <View style={{ flex: 1, gap: spacing.xs }}>
-                  <Text variant="body">{l.title}</Text>
-                  <Text variant="caption" tone={l.isPreview || enrolled ? "link" : "muted"}>
-                    {l.isPreview ? "Free preview" : enrolled ? "Included" : "Locked"}
-                  </Text>
-                  {enrolled && completedIds.has(l.id) ? (
-                    <Text variant="caption" tone="success" testID={`completed-${l.id}`}>
-                      ✓ Completed
-                    </Text>
-                  ) : null}
-                </View>
-              </Pressable>
+                {rows}
+              </ModuleAccordion>
+            ) : (
+              <View key="ungrouped" style={styles.plain}>
+                {rows}
+              </View>
             );
-            return header ? [header, row] : row;
           })}
         </View>
       )}
@@ -128,16 +125,24 @@ export function LessonOutlineSection({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    minHeight: MIN_TOUCH_SIZE,
-    padding: spacing.md,
+  plain: {
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: neutrals.divider,
+    overflow: "hidden",
     backgroundColor: colors.white,
   },
-  number: { minWidth: 24, textAlign: "center" },
 });
+
+type Group = { module: CourseModule | null; items: LessonOutlineItem[] };
+/** Consecutive lessons of one module form a group; lessons without a module stay together. */
+function groups(items: LessonOutlineItem[], modules: CourseModule[]): Group[] {
+  const out: Group[] = [];
+  for (const l of items) {
+    const mod = l.moduleId ? (modules.find((m) => m.id === l.moduleId) ?? null) : null;
+    const last = out[out.length - 1];
+    if (last && (last.module?.id ?? null) === (mod?.id ?? null)) last.items.push(l);
+    else out.push({ module: mod, items: [l] });
+  }
+  return out;
+}

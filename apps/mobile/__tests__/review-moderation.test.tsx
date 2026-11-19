@@ -181,14 +181,14 @@ beforeEach(async () => {
 describe("reporting a review", () => {
   it("offers Report on other people's reviews only, and only when signed in", async () => {
     reviews.list.mockResolvedValue(page([review(1), review(2, { mine: true })]));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     expect(screen.getByRole("button", { name: "Report review by Person 1" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Report review by Person 2" })).toBeNull();
   });
 
   it("asks for a reason, sends it once, announces it and closes", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     await fireEvent.press(screen.getByRole("button", { name: "Report review by Person 1" }));
     await press("Send report");
@@ -213,7 +213,7 @@ describe("reporting a review", () => {
 
   it("keeps the sheet open on failure, then succeeds on retry", async () => {
     reviews.report.mockRejectedValueOnce(appError("network"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     await fireEvent.press(screen.getByRole("button", { name: "Report review by Person 1" }));
     await radio("Spam or advertising");
@@ -226,7 +226,7 @@ describe("reporting a review", () => {
 
   it("says calmly when the review is no longer available", async () => {
     reviews.report.mockRejectedValueOnce(appError("not_found"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     await fireEvent.press(screen.getByRole("button", { name: "Report review by Person 1" }));
     await radio("Spam or advertising");
@@ -237,7 +237,7 @@ describe("reporting a review", () => {
   });
 
   it("has no reason about the rating, and labels every option in words", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByTestId("review-r1");
     await fireEvent.press(screen.getByRole("button", { name: "Report review by Person 1" }));
     for (const label of [
@@ -259,7 +259,7 @@ describe("the author's hidden review", () => {
   const own = review(9, { mine: true, rating: 1, body: "My honest words" });
   it("says it is hidden in words, with the reason and note, and keeps Edit and Delete", async () => {
     reviews.mine.mockResolvedValue({ review: own, moderation: moderation() });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(await screen.findByTestId("hidden-banner")).toBeTruthy();
     expect(
       screen.getByLabelText("Warning: Hidden from other students. Only you can see this review."),
@@ -275,7 +275,7 @@ describe("the author's hidden review", () => {
 
   it("shows no banner for a visible review", async () => {
     reviews.mine.mockResolvedValue({ review: own, moderation: null });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await screen.findByRole("button", { name: "Edit your review" });
     expect(screen.queryByTestId("hidden-banner")).toBeNull();
   });
@@ -307,7 +307,7 @@ describe("the author's hidden review", () => {
           })
         : moderation(),
     }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await fireEvent.press(await screen.findByRole("button", { name: "Appeal this decision" }));
     await press("Send appeal");
     expect(await screen.findByText("Tell us why you are appealing", hidden)).toBeTruthy();
@@ -337,7 +337,7 @@ describe("the author's hidden review", () => {
         },
       }),
     });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     expect(
       await screen.findByText(
         "Appeal decided: the review stays hidden. Moderator's note: Still shares a number",
@@ -348,7 +348,7 @@ describe("the author's hidden review", () => {
   it("treats an already-appealed answer as done, without an error", async () => {
     reviews.mine.mockResolvedValue({ review: own, moderation: moderation() });
     reviews.appeal.mockRejectedValueOnce(appError("conflict"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=reviews" });
     await fireEvent.press(await screen.findByRole("button", { name: "Appeal this decision" }));
     await type("Your message", "Please look again");
     await press("Send appeal");

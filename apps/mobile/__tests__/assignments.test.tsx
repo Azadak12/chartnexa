@@ -141,6 +141,9 @@ describe("the student's assignments", () => {
     expect(screen.getByText(/^Overdue · Due /)).toBeTruthy();
     expect(screen.getByText("Reviewed")).toBeTruthy();
     expect(screen.getAllByText("To do")).toHaveLength(2);
+    expect(screen.getByText("To do (2)")).toBeTruthy();
+    expect(screen.getByText("Reviewed (1)")).toBeTruthy();
+    expect(screen.queryByText(/^Submitted \(/)).toBeNull();
     await fireEvent.press(screen.getByTestId("assignment-a1"));
     expect(screen).toHavePathname("/assignment/a1");
     expect(await screen.findByTestId("assignment-instructions")).toBeTruthy();

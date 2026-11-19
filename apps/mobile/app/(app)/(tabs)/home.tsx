@@ -1,3 +1,3 @@
-import { CatalogScreen } from "../../../src/courses/screens/CatalogScreen";
+import { HomeScreen } from "../../../src/home/HomeScreen";
 
-export default CatalogScreen;
+export default HomeScreen;

@@ -101,6 +101,49 @@ beforeEach(async () => {
   lessons.outline.mockResolvedValue({ items: outline });
 });
 
+describe("My Learning summary and filters", () => {
+  beforeEach(() => {
+    mine.list.mockResolvedValue(
+      page([
+        owned(1, { progress: { completed: 2, total: 5 } }),
+        owned(2, { progress: { completed: 4, total: 4 } }),
+        owned(3, { progress: { completed: 0, total: 3 } }),
+      ]),
+    );
+  });
+
+  it("sums real lesson progress and counts completed courses", async () => {
+    await renderRouter(app, { initialUrl: "/courses" });
+    expect(await screen.findByTestId("learning-summary")).toBeTruthy();
+    expect(screen.getByText("6 of 12 lessons done")).toBeTruthy();
+    expect(screen.getByText("1 of 3 courses completed")).toBeTruthy();
+  });
+
+  it("filters to In Progress and Completed, and offers a way back from an empty filter", async () => {
+    await renderRouter(app, { initialUrl: "/courses" });
+    await screen.findByTestId("my-course-c1");
+    await press("Completed");
+    expect(screen.queryByTestId("my-course-c1")).toBeNull();
+    expect(screen.getByTestId("my-course-c2")).toBeTruthy();
+    await press("In Progress");
+    expect(screen.getByTestId("my-course-c1")).toBeTruthy();
+    expect(screen.getByTestId("my-course-c3")).toBeTruthy();
+    expect(screen.queryByTestId("my-course-c2")).toBeNull();
+
+    mine.list.mockResolvedValue(page([owned(1, { progress: { completed: 2, total: 5 } })]));
+  });
+
+  it("says nothing is completed yet when no course is finished", async () => {
+    mine.list.mockResolvedValue(page([owned(1, { progress: { completed: 2, total: 5 } })]));
+    await renderRouter(app, { initialUrl: "/courses" });
+    await screen.findByTestId("my-course-c1");
+    await press("Completed");
+    expect(await screen.findByText("Nothing completed yet")).toBeTruthy();
+    await press("Show all courses");
+    expect(screen.getByTestId("my-course-c1")).toBeTruthy();
+  });
+});
+
 describe("My Courses", () => {
   it("lists owned courses and says in text when one is not on sale", async () => {
     await renderRouter(app, { initialUrl: "/courses" });
@@ -124,7 +167,7 @@ describe("My Courses", () => {
     await renderRouter(app, { initialUrl: "/courses" });
     expect(await screen.findByText("You have not enrolled in any courses yet")).toBeTruthy();
     await press("Browse courses");
-    expect(screen).toHavePathname("/home");
+    expect(screen).toHavePathname("/explore");
   });
 
   it("shows an error with Retry, and an offline state", async () => {
@@ -149,7 +192,7 @@ describe("My Courses", () => {
 
 describe("the course page for an owner", () => {
   it("says they are enrolled in text and drops the enrollment-coming notice", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enrolled-notice")).toBeTruthy();
     expect(screen.getByLabelText(/You are enrolled in this course/)).toBeTruthy();
     expect(screen.queryByTestId("enroll-notice")).toBeNull();
@@ -158,14 +201,14 @@ describe("the course page for an owner", () => {
 
   it("explains an unpublished course and keeps their access", async () => {
     courses.get.mockResolvedValue(detail({ onSale: false, publishedAt: null }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("not-on-sale")).toBeTruthy();
     expect(screen.getByText(/You keep your access/)).toBeTruthy();
   });
 
   it("opens a lesson that is not a free preview, with no locked sheet", async () => {
     lessons.get.mockResolvedValue({ ...outline[1], body: "Owner text" });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByLabelText("Lesson 2: Locked lesson, included")).toBeTruthy();
     expect(screen.queryByText("Locked")).toBeNull();
     await fireEvent.press(screen.getByTestId("lesson-l2"));
@@ -176,7 +219,7 @@ describe("the course page for an owner", () => {
 
   it("keeps the notice and the locked sheet for someone who is not enrolled", async () => {
     courses.get.mockResolvedValue(detail({ enrolled: false }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enroll-notice")).toBeTruthy();
     expect(screen.queryByTestId("enrolled-notice")).toBeNull();
     await fireEvent.press(await screen.findByTestId("lesson-l2"));
@@ -202,7 +245,7 @@ describe("losing access while reading", () => {
     lessons.get.mockRejectedValue(
       Object.assign(appError("forbidden"), { code: "ENROLLMENT_REQUIRED" }),
     );
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enrolled-notice")).toBeTruthy();
     await fireEvent.press(await screen.findByTestId("lesson-l2"));
     expect(await screen.findByText("You no longer have access to this lesson")).toBeTruthy();

@@ -192,7 +192,7 @@ describe("Show all text", () => {
 
 describe("remembering the step", () => {
   it("reopens the step the person was on after going back to the course", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await fireEvent.press(await screen.findByTestId("lesson-l1"));
     await screen.findByText("First idea.");
     await press("Next");

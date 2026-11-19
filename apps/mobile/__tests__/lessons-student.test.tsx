@@ -77,7 +77,7 @@ beforeEach(async () => {
 
 describe("curriculum on the course page", () => {
   it("lists lessons in order with a text mark, not color alone, and names each state for screen readers", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("lesson-l1")).toBeTruthy();
     expect(lessons.outline).toHaveBeenCalledWith("c1");
     expect(screen.getByLabelText("Lesson 1: What is a candle?, free preview")).toBeTruthy();
@@ -88,7 +88,7 @@ describe("curriculum on the course page", () => {
 
   it("shows a friendly empty state when the course has no lessons", async () => {
     lessons.outline.mockResolvedValue({ items: [] });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("lessons-empty")).toBeTruthy();
     expect(screen.getByText("Lessons are coming.")).toBeTruthy();
   });
@@ -97,7 +97,7 @@ describe("curriculum on the course page", () => {
     lessons.outline
       .mockRejectedValueOnce(appError("unknown"))
       .mockResolvedValue({ items: outline });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("state-error")).toBeTruthy();
     expect(screen.getByText("Price Action Basics")).toBeTruthy();
     await press("Retry");
@@ -107,7 +107,7 @@ describe("curriculum on the course page", () => {
   it("shows the offline state when the network is down", async () => {
     jest.setTimeout(15000);
     lessons.outline.mockRejectedValue(appError("network"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("state-offline", {}, { timeout: 8000 })).toBeTruthy();
   });
 });
@@ -115,7 +115,7 @@ describe("curriculum on the course page", () => {
 describe("opening lessons", () => {
   it("opens a free preview in the reader, and Back returns to the course page", async () => {
     lessons.get.mockResolvedValue({ ...outline[0], body: "A candle shows four prices." });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await fireEvent.press(await screen.findByTestId("lesson-l1"));
     expect(await screen.findByTestId("lesson-body")).toBeTruthy();
     expect(screen).toHavePathname("/course/c1/lesson/l1");
@@ -128,7 +128,7 @@ describe("opening lessons", () => {
   });
 
   it("explains a locked lesson in a sheet and asks the server for nothing", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await fireEvent.press(await screen.findByTestId("lesson-l2"));
     expect(await screen.findByText("This lesson is locked")).toBeTruthy();
     expect(screen.getByText(/is part of the full course/)).toBeTruthy();
