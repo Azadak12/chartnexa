@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
@@ -89,6 +91,47 @@ describe("build variants (app.config.ts)", () => {
         AppConfigError,
       );
     }
+  });
+
+  it("makes the production iOS build the registered App Store app, with icon and splash", () => {
+    const prod = buildConfig({
+      APP_VARIANT: "production",
+      EXPO_PUBLIC_API_BASE_URL: "https://api.example.com",
+    });
+    expect(prod.ios?.bundleIdentifier).toBe("com.chartnexa.academy");
+    expect(prod.android?.package).toBe("com.chartnexa.academy");
+    expect(buildConfig({}).ios?.bundleIdentifier).toBe("com.chartnexa.academy.dev");
+    expect(prod.name).toBe("ChartNexa Academy");
+    expect(prod.icon).toBe("./assets/icon.png");
+    const info = prod.ios?.infoPlist ?? {};
+    expect(info["ITSAppUsesNonExemptEncryption"]).toBe(false);
+    expect(info["NSAppTransportSecurity"]).toBeUndefined();
+    expect(JSON.stringify(prod.plugins)).toContain("splash-icon.png");
+    expect(JSON.stringify(prod.extra)).not.toMatch(/secret|token|key/i);
+  });
+
+  it("points EAS Submit at the existing App Store Connect app and Apple team", () => {
+    const eas = JSON.parse(readFileSync(join(__dirname, "..", "eas.json"), "utf8"));
+    expect(eas.submit.production.ios).toEqual({
+      ascAppId: "6836844137",
+      appleTeamId: "MZK8QKSP2U",
+    });
+    expect(eas.build.production.distribution).toBe("store");
+    expect(eas.build.production.env.APP_VARIANT).toBe("production");
+    // Nothing development-only may be switched on in the store profile.
+    expect(JSON.stringify(eas.build.production)).not.toMatch(
+      /DEMO|MFA_DEV_BYPASS|192\.168|localhost/,
+    );
+  });
+
+  it("ships real image files at the sizes the stores need", () => {
+    const png = (f: string) => {
+      const b = readFileSync(join(__dirname, "..", "assets", f));
+      return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), colorType: b[25] };
+    };
+    const icon = png("icon.png");
+    expect([icon.w, icon.h]).toEqual([1024, 1024]);
+    expect(icon.colorType).toBe(2); // RGB: no alpha channel
   });
 
   it("asks only for network access on Android", () => {

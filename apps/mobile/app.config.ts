@@ -6,8 +6,9 @@ import type { ExpoConfig } from "expo/config";
  * - preview: installable test build (APK / ad hoc) against a development or staging API.
  * - production: store build. Refuses anything that only makes sense in testing.
  * Each variant has its own app id and link scheme, so test builds install beside each other and
- * email links open the build they were meant for. Identifiers stay placeholders until the
- * publisher accounts exist (decision Q12).
+ * email links open the build they were meant for. The production iOS id is the one registered in
+ * App Store Connect (com.chartnexa.academy); the Apple team and app ids used for upload are in
+ * eas.json under submit.
  */
 export type Variant = "development" | "preview" | "production";
 
@@ -71,6 +72,8 @@ export function buildConfig(env: Record<string, string | undefined>): ExpoConfig
     version: "0.1.0",
     orientation: "default",
     userInterfaceStyle: "light",
+    // 1024x1024, no transparency (App Store requirement). Made by scripts/make-icons.py.
+    icon: "./assets/icon.png",
     platforms: ["ios", "android"],
     ios: {
       bundleIdentifier: appId,
@@ -103,7 +106,10 @@ export function buildConfig(env: Record<string, string | undefined>): ExpoConfig
       "expo-router",
       "expo-font",
       "expo-status-bar",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        { image: "./assets/splash-icon.png", imageWidth: 160, backgroundColor: "#FFFFFF" },
+      ],
       "expo-secure-store",
       "expo-video",
       [

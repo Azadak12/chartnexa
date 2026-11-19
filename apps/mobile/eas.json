@@ -46,8 +46,18 @@
       "env": {
         "APP_VARIANT": "production"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "credentialsSource": "remote"
+      }
     }
   },
-  "submit": {}
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6836844137",
+        "appleTeamId": "MZK8QKSP2U"
+      }
+    }
+  }
 }
