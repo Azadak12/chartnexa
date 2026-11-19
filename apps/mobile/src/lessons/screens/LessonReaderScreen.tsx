@@ -12,6 +12,8 @@ import { Banner, Button, Screen, Text, useReducedMotion } from "../../ui";
 import { focusElement } from "../../ui/focus";
 import { courseApi } from "../../courses/course-api";
 import { LessonFilesSection } from "../../resources/LessonFilesSection";
+import { VideoLesson } from "../../video/VideoLesson";
+import { videoApi } from "../../video/video-api";
 import { CompletionControl } from "../../progress/CompletionControl";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
@@ -41,6 +43,13 @@ export function LessonReaderScreen() {
     retry: shouldRetry,
   });
   const done = progress.data?.lessons.some((l) => l.lessonId === lessonId) ?? false;
+  // Shared with the video section; a lesson with a video completes by watching it.
+  const video = useQuery({
+    queryKey: ["lesson-video", String(id), String(lessonId)],
+    queryFn: () => videoApi.get(String(id), String(lessonId)),
+    retry: shouldRetry,
+  });
+  const hasVideo = !!video.data;
   const e = query.status === "error" ? query.error : null;
   const lostAccess =
     isAppError(e) && e.kind === "forbidden" && e.code === LESSON_ERROR_CODES.enrollmentRequired;
@@ -147,8 +156,11 @@ export function LessonReaderScreen() {
       <Text variant="title" accessibilityRole="header">
         {l.title}
       </Text>
+      <VideoLesson courseId={String(id)} lessonId={String(lessonId)} />
       {steps.length === 0 ? (
-        <Text tone="muted">This lesson has no text yet.</Text>
+        hasVideo ? null : (
+          <Text tone="muted">This lesson has no text yet.</Text>
+        )
       ) : stepping ? (
         <>
           <View
@@ -208,7 +220,7 @@ export function LessonReaderScreen() {
         </>
       )}
       <LessonFilesSection courseId={String(id)} lessonId={String(lessonId)} />
-      {owner && steps.length > 0 ? (
+      {owner && steps.length > 0 && !hasVideo ? (
         progress.status === "success" ? (
           <CompletionControl courseId={String(id)} lessonId={String(lessonId)} completed={done} />
         ) : progress.status === "error" ? (

@@ -30,6 +30,12 @@ const schema = z.object({
   STORAGE_DIR: z.string().min(1).default(".dev-storage"),
   /** Malware scanning. Only "none" exists; files are marked not scanned and production refuses it. */
   SCANNER: z.enum(["none"]).default("none"),
+  /** Video hosting. Only the "test" adapter exists (no transcoding); production refuses it. */
+  VIDEO_PROVIDER: z.enum(["test"]).default("test"),
+  /** Lifetime of a playback link; long enough for a lesson, since players fetch ranges throughout. */
+  VIDEO_LINK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(14_400),
+  /** Share of a video to watch for the lesson to count as complete (Q07 proposal: 90). */
+  VIDEO_COMPLETION_PERCENT: z.coerce.number().int().min(50).max(100).default(90),
   /** Lifetime of a signed link to read a file. */
   FILE_LINK_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
   APP_LINK_BASE: z.string().min(1).default("chartnexa://"),
@@ -77,6 +83,13 @@ const checked = schema.superRefine((c, ctx) => {
       code: "custom",
       path: ["STORAGE_DRIVER"],
       message: "local-disk storage is not allowed in production; a storage provider is pending",
+    });
+  }
+  if (c.NODE_ENV === "production" && c.VIDEO_PROVIDER === "test") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["VIDEO_PROVIDER"],
+      message: "the test video adapter is not allowed in production; a video provider is pending",
     });
   }
   if (c.NODE_ENV === "production" && c.SCANNER === "none") {

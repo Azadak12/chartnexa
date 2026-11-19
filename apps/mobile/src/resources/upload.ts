@@ -3,6 +3,7 @@ import {
   RESOURCE_MIME_TYPES,
   type ResourceMimeType,
   type StaffResource,
+  type UploadSession,
 } from "@chartnexa/api-contracts";
 import { isAppError } from "../api/errors";
 import { staffResourceApi } from "./resource-api";
@@ -62,18 +63,21 @@ export class UploadCancelled extends Error {
 const PART_ATTEMPTS = 3;
 
 /**
- * Uploads in parts. A failed part is retried (network errors only) before giving up; cancelling
- * tells the server so it removes what was sent.
+ * Sends every part of a started upload. A failed part is retried (network errors only) before
+ * giving up; cancelling tells the server so it removes what was sent.
  */
-export async function uploadFile(input: UploadInput): Promise<StaffResource> {
-  const session = await staffResourceApi.start(input.courseId, input.lessonId, {
-    fileName: input.fileName,
-    mimeType: input.mimeType,
-    size: input.size,
-  });
+export async function sendParts(input: {
+  courseId: string;
+  session: UploadSession;
+  uri: string;
+  size: number;
+  onProgress?: ((percent: number) => void) | undefined;
+  signal?: AbortSignal | undefined;
+}): Promise<void> {
+  const { courseId, session } = input;
   const cancelled = async (): Promise<never> => {
     try {
-      await staffResourceApi.cancel(input.courseId, session.uploadId);
+      await staffResourceApi.cancel(courseId, session.uploadId);
     } catch {
       // The server also removes abandoned uploads after a day.
     }
@@ -87,7 +91,7 @@ export async function uploadFile(input: UploadInput): Promise<StaffResource> {
     const bytes = await fileReader.readPart(input.uri, offset, length);
     for (let attempt = 1; ; attempt++) {
       try {
-        await staffResourceApi.putPart(input.courseId, session.uploadId, n, bytes);
+        await staffResourceApi.putPart(courseId, session.uploadId, n, bytes);
         break;
       } catch (e) {
         if (input.signal?.aborted) await cancelled();
@@ -97,6 +101,16 @@ export async function uploadFile(input: UploadInput): Promise<StaffResource> {
     input.onProgress?.(Math.round((n / session.partCount) * 100));
   }
   if (input.signal?.aborted) await cancelled();
+}
+
+/** Uploads a lesson file in parts, then completes it. */
+export async function uploadFile(input: UploadInput): Promise<StaffResource> {
+  const session = await staffResourceApi.start(input.courseId, input.lessonId, {
+    fileName: input.fileName,
+    mimeType: input.mimeType,
+    size: input.size,
+  });
+  await sendParts({ ...input, session });
   return staffResourceApi.complete(input.courseId, session.uploadId, {
     title: input.title,
     ...(input.downloadable !== undefined ? { downloadable: input.downloadable } : {}),

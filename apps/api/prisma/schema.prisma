@@ -52,6 +52,7 @@ model User {
   hiddenReviews  Review[]       @relation("ReviewHider")
   reviewReports  ReviewReport[] @relation("ReviewReporter")
   decidedAppeals ReviewAppeal[] @relation("ReviewAppealDecider")
+  videoProgress  VideoProgress[]
 
   @@map("users")
 }
@@ -250,6 +251,8 @@ model Lesson {
   completions LessonCompletion[]
   resources LessonResource[]
   uploads   UploadSession[]
+  video     LessonVideo?
+  videoProgress VideoProgress[]
 
   @@unique([id, courseId], map: "lessons_id_course_id_key")
   @@map("lessons")
@@ -496,6 +499,8 @@ model UploadSession {
   partSize   Int      @map("part_size")
   partCount  Int      @map("part_count")
   status     String   @default("open")
+  /// "resource" (lesson file) or "video" (lesson video); limits differ (CHECK in the migration).
+  purpose    String   @default("resource")
   resourceId String?  @map("resource_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
@@ -503,4 +508,44 @@ model UploadSession {
   lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade, map: "upload_sessions_lesson_fkey")
 
   @@map("upload_sessions")
+}
+
+/// A lesson's video (at most one). The bytes live with the video provider; `providerRef` is the
+/// provider's id for it (the test adapter: an object storage key).
+model LessonVideo {
+  id              String   @id @default(uuid()) @db.Uuid
+  courseId        String   @map("course_id") @db.Uuid
+  lessonId        String   @unique @map("lesson_id") @db.Uuid
+  provider        String
+  providerRef     String?  @map("provider_ref")
+  status          String
+  durationSeconds Int?     @map("duration_seconds")
+  sizeBytes       Int?     @map("size_bytes")
+  errorCode       String?  @map("error_code")
+  version         Int      @default(1)
+  createdBy       String?  @map("created_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade, map: "lesson_videos_lesson_fkey")
+
+  @@unique([lessonId, courseId], map: "lesson_videos_lesson_id_course_id_key")
+  @@map("lesson_videos")
+}
+
+/// Watched time and last position of one person on one lesson's video.
+model VideoProgress {
+  userId          String   @map("user_id") @db.Uuid
+  lessonId        String   @map("lesson_id") @db.Uuid
+  courseId        String   @map("course_id") @db.Uuid
+  positionSeconds Int      @default(0) @map("position_seconds")
+  watchedSeconds  Int      @default(0) @map("watched_seconds")
+  lastBeatAt      DateTime @default(now()) @map("last_beat_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, map: "video_progress_user_fkey")
+  lesson Lesson @relation(fields: [lessonId, courseId], references: [id, courseId], onDelete: Cascade, map: "video_progress_lesson_fkey")
+
+  @@id([userId, lessonId])
+  @@map("video_progress")
 }

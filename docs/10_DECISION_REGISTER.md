@@ -234,3 +234,10 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | Q32 | Storage and delivery provider for files and video (object storage, CDN, region), and who owns the account? | Pending. The API uses an `ObjectStorage` interface; only a local-disk adapter exists and production refuses it. |
 | Q33 | Malware scanning for uploads (a hosted service or a self-run scanner)? | Pending. Uploads go through a `MalwareScanner` interface; today files are marked "not scanned" and production refuses to start without a scanner. |
 | Q04 (still open) | Which resources may students download? | Built default: each file has a download switch, off until staff turn it on. Word-to-PDF preview needs a conversion service and is not built. |
+
+## Video (change `lesson-video`, 2026-11-19)
+
+| ID | Decision (built; pending owner confirmation) |
+|---|---|
+| R36 | A video lesson completes when its owner has watched 90 percent of it (Q07 proposal, `VIDEO_COMPLETION_PERCENT`), credited at no more than twice real time; such lessons cannot be marked complete by hand. Text lessons keep manual marking (R18). |
+| Q09 (still open) | Video provider: needed for transcoding, adaptive streaming, protected playback at scale and a CDN. Only a test adapter exists and production refuses it. |

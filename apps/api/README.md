@@ -165,3 +165,8 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Manage:** `GET .../lessons/:lessonId/resources`, `PATCH .../resources/:id` `{ expectedVersion, title?, downloadable? }`, `DELETE .../resources/:id`.
 - **Students:** `GET /courses/:courseId/lessons/:lessonId/resources` and `POST .../resources/:id/link` `{ download? }` (same access as the lesson text). The link (`/files/:id?t=...`) works for `FILE_LINK_TTL_SECONDS` (default 300), serves inline unless a download was asked for and allowed, with `no-store`, `nosniff` and a sandboxing CSP.
 - **Providers:** `STORAGE_DRIVER=local` (`STORAGE_DIR`, default `.dev-storage`) and `SCANNER=none` are for development and tests; production refuses both (Q32, Q33). A cleanup runs every 15 minutes outside tests.
+
+## Lesson video (change `lesson-video`)
+- **Staff (`lesson:upload`):** `POST /staff/courses/:courseId/lessons/:lessonId/video/uploads` `{ fileName, size }` (MP4, up to 1 GB), the same part endpoint as files, then `POST .../uploads/:uploadId/complete-video`; `GET` and `DELETE .../lessons/:lessonId/video`.
+- **Viewers:** `GET /courses/:courseId/lessons/:lessonId/video` answers the ready video with a playback link (valid `VIDEO_LINK_TTL_SECONDS`, default 4 h) and, for owners, progress. `PUT /me/courses/:courseId/lessons/:lessonId/video-progress` `{ positionSeconds, watchedDeltaSeconds }`; credited time is capped by elapsed time (2x plus 5 s) and the duration; at `VIDEO_COMPLETION_PERCENT` (default 90) the lesson is completed. Manual completion of a video lesson answers 409 `VIDEO_LESSON`.
+- **Provider:** `VIDEO_PROVIDER=test` keeps the MP4 in object storage and serves `/videos/:id/stream?t=...` with HTTP ranges; no transcoding or adaptive streaming. Production refuses it (Q09).

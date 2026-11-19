@@ -1,4 +1,5 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
 import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import type { Readable } from "node:stream";
@@ -10,6 +11,10 @@ import type { Readable } from "node:stream";
 export interface ObjectStorage {
   put(key: string, data: Buffer): Promise<void>;
   read(key: string): Readable;
+  /** Bytes start..end (inclusive), for video players' range requests and header parsing. */
+  readRange(key: string, start: number, end: number): Readable;
+  /** Joins objects, in order, into one object without holding them in memory. */
+  compose(keys: string[], dest: string): Promise<void>;
   size(key: string): Promise<number | null>;
   delete(key: string): Promise<void>;
   /** Keys under a prefix with their last change, for cleanup. */
@@ -43,6 +48,23 @@ export class LocalDiskStorage implements ObjectStorage {
 
   read(key: string): Readable {
     return createReadStream(this.path(key));
+  }
+
+  readRange(key: string, start: number, end: number): Readable {
+    return createReadStream(this.path(key), { start, end });
+  }
+
+  async compose(keys: string[], dest: string): Promise<void> {
+    const out = this.path(dest);
+    await mkdir(dirname(out), { recursive: true });
+    const stream = createWriteStream(out);
+    try {
+      for (const k of keys) await pipeline(createReadStream(this.path(k)), stream, { end: false });
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        stream.end((e?: Error | null) => (e ? reject(e) : resolve())),
+      );
+    }
   }
 
   async size(key: string): Promise<number | null> {

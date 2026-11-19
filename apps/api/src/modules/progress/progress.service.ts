@@ -1,6 +1,13 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import {
   LESSON_ERROR_CODES,
+  VIDEO_ERROR_CODES,
   type CompletionResponse,
   type ProgressResponse,
 } from "@chartnexa/api-contracts";
@@ -36,6 +43,17 @@ export class ProgressService {
       select: { id: true },
     });
     if (!lesson) throw new NotFoundException("Lesson not found.");
+    // Q07 (proposal): a lesson with a video completes by watching it, not by a manual mark.
+    const video = await this.db.lessonVideo.findFirst({
+      where: { lessonId, status: "ready" },
+      select: { id: true },
+    });
+    if (video) {
+      throw new ConflictException({
+        message: "Watch the video to complete this lesson.",
+        code: VIDEO_ERROR_CODES.videoLesson,
+      });
+    }
     // The primary key decides when two requests arrive together; the loser changes nothing.
     await this.db.$executeRaw`
       INSERT INTO lesson_completions (user_id, lesson_id, course_id)

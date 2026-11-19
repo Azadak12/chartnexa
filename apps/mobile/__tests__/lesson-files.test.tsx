@@ -37,6 +37,11 @@ jest.mock("../src/resources/resource-api", () => ({
     remove: jest.fn(),
   },
 }));
+jest.mock("../src/video/video-api", () => ({
+  ...jest.requireActual("../src/video/video-api"),
+  videoApi: { get: jest.fn(async () => null), report: jest.fn() },
+  staffVideoApi: { get: jest.fn(async () => null), remove: jest.fn() },
+}));
 jest.mock("../src/auth/account-api", () => ({
   accountApi: {
     me: jest.fn().mockResolvedValue({

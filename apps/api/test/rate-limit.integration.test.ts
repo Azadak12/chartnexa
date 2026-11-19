@@ -47,8 +47,12 @@ describe("RateLimiterService", () => {
     await rl.hit(key, 60);
     await rl.hit(key, 60);
     await expect(rl.assertBelow(key, 2, 60)).rejects.toBeInstanceOf(RateLimitedException);
-    // A different window length is a different bucket start, standing in for an elapsed window.
-    await expect(rl.assertBelow(key, 2, 61)).resolves.toBeUndefined();
+    // A window whose start differs stands in for an elapsed window. Fixed lengths are not enough:
+    // a 60 s and a 61 s window start at the same second for one minute in every hour.
+    const now = Math.floor(Date.now() / 1000);
+    const start = (w: number) => Math.floor(now / w) * w;
+    const other = [61, 67, 71, 73, 79].find((w) => start(w) !== start(60))!;
+    await expect(rl.assertBelow(key, 2, other)).resolves.toBeUndefined();
   });
 
   it("survives concurrent hits without losing counts", async () => {

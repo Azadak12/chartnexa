@@ -193,6 +193,9 @@ export class ResourcesService {
     }
     if (s.status !== "open")
       throw new ConflictException("This upload is no longer open. Start the upload again.");
+    if (s.purpose !== "resource") {
+      throw new BadRequestException("This upload is for a video; finish it as a video.");
+    }
 
     const parts: Buffer[] = [];
     for (let n = 1; n <= s.partCount; n++) {
@@ -485,6 +488,22 @@ export class ResourcesService {
       });
       await this.deleteParts(s.id);
     }
+    const videoKeys = await this.storage.list("videos");
+    const knownVideos = new Set(
+      (
+        await this.db.lessonVideo.findMany({
+          where: { providerRef: { in: videoKeys.map((o) => o.key) } },
+          select: { providerRef: true },
+        })
+      ).map((v) => v.providerRef),
+    );
+    let orphanVideos = 0;
+    for (const o of videoKeys) {
+      if (knownVideos.has(o.key) || now.getTime() - o.modifiedAt.getTime() < ORPHAN_GRACE_MS)
+        continue;
+      orphanVideos += 1;
+      await this.storage.delete(o.key);
+    }
     const objects = await this.storage.list("resources");
     const keys = objects.map((o) => o.key);
     const known = new Set(
@@ -503,7 +522,7 @@ export class ResourcesService {
       orphans += 1;
       await this.storage.delete(o.key);
     }
-    return { expiredUploads: expired.length, orphanObjects: orphans };
+    return { expiredUploads: expired.length, orphanObjects: orphans + orphanVideos };
   }
 }
 

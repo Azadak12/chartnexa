@@ -25,12 +25,12 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` and `course-categories` archived (CI run 77); publication rules pending decision (R14) |
 | 3 | curriculum-crud | Archived | `course-lessons-basic` and `course-modules` archived (CI run 78); lesson types arrive with video |
 | 3 | asset-upload-pipeline | Built, awaiting CI | `lesson-resources`: checked uploads, scanning boundary, signed links, app screens; production storage and scanning blocked on Q32, Q33 |
-| 3 | video-processing-integration | Blocked | Video provider not chosen (Q09) |
+| 3 | video-processing-integration | Built (test adapter), awaiting CI | `lesson-video`: provider boundary, ranged playback, capped watch progress, 90% completion (R36); production provider blocked on Q09 |
 | 3 | entitlements-core | Archived | `admin_grant` source only |
 | 3 | staff-authoring-surface | Partly built | Course, lesson and student screens exist |
 | 4 | catalog-and-search | Archived | Part of `course-catalog-basics` |
 | 4 | course-detail-and-library | Archived | Course page and My Courses |
-| 4 | player-resources-progress | Partly built | Text reader and progress archived; no media, files or downloads |
+| 4 | player-resources-progress | Built, awaiting CI | Text reader, progress, files (`lesson-resources`) and video (`lesson-video`) |
 | 5 | payments-core-and-ledger | Not started | Provider-neutral parts can start; provider parts blocked |
 | 5 | stripe-web-checkout | Blocked | Payment strategy |
 | 5 | store-billing-ios / store-billing-android | Blocked | Payment strategy and store accounts |
