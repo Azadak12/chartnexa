@@ -46,6 +46,18 @@ export default tseslint.config(
     languageOptions: { globals: { console: "readonly", process: "readonly" } },
   },
   {
+    // Operations tools run on Node directly.
+    files: ["tools/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        fetch: "readonly",
+        setTimeout: "readonly",
+      },
+    },
+  },
+  {
     // The Jest setup file uses Jest globals.
     files: ["apps/mobile/jest.setup.js"],
     languageOptions: { globals: { jest: "readonly", require: "readonly" } },

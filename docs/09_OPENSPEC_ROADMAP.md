@@ -4,6 +4,19 @@
 
 Scenario references S1-S10 are the ten critical integration scenarios in `08_QUALITY_AND_TESTING.md`, numbered in order.
 
+## Status on 2026-11-19
+Per-change detail is in `docs/12_PROGRESS.md`; integration blockers are in `docs/operations/production-dependencies.md`.
+- **Phases 1 to 4:** built and archived. Exceptions: `video-processing-integration` has a test adapter only (Q09); publication rules in `course-lifecycle` are pending (R14).
+- **Phase 5:** `payments-core-and-ledger` is built in test mode only (C17). `stripe-web-checkout`, store billing and `reversals-reconciliation` stay blocked on `define-payment-strategy`.
+- **Phase 6:** scheduling, joining and cancelling are built as one change, `live-sessions-schedule`, with a manual meeting-link adapter (R38). A hosted provider is blocked on Q03.
+- **Phase 7:** built and archived.
+- **Phase 8:** `audit-viewer`, the order-status list and `announcements` (in-app only, R39) are built. `ops-lists-reports` and `reports-scoped-access` wait on owner report metrics.
+- **Phase 9:**
+  - `security-review`: an internal code review is done (`docs/security/2026-11-19-security-review.md`); an independent review is still required.
+  - `load-capacity`: tooling ready, run only on a development container (`docs/operations/load-testing.md`).
+  - `backup-restore-drill`: scripts drilled locally (`docs/operations/backup-and-restore.md`).
+  - `a11y-device-qa`, `store-compliance` and `runbooks-and-staged-release` need devices, accounts and hosting.
+
 ## Phase 0: Architecture before code
 | Change | Depends on | Acceptance / negative cases |
 |---|---|---|
