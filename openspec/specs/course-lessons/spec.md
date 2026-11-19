@@ -1,7 +1,7 @@
 # course-lessons Specification
 
 ## Purpose
-TBD - created by archiving change course-lessons-basic. Update Purpose after archive.
+Defines lessons inside a course: staff authoring and ordering, preview lessons, and who may read a lesson.
 
 ## Requirements
 

@@ -5,7 +5,7 @@
 - [x] 1.3 Video upload, replace, remove; playback links and ranged stream; capped heartbeats and completion; manual mark refused for video lessons; account deletion hook; verify 17 integration tests and 4 unit tests.
 - [x] 1.4 App: player, speeds, resume, reports, completion, error and retry; staff video section; verify 13 component tests.
 - [x] 1.5 Contract test against the real API; CI route check; mutation checks.
-- [ ] 1.6 Full checks; archive after CI passes.
+- [x] 1.6 Full checks; CI on `main` passed (run 81, `b674085`); archived.
 
 ## Evidence
 

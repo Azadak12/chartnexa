@@ -16,6 +16,7 @@ import { RatingSummary } from "../../reviews/RatingSummary";
 import { ReviewsSection } from "../../reviews/ReviewsSection";
 import { formatPrice } from "../money";
 import { BuySection } from "../../payments/BuySection";
+import { LiveClassesSection } from "../../live/LiveClassesSection";
 
 export function CoursePageScreen() {
   const router = useRouter();
@@ -127,6 +128,7 @@ export function CoursePageScreen() {
           ) : null}
         </View>
       ) : null}
+      {c.enrolled ? <LiveClassesSection courseId={c.id} /> : null}
       <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} />
       <ReviewsSection courseId={c.id} enrolled={c.enrolled} rating={c.rating} />
       <Button label="Back to courses" variant="secondary" onPress={goHome} />

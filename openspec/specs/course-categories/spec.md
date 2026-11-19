@@ -1,7 +1,7 @@
 # course-categories Specification
 
 ## Purpose
-TBD - created by archiving change course-categories. Update Purpose after archive.
+Lets staff group courses into named categories and lets everyone filter the catalog by category.
 
 ## Requirements
 

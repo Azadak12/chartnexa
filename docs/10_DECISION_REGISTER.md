@@ -249,3 +249,10 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | R37 | Test-mode purchases (C17): a priced, published course can be bought once per person; failed and cancelled checkouts give nothing; a reversal removes access and a won dispute restores it (N01); a second payment for an owned course becomes `duplicate_needs_refund` without a second access (Q19 still decides what operators do then). | Built. |
 | Q34 | How does a student get a free course (price 0): automatic enrollment, a "Get for free" order, or staff grants only? | Pending. Checkout refuses free courses (`COURSE_FREE`); staff grants work. |
 | ADR-0008 (still open) | Real payment strategy: Stripe, Apple, Google or a hybrid. | Pending; only the test provider exists and production refuses it. |
+
+## Live classes (change `live-sessions-schedule`, 2026-11-19)
+
+| ID | Question or decision | Status |
+|---|---|---|
+| R38 | Live classes without a chosen provider: staff paste an https meeting link (`manual` adapter); owners get it from 15 minutes before the start (`LIVE_JOIN_OPENS_MINUTES`) until the end; a started class cannot move; ended and cancelled classes are final; owners see classes that ended in the last 14 days; at most 100 upcoming per course; the first join request per person is counted for staff. | Built; pending owner confirmation. |
+| Q03 (still open) | Hosted live provider, recordings, attendance rules and what a missed or cancelled class means for students. | Pending; the `LiveProvider` boundary is ready for an adapter. |

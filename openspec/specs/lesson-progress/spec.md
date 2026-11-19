@@ -1,7 +1,7 @@
 # lesson-progress Specification
 
 ## Purpose
-TBD - created by archiving change lesson-progress-basic. Update Purpose after archive.
+Records which lessons an owner has completed and what to study next.
 
 ## Requirements
 

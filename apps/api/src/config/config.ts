@@ -43,6 +43,10 @@ const schema = z.object({
     .string()
     .min(32)
     .default("test-webhook-secret-test-webhook-secret"),
+  /** Live classes. Only "manual" exists: staff paste the meeting link of any host (R38, Q03). */
+  LIVE_PROVIDER: z.enum(["manual"]).default("manual"),
+  /** How many minutes before the start students can get the join link (R38 proposal: 15). */
+  LIVE_JOIN_OPENS_MINUTES: z.coerce.number().int().min(0).max(120).default(15),
   /** Lifetime of a signed link to read a file. */
   FILE_LINK_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
   APP_LINK_BASE: z.string().min(1).default("chartnexa://"),

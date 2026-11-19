@@ -144,3 +144,6 @@ EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
 - **Admins** can also press **Make Instructor** on someone who is not one, and **Remove Instructor role** on the person's page (this ends all their permissions).
 - **Instructors** see Manage courses only when they have been given access, and only their own courses. New course appears only with "Create new courses"; Publish appears only with the publish permission on that course.
 - **Try it on the phone:** make account A an Admin (`admin:bootstrap`), create account B in the app. As A: Profile > Instructor permissions > find B > Make Instructor > Add permission > "Create new courses". Sign in as B: Profile > Manage courses > New course. Back as A, give B "Publish and unpublish courses" for that course, and B can publish it.
+
+## Live classes
+`src/live`: the course page lists live classes for owners and joins through the browser while a class is open; home shows the next class. Staff open "Live classes" from a course's management screen to schedule (local date and 24-hour time; the device time zone is stated), edit and cancel with a reason.

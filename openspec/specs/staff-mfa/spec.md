@@ -1,7 +1,7 @@
 # staff-mfa Specification
 
 ## Purpose
-TBD - created by archiving change staff-mfa. Update Purpose after archive.
+Requires a second sign-in step for Admins and Managers, with recovery codes and audited resets.
 
 ## Requirements
 

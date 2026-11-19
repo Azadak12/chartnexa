@@ -1,7 +1,7 @@
 # mobile-review-moderation Specification
 
 ## Purpose
-TBD - created by archiving change reviews-moderation. Update Purpose after archive.
+The app screens staff use to moderate reviews and decide appeals.
 
 ## Requirements
 

@@ -176,3 +176,8 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Test provider:** `POST /payments/test/checkouts/:ref/complete` `{ outcome: paid | failed | cancelled }` sends a signed event to the webhook handler. `POST /payments/webhooks/:provider` takes signed events (`x-payment-signature`, HMAC-SHA256 of the event JSON with `PAYMENT_TEST_WEBHOOK_SECRET`) of type paid, failed, cancelled, reversed or dispute_won.
 - **Staff (`payments:read_status`):** `GET /staff/orders?status=`.
 - **Rules:** one pending checkout per person and course; events applied once under a lock on the order; access only through `entitlements` (source `test_purchase`). `PAYMENT_PROVIDER=test` is refused in production (ADR-0008 pending).
+
+## Live classes (change `live-sessions-schedule`)
+- **Staff (`live:schedule`, role or Instructor grant):** `GET/POST /staff/courses/:courseId/live-sessions`, `PATCH .../live-sessions/:sessionId` `{ expectedVersion, title?, description?, startsAt?, durationMinutes?, joinUrl? }`, `POST .../live-sessions/:sessionId/cancel` `{ expectedVersion, reason }`.
+- **Owners:** `GET /courses/:courseId/live-sessions` (no links), `GET /me/live-sessions` (upcoming across courses), `POST /me/courses/:courseId/live-sessions/:sessionId/join` answers `{ url, endsAt }` while open, else 409 `LIVE_NOT_OPEN`, `LIVE_ENDED` or `LIVE_CANCELLED`.
+- **Provider:** `LIVE_PROVIDER=manual` keeps the meeting link staff paste (https, no credentials). `LIVE_JOIN_OPENS_MINUTES` (default 15) sets when the link opens. Rules are proposals (R38); the hosted provider is Q03.

@@ -25,17 +25,17 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` and `course-categories` archived (CI run 77); publication rules pending decision (R14) |
 | 3 | curriculum-crud | Archived | `course-lessons-basic` and `course-modules` archived (CI run 78); lesson types arrive with video |
 | 3 | asset-upload-pipeline | Archived (CI runs 79, 80) | `lesson-resources`: checked uploads, scanning boundary, signed links, app screens; production storage and scanning blocked on Q32, Q33 |
-| 3 | video-processing-integration | Built (test adapter), awaiting CI | `lesson-video`: provider boundary, ranged playback, capped watch progress, 90% completion (R36); production provider blocked on Q09 |
+| 3 | video-processing-integration | Archived, test adapter only (CI run 81) | `lesson-video`: provider boundary, ranged playback, capped watch progress, 90% completion (R36); production provider blocked on Q09 |
 | 3 | entitlements-core | Archived | `admin_grant` source only |
 | 3 | staff-authoring-surface | Partly built | Course, lesson and student screens exist |
 | 4 | catalog-and-search | Archived | Part of `course-catalog-basics` |
 | 4 | course-detail-and-library | Archived | Course page and My Courses |
-| 4 | player-resources-progress | Built, awaiting CI | Text reader, progress, files (`lesson-resources`) and video (`lesson-video`) |
-| 5 | payments-core-and-ledger | Built (test mode), awaiting CI | `payments-foundation`: orders, events, state machine, reversals, test checkout, purchases screen; real providers blocked on ADR-0008 |
+| 4 | player-resources-progress | Archived (CI runs 80, 81) | Text reader, progress, files (`lesson-resources`) and video (`lesson-video`) |
+| 5 | payments-core-and-ledger | Archived, test mode only (CI run 82) | `payments-foundation`: orders, events, state machine, reversals, test checkout, purchases screen; real providers blocked on ADR-0008 |
 | 5 | stripe-web-checkout | Blocked | Payment strategy |
 | 5 | store-billing-ios / store-billing-android | Blocked | Payment strategy and store accounts |
 | 5 | reversals-reconciliation | Blocked | Payment strategy and refund policy (N01) |
-| 6 | live-sessions-schedule / join / cancel | Not started | Live provider not chosen (Q03); scheduling can start |
+| 6 | live-sessions-schedule / join / cancel | Built (manual-link adapter), awaiting CI | `live-sessions-schedule`: scheduling, join window, cancel with reason, staff and student screens (R38); hosted provider blocked on Q03 |
 | 7 | reviews-submit / reviews-list-edit | Archived | As `course-reviews-basic` |
 | 7 | reviews-moderation | Archived | CI run 75 |
 | 8 | ops-lists-reports, audit-viewer, announcements, reports-scoped-access | Not started | Audit API exists; no viewer screen |
@@ -60,7 +60,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 
 ## Outstanding owner decisions
 
-Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider (Q03), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
+Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider and live rules (Q03, R38), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
 
 ## Current risks
 

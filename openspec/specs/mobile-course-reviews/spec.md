@@ -1,7 +1,7 @@
 # mobile-course-reviews Specification
 
 ## Purpose
-TBD - created by archiving change course-reviews-basic. Update Purpose after archive.
+The app screens for reading, writing, editing and appealing course reviews.
 
 ## Requirements
 

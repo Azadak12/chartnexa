@@ -1,7 +1,7 @@
 # mobile-lesson-resources Specification
 
 ## Purpose
-TBD - created by archiving change lesson-resources. Update Purpose after archive.
+The app screens for opening lesson files and for staff file uploads and management.
 
 ## Requirements
 

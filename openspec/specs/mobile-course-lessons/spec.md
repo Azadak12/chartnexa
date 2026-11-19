@@ -1,7 +1,7 @@
 # mobile-course-lessons Specification
 
 ## Purpose
-TBD - created by archiving change course-lessons-basic. Update Purpose after archive.
+The app screens for reading lessons and for staff lesson authoring.
 
 ## Requirements
 

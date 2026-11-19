@@ -124,3 +124,8 @@ export const canAuthorLessons = (a: AccessResponse | undefined, courseId: string
 /** Granting and ending access to courses (Admins and Managers). */
 export const canManageEnrollments = (a: AccessResponse | undefined): boolean =>
   has(a, "enrollments:manage");
+
+/** Scheduling live classes: the role permission, or a live grant on that course. */
+export const canScheduleLive = (a: AccessResponse | undefined, courseId: string): boolean =>
+  has(a, "live:schedule") ||
+  grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("live:schedule"));

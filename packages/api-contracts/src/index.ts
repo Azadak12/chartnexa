@@ -33,3 +33,4 @@ export * from "./categories.js";
 export * from "./resources.js";
 export * from "./video.js";
 export * from "./payments.js";
+export * from "./live.js";

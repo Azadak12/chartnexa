@@ -5,7 +5,7 @@
 - [x] 1.3 Orders with idempotency and one pending checkout; signed events with dedupe, locked state machine, grants, reversals, duplicates; history and staff list; verify 16 integration tests and a config test.
 - [x] 1.4 App: buy section, test checkout, purchases; verify 9 component tests (and the updated course page test).
 - [x] 1.5 Contract test against the real API; CI route check; mutation checks.
-- [ ] 1.6 Full checks; archive after CI passes.
+- [x] 1.6 Full checks; CI on `main` passed (run 82, `ea5dbdf`); archived.
 
 ## Evidence
 

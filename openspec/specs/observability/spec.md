@@ -1,7 +1,7 @@
 # observability Specification
 
 ## Purpose
-TBD - created by archiving change observability-baseline. Update Purpose after archive.
+Structured, redacted logs, request ids, metrics and alert rules for operating the API.
 
 ## Requirements
 

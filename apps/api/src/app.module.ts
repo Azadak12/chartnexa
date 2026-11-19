@@ -7,6 +7,7 @@ import { CategoriesModule } from "./modules/categories/index.js";
 import { CoursesModule } from "./modules/courses/index.js";
 import { EntitlementsModule } from "./modules/entitlements/index.js";
 import { LessonsModule } from "./modules/lessons/index.js";
+import { LiveModule } from "./modules/live/index.js";
 import { AccessModule } from "./modules/access/index.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { MailerModule } from "./modules/mailer/index.js";
@@ -38,6 +39,7 @@ export class AppModule {
         ReviewsModule,
         ResourcesModule,
         PaymentsModule,
+        LiveModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

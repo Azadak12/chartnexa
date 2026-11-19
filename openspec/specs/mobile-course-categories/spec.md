@@ -1,7 +1,7 @@
 # mobile-course-categories Specification
 
 ## Purpose
-TBD - created by archiving change course-categories. Update Purpose after archive.
+Category management for staff and category filters for everyone in the app.
 
 ## Requirements
 

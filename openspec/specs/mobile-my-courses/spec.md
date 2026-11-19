@@ -1,7 +1,7 @@
 # mobile-my-courses Specification
 
 ## Purpose
-TBD - created by archiving change entitlements-core. Update Purpose after archive.
+The app's list of courses a person owns, with progress and a way back into each.
 
 ## Requirements
 

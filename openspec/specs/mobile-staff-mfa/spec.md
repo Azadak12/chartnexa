@@ -1,7 +1,7 @@
 # mobile-staff-mfa Specification
 
 ## Purpose
-TBD - created by archiving change staff-mfa. Update Purpose after archive.
+The app's second sign-in step for Admins and Managers: enrolment, codes and recovery.
 
 ## Requirements
 

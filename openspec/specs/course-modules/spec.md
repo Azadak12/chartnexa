@@ -1,7 +1,7 @@
 # course-modules Specification
 
 ## Purpose
-TBD - created by archiving change course-modules. Update Purpose after archive.
+Groups a course's lessons into ordered modules without changing who may read them.
 
 ## Requirements
 

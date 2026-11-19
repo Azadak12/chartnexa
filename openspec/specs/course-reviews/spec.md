@@ -1,7 +1,7 @@
 # course-reviews Specification
 
 ## Purpose
-TBD - created by archiving change course-reviews-basic. Update Purpose after archive.
+Lets owners rate and review a course once, and shows ratings and reviews to everyone.
 
 ## Requirements
 

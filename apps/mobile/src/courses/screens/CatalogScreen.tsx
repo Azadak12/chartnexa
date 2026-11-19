@@ -13,6 +13,7 @@ import { Chip, Screen, Skeleton, Text, TextField } from "../../ui";
 import { categoryApi } from "../../categories/category-api";
 import { courseApi } from "../course-api";
 import { CourseCard, LEVEL_LABEL } from "../CourseCard";
+import { NextLiveCard } from "../../live/NextLiveCard";
 
 interface Filters {
   q: string;
@@ -69,6 +70,7 @@ export function CatalogScreen() {
         Courses
       </Text>
       {me.data && !me.data.emailVerified ? <VerifyNotice /> : null}
+      {me.data ? <NextLiveCard /> : null}
       <TextField
         label="Search courses"
         value={text}

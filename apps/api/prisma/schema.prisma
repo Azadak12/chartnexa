@@ -54,6 +54,8 @@ model User {
   decidedAppeals ReviewAppeal[] @relation("ReviewAppealDecider")
   videoProgress  VideoProgress[]
   orders         Order[]
+  liveSessionsCreated LiveSession[]   @relation("LiveSessionCreator")
+  liveAttendance      LiveAttendance[]
 
   @@map("users")
 }
@@ -195,6 +197,7 @@ model Course {
   lessons Lesson[]
   modules CourseModule[]
   orders  Order[]
+  liveSessions LiveSession[]
   lessonKeys LessonCreateKey[]
   entitlements Entitlement[]
 
@@ -596,4 +599,44 @@ model PaymentEvent {
 
   @@unique([provider, eventId], map: "payment_events_provider_event_key")
   @@map("payment_events")
+}
+
+/// A scheduled live class. The join link stays on the server until the class opens.
+model LiveSession {
+  id              String    @id @default(uuid()) @db.Uuid
+  courseId        String    @map("course_id") @db.Uuid
+  title           String
+  description     String    @default("")
+  startsAt        DateTime  @map("starts_at") @db.Timestamptz(6)
+  durationMinutes Int       @map("duration_minutes")
+  provider        String
+  joinUrl         String    @map("join_url")
+  status          String    @default("scheduled")
+  cancelReason    String?   @map("cancel_reason")
+  cancelledAt     DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  version         Int       @default(1)
+  createdBy       String?   @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "live_sessions_course_fkey")
+  creator    User?            @relation("LiveSessionCreator", fields: [createdBy], references: [id], onDelete: SetNull, map: "live_sessions_creator_fkey")
+  attendance LiveAttendance[]
+
+  @@index([courseId, startsAt], map: "live_sessions_course_starts_idx")
+  @@map("live_sessions")
+}
+
+/// The first time a person asked for a class's join link.
+model LiveAttendance {
+  sessionId     String   @map("session_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  firstJoinedAt DateTime @default(now()) @map("first_joined_at") @db.Timestamptz(6)
+
+  session LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, map: "live_attendance_session_fkey")
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade, map: "live_attendance_user_fkey")
+
+  @@id([sessionId, userId])
+  @@index([userId], map: "live_attendance_user_idx")
+  @@map("live_attendance")
 }

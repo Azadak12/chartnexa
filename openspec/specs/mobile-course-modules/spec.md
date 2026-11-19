@@ -1,7 +1,7 @@
 # mobile-course-modules Specification
 
 ## Purpose
-TBD - created by archiving change course-modules. Update Purpose after archive.
+The app screens that show and manage a course's modules.
 
 ## Requirements
 

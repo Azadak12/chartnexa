@@ -1,7 +1,7 @@
 # review-moderation Specification
 
 ## Purpose
-TBD - created by archiving change reviews-moderation. Update Purpose after archive.
+Lets staff hide and restore reviews, handle reports, and decide authors' appeals, all audited.
 
 ## Requirements
 

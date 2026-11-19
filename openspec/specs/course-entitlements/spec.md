@@ -1,7 +1,7 @@
 # course-entitlements Specification
 
 ## Purpose
-TBD - created by archiving change entitlements-core. Update Purpose after archive.
+Records who has access to which course, why, and when access ended; every other access check reads from it.
 
 ## Requirements
 

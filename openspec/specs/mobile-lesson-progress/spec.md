@@ -1,7 +1,7 @@
 # mobile-lesson-progress Specification
 
 ## Purpose
-TBD - created by archiving change lesson-progress-basic. Update Purpose after archive.
+How the app shows and changes lesson completion and course progress.
 
 ## Requirements
 

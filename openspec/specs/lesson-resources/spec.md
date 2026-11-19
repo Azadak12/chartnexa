@@ -1,7 +1,7 @@
 # lesson-resources Specification
 
 ## Purpose
-TBD - created by archiving change lesson-resources. Update Purpose after archive.
+Lets staff attach checked files to lessons and gives owners short-lived links to view or download them.
 
 ## Requirements
 
