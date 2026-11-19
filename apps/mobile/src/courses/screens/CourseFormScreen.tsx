@@ -1,3 +1,4 @@
+import { StaffCourseThumbnail } from "../StaffCourseThumbnail";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -385,6 +386,9 @@ function Form({
         loading={pending}
         onPress={() => void handleSubmit((v) => run(v))()}
       />
+      {course ? (
+        <StaffCourseThumbnail courseId={course.id} tone={tone} initialUrl={course.thumbnailUrl} />
+      ) : null}
       {course && status && canPublish ? (
         <View ref={publishRef} collapsable={false} style={{ gap: spacing.sm }}>
           {dirty ? (

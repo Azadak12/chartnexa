@@ -252,6 +252,10 @@ export class EntitlementsService {
         priceCents: r.course.priceCents,
         currency: "USD" as const,
         coverTone: r.course.coverTone,
+        thumbnailUrl:
+          r.course.thumbnailId && r.course.thumbnailMime
+            ? `/courses/thumbnails/${r.course.thumbnailId}`
+            : null,
         onSale: r.course.status === "published",
         enrolledAt: iso(r.createdAt),
         progress: counts.get(r.course.id) ?? { completed: 0, total: 0 },

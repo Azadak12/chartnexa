@@ -77,6 +77,8 @@ const PUBLIC = [
   // Published catalog.
   "GET /categories",
   "GET /courses",
+  // Course thumbnail images (unguessable ids, validated image bytes).
+  "GET /courses/thumbnails/:id",
 ];
 
 describe("every route is protected or reviewed as public", () => {

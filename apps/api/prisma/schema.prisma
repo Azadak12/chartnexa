@@ -59,6 +59,7 @@ model User {
   announcementsWritten   Announcement[]     @relation("AnnouncementAuthor")
   announcementsWithdrawn Announcement[]     @relation("AnnouncementWithdrawer")
   announcementReads      AnnouncementRead[]
+  coursesTaught          Course[]           @relation("CourseInstructor")
 
   @@map("users")
 }
@@ -193,6 +194,12 @@ model Course {
   /// Optional; a category in use cannot be deleted (RESTRICT).
   categoryId  String?      @map("category_id") @db.Uuid
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// The instructor shown on the course (set when an Instructor creates it, or by the demo seed).
+  instructorId  String?    @map("instructor_id") @db.Uuid
+  instructor    User?      @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: SetNull, map: "courses_instructor_fkey")
+  /// Public id of the thumbnail image in object storage (thumbnails/<id>); changes on replace.
+  thumbnailId   String?    @unique(map: "courses_thumbnail_id_key") @map("thumbnail_id") @db.Uuid
+  thumbnailMime String?    @map("thumbnail_mime")
   reviews     Review[]
 
   @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
