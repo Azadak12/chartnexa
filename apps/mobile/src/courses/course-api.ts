@@ -152,3 +152,7 @@ export const canManageRoles = (a: AccessResponse | undefined): boolean => has(a,
 export const canManageAssignments = (a: AccessResponse | undefined, courseId: string): boolean =>
   has(a, "assignments:manage") ||
   grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("assignments:manage"));
+
+/** Instructors, Managers and Admins get the staff dashboard. */
+export const isStaff = (a: AccessResponse | undefined): boolean =>
+  !!a && a.roles.some((r) => r === "instructor" || r === "manager" || r === "admin");

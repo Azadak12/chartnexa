@@ -232,6 +232,13 @@ describe("staff screen", () => {
 describe("accepting an invitation", () => {
   beforeEach(() => sessionStore.set("signed-out"));
 
+  it("can be reached from the Welcome screen without a link", async () => {
+    await renderRouter(app, { initialUrl: "/welcome" });
+    await fireEvent.press(await screen.findByRole("button", { name: "I have an invitation" }));
+    expect(screen).toHavePathname("/accept-invitation");
+    expect(await screen.findByLabelText("Invitation code")).toBeTruthy();
+  });
+
   it("takes the code from the link, checks the form, and sends the person to sign in", async () => {
     s.accept.mockResolvedValue(undefined);
     await renderRouter(app, { initialUrl: "/accept-invitation?token=abcdefghijklmnopqrstuvwxyz" });

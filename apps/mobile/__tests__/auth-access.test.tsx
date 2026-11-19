@@ -198,6 +198,7 @@ describe("create account", () => {
     await renderRouter(app, { initialUrl: "/register" });
     await type("Email", "new@example.com");
     await type("Password", "correct horse battery");
+    await type("Confirm password", "correct horse battery");
     await press("Create account");
     expect(http.register).toHaveBeenCalledWith({
       email: "new@example.com",
@@ -215,6 +216,7 @@ describe("create account", () => {
     await type("Name (optional)", "Ann");
     await type("Email", "new@example.com");
     await type("Password", "correct horse battery");
+    await type("Confirm password", "correct horse battery");
     await press("Create account");
     expect(http.register).toHaveBeenCalledWith({
       email: "new@example.com",
@@ -232,12 +234,26 @@ describe("create account", () => {
     await renderRouter(app, { initialUrl: "/register" });
     await type("Email", "new@example.com");
     await type("Password", "Password123");
+    await type("Confirm password", "Password123");
     await press("Create account");
     expect(screen.getByText("This password is too common.")).toBeTruthy();
     expect(screen.getByLabelText("Email").props.value).toBe("new@example.com");
     expect(screen.getByLabelText("Password").props.accessibilityHint).toBe(
       "Error: This password is too common.",
     );
+  });
+
+  it("asks for the password twice and does not submit when they differ", async () => {
+    await renderRouter(app, { initialUrl: "/register" });
+    await type("Email", "new@example.com");
+    await type("Password", "correct horse battery");
+    await press("Create account");
+    expect(await screen.findByText("Enter the password again")).toBeTruthy();
+    await type("Confirm password", "correct horse batter");
+    await press("Create account");
+    expect(await screen.findByText("The passwords do not match")).toBeTruthy();
+    expect(http.register).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Email").props.value).toBe("new@example.com");
   });
 
   it("uses a new-password autofill hint", async () => {

@@ -263,3 +263,12 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 |---|---|---|
 | R39 | In-app announcements: Admins and Managers hold `announcements:publish` (not grantable to Instructors); plain text to everyone with an account or to one course's owners; withdrawing hides it from readers and keeps the reason in the audit log; no editing after posting. | Built; pending owner confirmation. |
 | Q35 | Delivery beyond the app (email, push), consent and quiet hours; may Instructors announce to their own courses? | Pending. In-app only; no email or push is sent. |
+
+## MVP demo (change `mvp-demo`, 2026-11-20)
+
+| ID | Question or decision | Status |
+|---|---|---|
+| R40 | Instructor access is by invitation only: Admins and Managers (`instructors:invite`) invite by email; the code is single use and lasts 7 days; Managers manage only their own invitations; only Admins deactivate Instructors (role, permissions and sessions end; courses stay attributed). | Built; pending owner confirmation. |
+| R41 | Assignments: new course-scoped permission `assignments:manage` (grantable, given automatically on an Instructor's own courses, held by Admins and Managers); students see only published assignments assigned to them for courses they own; text hand-in; feedback locks the work. | Built; pending owner confirmation. |
+| R42 | Demo data is development only: generated passwords in an ignored local file, two-step sign-in unchanged, fictional reviewers who cannot sign in, simulated purchases only. | Built. |
+| Q36 | Should students be able to attach files to submissions, and should people who enrol after an assignment is assigned receive it automatically? | Pending. Text only; assignment applies to students enrolled at that moment. |

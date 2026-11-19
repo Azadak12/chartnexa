@@ -40,7 +40,14 @@ const optionalName = z
 export const signInSchema = loginRequestSchema.pick({ email: true, password: true });
 export const registerFormSchema = registerRequestSchema
   .omit({ displayName: true })
-  .extend({ displayName: optionalName });
+  .extend({
+    displayName: optionalName,
+    confirmPassword: z.string().min(1, "Enter the password again"),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "The passwords do not match",
+  });
 export const forgotSchema = forgotPasswordRequestSchema;
 export const resetFormSchema = resetPasswordRequestSchema;
 export const changePasswordSchema = changePasswordRequestSchema;

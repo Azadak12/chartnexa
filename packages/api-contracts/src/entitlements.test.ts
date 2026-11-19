@@ -63,6 +63,7 @@ describe("responses", () => {
     expect(Object.keys(c).sort()).toEqual(
       [
         "coverTone",
+        "thumbnailUrl",
         "currency",
         "enrolledAt",
         "id",

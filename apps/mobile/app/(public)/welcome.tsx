@@ -15,6 +15,11 @@ export default function Welcome() {
       {notice ? <Banner kind="info" message={notice} testID="session-notice" /> : null}
       <Button label="Sign in" onPress={() => router.push("/sign-in")} />
       <Button label="Create account" variant="secondary" onPress={() => router.push("/register")} />
+      <Button
+        label="I have an invitation"
+        variant="tertiary"
+        onPress={() => router.push("/accept-invitation")}
+      />
       <TestServerSection />
     </Screen>
   );
