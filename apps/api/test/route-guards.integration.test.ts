@@ -67,6 +67,8 @@ const PUBLIC = [
   "POST /auth/password/reset",
   "POST /auth/email/verify",
   "POST /auth/mfa/verify",
+  // Accepting an invitation: the emailed single-use code is the permission; rate limited.
+  "POST /auth/instructor-invitations/accept",
   "POST /auth/mfa/setup/start",
   "POST /auth/mfa/setup/complete",
   // Signed links: the token in the address is the permission (short-lived, HMAC).

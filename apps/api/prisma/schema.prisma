@@ -60,6 +60,9 @@ model User {
   announcementsWithdrawn Announcement[]     @relation("AnnouncementWithdrawer")
   announcementReads      AnnouncementRead[]
   coursesTaught          Course[]           @relation("CourseInstructor")
+  invitationsSent        InstructorInvitation[] @relation("InvitationSender")
+  invitationsAccepted    InstructorInvitation[] @relation("InvitationAcceptor")
+  invitationsRevoked     InstructorInvitation[] @relation("InvitationRevoker")
 
   @@map("users")
 }
@@ -687,4 +690,26 @@ model AnnouncementRead {
   @@id([announcementId, userId])
   @@index([userId], map: "announcement_reads_user_idx")
   @@map("announcement_reads")
+}
+
+/// An invitation to become an Instructor. The raw token is only ever in the email.
+model InstructorInvitation {
+  id         String    @id @default(uuid()) @db.Uuid
+  email      String
+  tokenHash  String    @unique(map: "instructor_invitations_token_key") @map("token_hash")
+  status     String    @default("pending")
+  invitedBy  String?   @map("invited_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt DateTime? @map("accepted_at") @db.Timestamptz(6)
+  acceptedBy String?   @map("accepted_by") @db.Uuid
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy  String?   @map("revoked_by") @db.Uuid
+
+  inviter  User? @relation("InvitationSender", fields: [invitedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_inviter_fkey")
+  acceptor User? @relation("InvitationAcceptor", fields: [acceptedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_acceptor_fkey")
+  revoker  User? @relation("InvitationRevoker", fields: [revokedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_revoker_fkey")
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "instructor_invitations_feed_idx")
+  @@map("instructor_invitations")
 }

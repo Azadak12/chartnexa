@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { View } from "react-native";
 import {
   canManageCourses,
+  canInviteInstructors,
   canModerateReviews,
   canPublishAnnouncements,
   canReadAudit,
@@ -152,6 +153,13 @@ export function ProfileScreen() {
               variant="secondary"
               onPress={() => router.push("/profile/announcements")}
             />
+            {canInviteInstructors(access.data) ? (
+              <Button
+                label="Invite instructors"
+                variant="secondary"
+                onPress={() => router.push("/profile/invitations")}
+              />
+            ) : null}
             {canPublishAnnouncements(access.data) ? (
               <Button
                 label="Post announcements"

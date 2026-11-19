@@ -190,6 +190,60 @@ export class RolesService {
   }
 
   /**
+   * Deactivates an Instructor: the role ends, every course permission ends and every session
+   * ends, in one transaction. Nothing is deleted: their courses stay (attributed to them) and
+   * the history stays. Repeating it answers 404, because there is no Instructor left.
+   */
+  async deactivateInstructor(
+    actor: Actor,
+    targetId: string,
+    reason: string,
+  ): Promise<{ grantsEnded: number; sessionsEnded: number; coursesKept: number }> {
+    if (actor.userId === targetId) {
+      return this.deny(actor, "instructor.deactivate", targetId, "self_change");
+    }
+    const outcome = await this.db.$transaction(async (tx) => {
+      await this.lockActiveAdmins(tx);
+      if (!(await this.actorIsAdmin(tx, actor.userId))) {
+        return { denied: "actor_not_authorized" as const };
+      }
+      const current = await tx.userRole.findFirst({
+        where: { userId: targetId, role: "instructor", revokedAt: null },
+      });
+      if (!current) throw new NotFoundException("Instructor not found.");
+      const now = new Date();
+      const grantsEnded = await this.grants.endAllForUser(tx, targetId, actor.userId, "role_ended");
+      await tx.userRole.update({
+        where: { id: current.id },
+        data: { revokedAt: now, revokedBy: actor.userId, revokeReason: reason },
+      });
+      const sessions = await tx.session.updateMany({
+        where: { userId: targetId, revokedAt: null },
+        data: { revokedAt: now, revokedReason: "instructor_deactivated" },
+      });
+      await tx.user.update({ where: { id: targetId }, data: { authzVersion: { increment: 1 } } });
+      const coursesKept = await tx.course.count({ where: { instructorId: targetId } });
+      await this.audit.record(tx, {
+        actorKind: "user",
+        actorUserId: actor.userId,
+        action: "instructor.deactivate",
+        targetType: "user",
+        targetId,
+        outcome: "success",
+        reason,
+        before: { role: "instructor" },
+        after: { role: null, grantsEnded, sessionsEnded: sessions.count, coursesKept },
+        requestId: actor.requestId ?? null,
+      });
+      return { grantsEnded, sessionsEnded: sessions.count, coursesKept };
+    });
+    if ("denied" in outcome) {
+      return this.deny(actor, "instructor.deactivate", targetId, outcome.denied);
+    }
+    return outcome;
+  }
+
+  /**
    * Operator-run. Makes an existing, verified, active account Admin when no Admin exists, or
    * (recovery) regardless. Returns a message for the command line; never throws for rule refusals.
    */
