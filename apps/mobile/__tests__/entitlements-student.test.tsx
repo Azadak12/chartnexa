@@ -149,7 +149,7 @@ describe("My Courses", () => {
 
 describe("the course page for an owner", () => {
   it("says they are enrolled in text and drops the enrollment-coming notice", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enrolled-notice")).toBeTruthy();
     expect(screen.getByLabelText(/You are enrolled in this course/)).toBeTruthy();
     expect(screen.queryByTestId("enroll-notice")).toBeNull();
@@ -158,14 +158,14 @@ describe("the course page for an owner", () => {
 
   it("explains an unpublished course and keeps their access", async () => {
     courses.get.mockResolvedValue(detail({ onSale: false, publishedAt: null }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("not-on-sale")).toBeTruthy();
     expect(screen.getByText(/You keep your access/)).toBeTruthy();
   });
 
   it("opens a lesson that is not a free preview, with no locked sheet", async () => {
     lessons.get.mockResolvedValue({ ...outline[1], body: "Owner text" });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByLabelText("Lesson 2: Locked lesson, included")).toBeTruthy();
     expect(screen.queryByText("Locked")).toBeNull();
     await fireEvent.press(screen.getByTestId("lesson-l2"));
@@ -176,7 +176,7 @@ describe("the course page for an owner", () => {
 
   it("keeps the notice and the locked sheet for someone who is not enrolled", async () => {
     courses.get.mockResolvedValue(detail({ enrolled: false }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enroll-notice")).toBeTruthy();
     expect(screen.queryByTestId("enrolled-notice")).toBeNull();
     await fireEvent.press(await screen.findByTestId("lesson-l2"));
@@ -202,7 +202,7 @@ describe("losing access while reading", () => {
     lessons.get.mockRejectedValue(
       Object.assign(appError("forbidden"), { code: "ENROLLMENT_REQUIRED" }),
     );
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("enrolled-notice")).toBeTruthy();
     await fireEvent.press(await screen.findByTestId("lesson-l2"));
     expect(await screen.findByText("You no longer have access to this lesson")).toBeTruthy();

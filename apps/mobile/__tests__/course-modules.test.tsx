@@ -143,11 +143,13 @@ describe("students see modules on the course page", () => {
         { id: "m2", title: "Advanced", position: 2 },
       ],
     });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByText("Module 1: Basics")).toBeTruthy();
     expect(screen.getByText("Module 2: Advanced")).toBeTruthy();
-    expect(screen.getByTestId("module-m1").props.accessibilityRole).toBe("header");
-    expect(screen.getByText("Welcome")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /^Module 1: Basics/ }).props.accessibilityState.expanded,
+    ).toBe(true);
+    expect(screen.getByText(/Welcome/)).toBeTruthy();
   });
 });
 

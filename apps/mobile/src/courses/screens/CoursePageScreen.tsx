@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import { useState } from "react";
 import { View } from "react-native";
+import type { PublicCourseDetail } from "@chartnexa/api-contracts";
+import { TabBar } from "../../kit/TabBar";
 import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
-import { spacing } from "../../theme";
-import { Banner, Button, Screen, Text } from "../../ui";
+import { colors, neutrals, radii, spacing } from "../../theme";
+import { Button, Screen, Skeleton, Text } from "../../ui";
 import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { CoverBlock } from "../CoverBlock";
@@ -20,7 +24,7 @@ import { LiveClassesSection } from "../../live/LiveClassesSection";
 
 export function CoursePageScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tab } = useLocalSearchParams<{ id: string; tab?: string }>();
   const query = useQuery({
     queryKey: ["course", id],
     queryFn: () => courseApi.get(String(id)),
@@ -76,9 +80,41 @@ export function CoursePageScreen() {
     }
     if (target) router.push(`/course/${courseId}/lesson/${target}`);
   };
+  return <CourseDetails c={c} goHome={goHome} goToLesson={goToLesson} initialTab={tab} />;
+}
+
+type Tab = "overview" | "learn" | "curriculum" | "reviews";
+const TABS = [
+  { key: "overview", label: "Overview" },
+  { key: "learn", label: "What You Will Learn" },
+  { key: "curriculum", label: "Curriculum" },
+  { key: "reviews", label: "Reviews" },
+] as const;
+
+function CourseDetails({
+  c,
+  goHome,
+  goToLesson,
+  initialTab,
+}: {
+  initialTab?: string;
+  c: PublicCourseDetail;
+  goHome: () => void;
+  goToLesson: (courseId: string, lessonId: string | null) => Promise<void>;
+}) {
+  const router = useRouter();
+  const [tab, setTab] = useState<Tab>(TABS.find((t) => t.key === initialTab)?.key ?? "overview");
+  // Shared with the curriculum tab, so one request serves both.
+  const outline = useQuery({
+    queryKey: ["lessons", c.id, c.enrolled],
+    queryFn: () => lessonApi.outline(c.id),
+    retry: shouldRetry,
+  });
+  const preview = outline.data?.items.find((l) => l.isPreview) ?? null;
+
   return (
     <Screen>
-      <CoverBlock tone={c.coverTone} height={190} thumbnailUrl={c.thumbnailUrl} />
+      <CoverBlock tone={c.coverTone} height={200} thumbnailUrl={c.thumbnailUrl} />
       <Text variant="title" accessibilityRole="header">
         {c.title}
       </Text>
@@ -104,42 +140,123 @@ export function CoursePageScreen() {
         </Text>
       </View>
       <RatingSummary rating={c.rating} testID="course-rating" />
+
       {c.enrolled ? (
-        <>
-          <Banner
-            kind="success"
-            message="You are enrolled in this course."
+        <View style={{ gap: spacing.md }}>
+          <View
+            accessible
+            accessibilityLabel="You are enrolled in this course"
             testID="enrolled-notice"
-          />
+            style={{
+              alignSelf: "flex-start",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.xs,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+              borderRadius: radii.pill,
+              backgroundColor: neutrals.surface,
+              borderWidth: 1,
+              borderColor: neutrals.divider,
+            }}
+          >
+            <Feather name="check" size={14} color={colors.blue} accessible={false} />
+            <Text variant="caption" tone="link">
+              Enrolled
+            </Text>
+          </View>
           {c.onSale ? null : (
             <Text variant="caption" tone="muted" testID="not-on-sale">
               This course is not currently on sale. You keep your access.
             </Text>
           )}
-        </>
-      ) : (
-        <BuySection courseId={c.id} priceCents={c.priceCents} />
-      )}
-      {c.description ? <Text>{c.description}</Text> : null}
-      {c.enrolled && c.progress ? (
-        <View style={{ gap: spacing.md }}>
-          <ProgressBar
-            completed={c.progress.completed}
-            total={c.progress.total}
-            testID="course-progress"
-          />
-          {c.progress.total > 0 ? (
+          {c.progress ? (
+            <ProgressBar
+              completed={c.progress.completed}
+              total={c.progress.total}
+              testID="course-progress"
+            />
+          ) : null}
+          {c.progress && c.progress.total > 0 ? (
             <Button
               label={c.nextLessonId ? "Continue" : "Review course"}
               onPress={() => void goToLesson(c.id, c.nextLessonId)}
             />
           ) : null}
         </View>
+      ) : (
+        <View style={{ gap: spacing.sm }}>
+          <BuySection courseId={c.id} priceCents={c.priceCents} />
+          {preview ? (
+            <Button
+              label="Watch the free preview"
+              variant="secondary"
+              onPress={() => router.push(`/course/${c.id}/lesson/${preview.id}`)}
+            />
+          ) : null}
+        </View>
+      )}
+
+      <TabBar tabs={TABS} value={tab} onChange={setTab} />
+
+      {tab === "overview" ? (
+        <View style={{ gap: spacing.lg }} testID="panel-overview">
+          {c.description ? (
+            <Text>{c.description}</Text>
+          ) : (
+            <Text tone="muted">No description yet.</Text>
+          )}
+          {c.enrolled ? <LiveClassesSection courseId={c.id} /> : null}
+        </View>
       ) : null}
-      {c.enrolled ? <LiveClassesSection courseId={c.id} /> : null}
-      <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} />
-      <ReviewsSection courseId={c.id} enrolled={c.enrolled} rating={c.rating} />
+      {tab === "learn" ? <LearnPanel outline={outline.data} loading={outline.isPending} /> : null}
+      {tab === "curriculum" ? <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} /> : null}
+      {tab === "reviews" ? (
+        <ReviewsSection courseId={c.id} enrolled={c.enrolled} rating={c.rating} />
+      ) : null}
       <Button label="Back to courses" variant="secondary" onPress={goHome} />
     </Screen>
+  );
+}
+
+/**
+ * The course has no separate "learning outcomes" field, so this lists what it really contains:
+ * its modules and lesson titles. Nothing is invented.
+ */
+function LearnPanel({
+  outline,
+  loading,
+}: {
+  outline:
+    | {
+        items: { id: string; title: string; moduleId: string | null }[];
+        modules?: { id: string; title: string }[];
+      }
+    | undefined;
+  loading: boolean;
+}) {
+  if (loading) return <Skeleton height={96} />;
+  const lessons = outline?.items ?? [];
+  if (lessons.length === 0) {
+    return (
+      <Text tone="muted" testID="learn-empty">
+        The topics will be listed once lessons are added.
+      </Text>
+    );
+  }
+  const modules = outline?.modules ?? [];
+  const lines = modules.length > 0 ? modules.map((m) => m.title) : lessons.map((l) => l.title);
+  return (
+    <View style={{ gap: spacing.sm }} testID="panel-learn">
+      <Text tone="muted" variant="caption">
+        Topics covered, taken from this course's {modules.length > 0 ? "modules" : "lessons"}.
+      </Text>
+      {lines.map((t, i) => (
+        <View key={`${i}-${t}`} style={{ flexDirection: "row", gap: spacing.sm }}>
+          <Feather name="check-circle" size={18} color={colors.blue} accessible={false} />
+          <Text style={{ flex: 1 }}>{t}</Text>
+        </View>
+      ))}
+    </View>
   );
 }

@@ -85,17 +85,28 @@ export function LessonCard({
   state,
   onPress,
   testID,
+  label,
+  statusText,
+  hint,
+  statusTestID,
 }: {
   title: string;
   position: number;
   state: LessonState;
   onPress: () => void;
   testID?: string;
+  /** Overrides the spoken label. */
+  label?: string;
+  /** Overrides the visible state word. */
+  statusText?: string;
+  hint?: string;
+  statusTestID?: string;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Lesson ${position}, ${title}, ${WORD[state]}`}
+      accessibilityLabel={label ?? `Lesson ${position}, ${title}, ${WORD[state]}`}
+      accessibilityHint={hint}
       onPress={onPress}
       testID={testID}
       style={({ pressed }) => ({
@@ -129,9 +140,10 @@ export function LessonCard({
       </View>
       <Text
         variant="caption"
+        testID={state === "done" ? statusTestID : undefined}
         tone={state === "done" ? "success" : state === "preview" ? "link" : "muted"}
       >
-        {WORD[state]}
+        {statusText ?? WORD[state]}
       </Text>
     </Pressable>
   );

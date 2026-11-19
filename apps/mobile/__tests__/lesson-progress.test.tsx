@@ -221,7 +221,7 @@ describe("marking a lesson in the reader", () => {
 
 describe("progress on the course page", () => {
   it("shows the count in text with a labelled progress bar", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("course-progress")).toBeTruthy();
     expect(screen.getByText("1 of 3 lessons complete")).toBeTruthy();
     const bar = screen.getByRole("progressbar", { name: "1 of 3 lessons complete" });
@@ -229,7 +229,7 @@ describe("progress on the course page", () => {
   });
 
   it("marks completed lessons in the outline with text", async () => {
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByTestId("completed-l1")).toBeTruthy();
     expect(screen.queryByTestId("completed-l2")).toBeNull();
     expect(screen.getByLabelText("Lesson 1: First, free preview, completed")).toBeTruthy();
@@ -238,7 +238,7 @@ describe("progress on the course page", () => {
 
   it("Continue opens the next lesson", async () => {
     lessons.get.mockResolvedValue(lesson("l2"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await screen.findByTestId("course-progress");
     await press("Continue");
     expect(screen).toHavePathname("/course/c1/lesson/l2");
@@ -249,7 +249,7 @@ describe("progress on the course page", () => {
       detail({ progress: { completed: 3, total: 3 }, nextLessonId: null }),
     );
     lessons.get.mockResolvedValue(lesson("l1"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await screen.findByText("3 of 3 lessons complete");
     expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
     await press("Review course");
@@ -261,7 +261,7 @@ describe("progress on the course page", () => {
       detail({ progress: { completed: 0, total: 0 }, nextLessonId: null, lessonCount: 0 }),
     );
     lessons.outline.mockResolvedValue({ items: [] });
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     expect(await screen.findByText("No lessons yet")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Review course" })).toBeNull();
@@ -270,7 +270,7 @@ describe("progress on the course page", () => {
 
   it("shows no progress, Continue or outline marks to someone who does not own the course", async () => {
     courses.get.mockResolvedValue(detail({ enrolled: false, progress: null, nextLessonId: null }));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await screen.findByTestId("enroll-notice");
     expect(screen.queryByTestId("course-progress")).toBeNull();
     expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
@@ -282,7 +282,7 @@ describe("progress on the course page", () => {
       .mockResolvedValueOnce(detail())
       .mockResolvedValue(detail({ progress: { completed: 2, total: 3 }, nextLessonId: "l3" }));
     lessons.get.mockResolvedValue(lesson("l2"));
-    await renderRouter(app, { initialUrl: "/course/c1" });
+    await renderRouter(app, { initialUrl: "/course/c1?tab=curriculum" });
     await screen.findByText("1 of 3 lessons complete");
     await fireEvent.press(screen.getByTestId("lesson-l2"));
     await screen.findByRole("button", { name: "Mark as complete" });
