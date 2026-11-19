@@ -181,3 +181,6 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Staff (`live:schedule`, role or Instructor grant):** `GET/POST /staff/courses/:courseId/live-sessions`, `PATCH .../live-sessions/:sessionId` `{ expectedVersion, title?, description?, startsAt?, durationMinutes?, joinUrl? }`, `POST .../live-sessions/:sessionId/cancel` `{ expectedVersion, reason }`.
 - **Owners:** `GET /courses/:courseId/live-sessions` (no links), `GET /me/live-sessions` (upcoming across courses), `POST /me/courses/:courseId/live-sessions/:sessionId/join` answers `{ url, endsAt }` while open, else 409 `LIVE_NOT_OPEN`, `LIVE_ENDED` or `LIVE_CANCELLED`.
 - **Provider:** `LIVE_PROVIDER=manual` keeps the meeting link staff paste (https, no credentials). `LIVE_JOIN_OPENS_MINUTES` (default 15) sets when the link opens. Rules are proposals (R38); the hosted provider is Q03.
+
+## Continue learning (change `continue-learning`)
+`GET /me/continue-learning` answers `{ item: { courseId, courseTitle, coverTone, completed, total, nextLessonId, nextLessonTitle, lastActivityAt } | null }`: the owned, unfinished course with the latest completion or video progress (else the newest access).

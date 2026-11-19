@@ -31,6 +31,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 4 | catalog-and-search | Archived | Part of `course-catalog-basics` |
 | 4 | course-detail-and-library | Archived | Course page and My Courses |
 | 4 | player-resources-progress | Archived (CI runs 80, 81) | Text reader, progress, files (`lesson-resources`) and video (`lesson-video`) |
+| 4 | continue-learning (student improvement) | Built, awaiting CI | Home card with the next lesson of the most recently studied course |
 | 5 | payments-core-and-ledger | Archived, test mode only (CI run 82) | `payments-foundation`: orders, events, state machine, reversals, test checkout, purchases screen; real providers blocked on ADR-0008 |
 | 5 | stripe-web-checkout | Blocked | Payment strategy |
 | 5 | store-billing-ios / store-billing-android | Blocked | Payment strategy and store accounts |
@@ -54,6 +55,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-19 | CI on `main` runs 80, 81, 82 (files app, video, payments) | Success |
 | 2026-11-19 | Local full checks after `live-sessions-schedule` | All pass: 540 API, 486 app, 40 contract; lint, format, builds, secrets, migration round trip (typecheck re-run after fixing two test option types) |
 | 2026-11-19 | Checks after `ops-audit-and-orders` (app only): lint, format, typecheck, app tests, contract tests, app build, secrets | All pass: 493 app, 41 contract |
+| 2026-11-19 | Local full checks after `continue-learning` | All pass: 545 API, 495 app, 42 contract; lint, format, typecheck, builds, secrets, migration round trip |
 
 ## Never verified
 

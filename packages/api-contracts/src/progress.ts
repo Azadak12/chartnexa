@@ -23,3 +23,21 @@ export const progressResponseSchema = z.object({
 export type CourseProgress = z.infer<typeof courseProgressSchema>;
 export type CompletionResponse = z.infer<typeof completionResponseSchema>;
 export type ProgressResponse = z.infer<typeof progressResponseSchema>;
+
+/** The course to pick up again: the owned, unfinished course with the most recent activity. */
+export const continueLearningSchema = z.object({
+  item: z
+    .object({
+      courseId: z.string(),
+      courseTitle: z.string(),
+      coverTone: z.string(),
+      completed: z.number().int().min(0),
+      total: z.number().int().min(0),
+      nextLessonId: z.string(),
+      nextLessonTitle: z.string(),
+      /** The latest completion or video progress, or when access began if nothing yet. */
+      lastActivityAt: z.string(),
+    })
+    .nullable(),
+});
+export type ContinueLearning = z.infer<typeof continueLearningSchema>;

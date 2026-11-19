@@ -9,6 +9,7 @@ import {
   LESSON_ERROR_CODES,
   VIDEO_ERROR_CODES,
   type CompletionResponse,
+  type ContinueLearning,
   type ProgressResponse,
 } from "@chartnexa/api-contracts";
 import { loadCourseCounts, loadNextLessonId } from "../../database/course-progress.js";
@@ -100,6 +101,60 @@ export class ProgressService {
         completedAt: r.completedAt.toISOString(),
       })),
     };
+  }
+
+  /**
+   * The owned course with the most recent activity (a completion or video progress; when access
+   * began if nothing yet) that still has a lesson left. Finished and empty courses are skipped.
+   */
+  async continueLearning(userId: string): Promise<ContinueLearning> {
+    const rows = await this.db.$queryRaw<{ course_id: string; last: Date }[]>`
+      WITH activity AS (
+        SELECT course_id, max(completed_at) AS t FROM lesson_completions
+        WHERE user_id = ${userId}::uuid GROUP BY course_id
+        UNION ALL
+        SELECT course_id, max(updated_at) AS t FROM video_progress
+        WHERE user_id = ${userId}::uuid GROUP BY course_id
+      )
+      SELECT e.course_id, greatest(max(e.created_at), coalesce(max(a.t), max(e.created_at))) AS last
+      FROM entitlements e
+      LEFT JOIN activity a ON a.course_id = e.course_id
+      WHERE e.user_id = ${userId}::uuid AND e.status = 'active'
+      GROUP BY e.course_id
+      ORDER BY last DESC, e.course_id ASC
+      LIMIT 20`;
+    const counts = await loadCourseCounts(
+      this.db,
+      userId,
+      rows.map((r) => r.course_id),
+    );
+    for (const r of rows) {
+      const c = counts.get(r.course_id);
+      if (!c || c.completed >= c.total) continue;
+      const nextId = await loadNextLessonId(this.db, userId, r.course_id);
+      if (!nextId) continue;
+      const [course, lesson] = await Promise.all([
+        this.db.course.findUnique({
+          where: { id: r.course_id },
+          select: { title: true, coverTone: true },
+        }),
+        this.db.lesson.findUnique({ where: { id: nextId }, select: { title: true } }),
+      ]);
+      if (!course || !lesson) continue;
+      return {
+        item: {
+          courseId: r.course_id,
+          courseTitle: course.title,
+          coverTone: course.coverTone,
+          completed: c.completed,
+          total: c.total,
+          nextLessonId: nextId,
+          nextLessonTitle: lesson.title,
+          lastActivityAt: r.last.toISOString(),
+        },
+      };
+    }
+    return { item: null };
   }
 
   /** Runs inside the account-deletion transaction: the person's completions go with the account. */

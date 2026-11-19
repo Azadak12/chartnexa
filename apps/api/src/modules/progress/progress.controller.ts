@@ -1,7 +1,11 @@
 import { Controller, Delete, Get, HttpCode, Inject, Param, Put } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { z } from "zod";
-import type { CompletionResponse, ProgressResponse } from "@chartnexa/api-contracts";
+import type {
+  CompletionResponse,
+  ContinueLearning,
+  ProgressResponse,
+} from "@chartnexa/api-contracts";
 import { ApiErrors } from "../../platform/openapi-helpers.js";
 import { ZodPipe } from "../../platform/zod.pipe.js";
 import { Authenticated, CurrentUser, type AuthContext } from "../identity/index.js";
@@ -50,5 +54,21 @@ export class ProgressController {
     @Param("lessonId", idPipe()) lessonId: string,
   ): Promise<CompletionResponse> {
     return this.progress.unmark(user.userId, courseId, lessonId);
+  }
+}
+
+@ApiTags("me")
+@Controller("me")
+export class ContinueLearningController {
+  constructor(@Inject(ProgressService) private readonly progress: ProgressService) {}
+
+  @Get("continue-learning")
+  @Authenticated()
+  @ApiOperation({
+    summary: "The unfinished course you were most recently studying, and its next lesson",
+  })
+  @ApiErrors(401)
+  get(@CurrentUser() user: AuthContext): Promise<ContinueLearning> {
+    return this.progress.continueLearning(user.userId);
   }
 }

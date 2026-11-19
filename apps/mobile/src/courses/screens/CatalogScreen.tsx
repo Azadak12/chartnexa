@@ -14,6 +14,7 @@ import { categoryApi } from "../../categories/category-api";
 import { courseApi } from "../course-api";
 import { CourseCard, LEVEL_LABEL } from "../CourseCard";
 import { NextLiveCard } from "../../live/NextLiveCard";
+import { ContinueCard } from "../../progress/ContinueCard";
 
 interface Filters {
   q: string;
@@ -70,6 +71,7 @@ export function CatalogScreen() {
         Courses
       </Text>
       {me.data && !me.data.emailVerified ? <VerifyNotice /> : null}
+      {me.data ? <ContinueCard /> : null}
       {me.data ? <NextLiveCard /> : null}
       <TextField
         label="Search courses"
