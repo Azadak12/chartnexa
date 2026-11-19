@@ -1,17 +1,14 @@
-import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { HOME_ROUTE, sanitizeReturnTo } from "../navigation/return-to";
 import { useSession } from "../session/session-store";
 import { mfaFlow } from "./mfa-flow";
 
-/** Once the session exists, leave the two-step screens for where the person was headed. */
-export function useFinishSignIn(returnTo: string | undefined): void {
-  const router = useRouter();
+/**
+ * Once the session exists, forget the two-step state. AuthGate then moves the person on, to where
+ * they were headed or to their role's landing page.
+ */
+export function useFinishSignIn(): void {
   const { status } = useSession();
   useEffect(() => {
-    if (status === "signed-in") {
-      mfaFlow.clear();
-      router.replace((sanitizeReturnTo(returnTo) ?? HOME_ROUTE) as never);
-    }
-  }, [status, returnTo, router]);
+    if (status === "signed-in") mfaFlow.clear();
+  }, [status]);
 }

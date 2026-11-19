@@ -75,14 +75,14 @@ Scan the QR code with Expo Go. Never use `localhost` for this variable: on the p
 Where the app cannot reach the Mac, check: same Wi-Fi, no VPN, macOS Firewall allows Node, and `curl http://192.168.1.20:3000/health/ready` works from another device's browser.
 
 ## 6. Development or preview build (if Expo Go cannot be used)
-The repository has `development`, `preview` and `production` build profiles (`apps/mobile/eas.json`). They need an Expo account (the Expo access token saved for this project was rejected and must be replaced). Then run `eas login` and `eas build --platform android --profile preview` from `apps/mobile`, with `EXPO_PUBLIC_API_BASE_URL` set to your Mac's address. Preview and development builds show a **Test server** button on the Welcome screen so you can point the phone at your Mac without rebuilding.
+The repository has `development`, `preview` and `production` build profiles (`apps/mobile/eas.json`). They need an Expo account (the Expo access token saved for this project was rejected and must be replaced). Then run `eas login` and `eas build --platform android --profile preview` from `apps/mobile`, with `EXPO_PUBLIC_API_BASE_URL` set to your Mac's address. Preview and development builds show a **Test server** button at the bottom of the Sign In screen so you can point the phone at your Mac without rebuilding.
 
 ## 7. What to try (manual acceptance checks on your phone)
 Student: register (with the confirm-password field) → read the email in `apps/api/.dev-mail/` for the verify link or code → sign in → browse and search → open a course → play the preview video → read reviews → simulated purchase ("Test mode: no money is charged") → My Learning → open a lesson, mark it complete → Assignments tab: open "Identify Chart Patterns", download the sample charts, submit an answer → write or edit a review.
 
 Instructor: Dashboard → Courses → open a course → change the thumbnail → add a lesson, a video (MP4) and a PDF → Assignments → New assignment → publish → Assign to students → review a submission and give feedback.
 
-Admin or Manager: complete two-step sign-in → Dashboard → Instructors → Invite an instructor (their email arrives in `apps/api/.dev-mail/` as a file containing the accept link and code) → accept it on the phone: tap **I have an invitation** on the Welcome screen and paste the code from that email (or open the link if your build handles the `chartnexa-preview://` scheme) → Admin: Deactivate that instructor.
+Admin or Manager: complete two-step sign-in → Dashboard → Instructors → Invite an instructor (their email arrives in `apps/api/.dev-mail/` as a file containing the accept link and code) → accept it on the phone: tap **I have an invitation** on the Sign In screen and paste the code from that email (or open the link if your build handles the `chartnexa-preview://` scheme) → Admin: Deactivate that instructor.
 
 Things only a phone can confirm (not verified here): video playback smoothness, file download and PDF opening, keyboard and back-button behaviour, large text and screen reader, and slow-network behaviour.
 

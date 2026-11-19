@@ -46,13 +46,13 @@ describe("the sign-in design", () => {
     expect(screen.queryByText(/or continue with/i)).toBeNull();
   });
 
-  it("leads to Create account and Forgot password", async () => {
+  it("leads to Sign up and Forgot password", async () => {
     await renderRouter(app, { initialUrl: "/sign-in" });
     await fireEvent.press(await screen.findByRole("button", { name: "Forgot password?" }));
     expect(screen).toHavePathname("/forgot-password");
     await screen.unmount();
     await renderRouter(app, { initialUrl: "/sign-in" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Create account" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Sign up" }));
     expect(screen).toHavePathname("/register");
   });
 

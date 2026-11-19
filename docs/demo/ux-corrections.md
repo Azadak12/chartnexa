@@ -40,7 +40,7 @@ Student tabs: Home, Explore, Learn, Tasks, Profile. Instructor: Dashboard, Cours
 
 ## Demo Accounts hub (development only)
 - Enable: `EXPO_PUBLIC_DEMO_ACCOUNTS=true` when starting Expo (`EXPO_PUBLIC_DEMO_ACCOUNTS=true EXPO_PUBLIC_API_BASE_URL=http://YOUR-IP:3000 pnpm --filter @chartnexa/mobile start`). The `development` and `preview` EAS profiles set it; `production` does not, and production builds ignore it.
-- Open it from **Welcome > Demo accounts**, or **Profile / More > Demo accounts** when signed in.
+- Open it from **Sign In > Try a demo account**, or **Profile / More > Demo accounts** when signed in.
 - Four cards (Student, Instructor, Manager, Admin) show the public email, what the role does, and a note that Manager and Admin need two-step sign-in. **Sign in as …** opens the normal sign-in with the email filled in. If you are already signed in it signs out first (the normal sign-out).
 - No password, token, MFA secret or recovery code is in the app. Passwords come from `pnpm --filter @chartnexa/api demo:credentials`; Manager and Admin still need the authenticator code (or `dev:totp`). Only the four demo emails can be prefilled.
 
@@ -52,3 +52,6 @@ Student tabs: Home, Explore, Learn, Tasks, Profile. Instructor: Dashboard, Cours
 
 ## Still needs a physical Android phone
 Tab bar and cards on real widths and large font sizes; chart animation smoothness; the filter sheet with the keyboard; hardware Back; video playback; MFA on a real authenticator; installable build (needs a valid Expo token).
+
+## Authentication-first navigation
+The app opens on **Sign In** (there is no Welcome page). Signed out: every protected link goes to Sign In and remembers where it was headed; Sign In and Sign Up link to each other at the bottom ("Don't have an account? Sign up", "Already have an account? Sign in"); neither shows the tab bar. Password reset, email verification, two-step and instructor-invitation screens stay reachable. Signed in: Student to Home; Instructor, Manager and Admin to Dashboard, after a plain loading view while the role is read (Sign In is never shown to a valid session). One guard in the root layout (`src/navigation/AuthGate.tsx`) enforces this; on sign-out or expiry the protected screens are replaced, so Android Back cannot return to them. The Test server control and the dev-only Demo accounts card moved to the bottom of Sign In.

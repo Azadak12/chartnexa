@@ -88,7 +88,7 @@ export function AcceptInvitationScreen() {
         loading={pending}
         onPress={() => void handleSubmit((v) => run(v as z.output<typeof formSchema>))()}
       />
-      <Button label="Back" variant="tertiary" onPress={() => router.replace("/welcome")} />
+      <Button label="Back" variant="tertiary" onPress={() => router.replace("/sign-in")} />
     </Screen>
   );
 }

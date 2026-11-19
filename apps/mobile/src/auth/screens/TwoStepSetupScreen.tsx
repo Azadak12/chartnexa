@@ -25,7 +25,7 @@ export function TwoStepSetupScreen() {
   const [hint, setHint] = useState<string | null>(null);
   const started = useRef(false);
   const { status } = useSession();
-  useFinishSignIn(returnTo);
+  useFinishSignIn();
 
   const backToSignIn = () => {
     mfaFlow.clear();

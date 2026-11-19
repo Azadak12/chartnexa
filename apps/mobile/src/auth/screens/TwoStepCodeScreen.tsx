@@ -26,7 +26,7 @@ export function TwoStepCodeScreen() {
   const [used, setUsed] = useState<{ pair: TokenPair; remaining: number } | null>(null);
   const input = useRef<{ focus?: () => void } | null>(null);
   const { status } = useSession();
-  useFinishSignIn(returnTo);
+  useFinishSignIn();
 
   const backToSignIn = () => {
     mfaFlow.clear();

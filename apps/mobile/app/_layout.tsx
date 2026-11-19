@@ -11,6 +11,7 @@ import { sessionManager } from "../src/auth/session-manager";
 import { useAppFonts } from "../src/fonts/use-app-fonts";
 import { sessionStore, useSession } from "../src/session/session-store";
 import { connectOnlineManager, createQueryClient } from "../src/state/query-client";
+import { AuthGate } from "../src/navigation/AuthGate";
 import { OverlayProvider } from "../src/ui";
 
 void SplashScreen.preventAutoHideAsync();
@@ -46,7 +47,9 @@ export default function RootLayout() {
       <QueryClientProvider client={client}>
         <OverlayProvider>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }} />
+          <AuthGate>
+            <Stack screenOptions={{ headerShown: false }} />
+          </AuthGate>
         </OverlayProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

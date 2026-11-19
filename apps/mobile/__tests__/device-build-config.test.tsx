@@ -140,13 +140,13 @@ describe("test server setting", () => {
     expect(testServer.current()).toBeNull();
   });
 
-  it("is offered on Welcome in test builds, checks the server, and is hidden in production", async () => {
+  it("is offered on Sign In in test builds, checks the server, and is hidden in production", async () => {
     sessionManager._resetForTests();
     sessionStore.set("signed-out");
     const fetchMock = jest
       .spyOn(globalThis, "fetch" as never)
       .mockResolvedValue({ ok: true, status: 200 } as never);
-    await renderRouter("./app", { initialUrl: "/welcome" });
+    await renderRouter("./app", { initialUrl: "/sign-in" });
     expect(await screen.findByTestId("build-label")).toBeTruthy();
     await fireEvent.press(screen.getByRole("button", { name: "Change the test server address" }));
     await fireEvent.changeText(
@@ -171,7 +171,7 @@ describe("test server setting", () => {
     fetchMock.mockRestore();
     await screen.unmount();
     extra["variant"] = "production";
-    await renderRouter("./app", { initialUrl: "/welcome" });
+    await renderRouter("./app", { initialUrl: "/sign-in" });
     await screen.findByRole("button", { name: "Sign in" });
     expect(screen.queryByTestId("build-label")).toBeNull();
   });

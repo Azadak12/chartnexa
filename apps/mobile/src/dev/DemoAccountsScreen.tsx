@@ -24,7 +24,7 @@ export function DemoAccountsScreen() {
     queryFn: accountApi.me,
     enabled: signedIn && demoAccountsEnabled(),
   });
-  const back = () => (router.canGoBack() ? router.back() : router.replace("/welcome"));
+  const back = () => (router.canGoBack() ? router.back() : router.replace("/sign-in"));
   const pick = useSubmitOnce(async (a: DemoAccount) => {
     if (signedIn) await sessionManager.signOut();
     router.replace({ pathname: "/sign-in", params: { email: a.email } });
