@@ -256,3 +256,10 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 |---|---|---|
 | R38 | Live classes without a chosen provider: staff paste an https meeting link (`manual` adapter); owners get it from 15 minutes before the start (`LIVE_JOIN_OPENS_MINUTES`) until the end; a started class cannot move; ended and cancelled classes are final; owners see classes that ended in the last 14 days; at most 100 upcoming per course; the first join request per person is counted for staff. | Built; pending owner confirmation. |
 | Q03 (still open) | Hosted live provider, recordings, attendance rules and what a missed or cancelled class means for students. | Pending; the `LiveProvider` boundary is ready for an adapter. |
+
+## Announcements (change `announcements`, 2026-11-19)
+
+| ID | Question or decision | Status |
+|---|---|---|
+| R39 | In-app announcements: Admins and Managers hold `announcements:publish` (not grantable to Instructors); plain text to everyone with an account or to one course's owners; withdrawing hides it from readers and keeps the reason in the audit log; no editing after posting. | Built; pending owner confirmation. |
+| Q35 | Delivery beyond the app (email, push), consent and quiet hours; may Instructors announce to their own courses? | Pending. In-app only; no email or push is sent. |

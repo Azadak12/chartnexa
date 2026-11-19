@@ -40,7 +40,8 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 7 | reviews-submit / reviews-list-edit | Archived | As `course-reviews-basic` |
 | 7 | reviews-moderation | Archived | CI run 75 |
 | 8 | audit-viewer, ops-lists (orders) | Archived (CI run 84) | `ops-audit-and-orders`: audit log and order status screens for Admins and Managers |
-| 8 | reports, announcements, reports-scoped-access | Not started | Report metrics and announcement channels need owner decisions |
+| 8 | announcements | Built (in-app only), in pull request | `announcements`: post, withdraw, feed, unread count (R39); email and push blocked on Q35 |
+| 8 | reports, reports-scoped-access | Not started | Report metrics need owner decisions |
 | 9 | security-review, a11y-device-qa, load-capacity, backup-restore-drill, store-compliance, runbooks-and-staged-release | Not started | Device QA and store work need hardware and accounts |
 
 ## Latest verified test results

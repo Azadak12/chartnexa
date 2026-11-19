@@ -136,3 +136,7 @@ export const canReadAudit = (a: AccessResponse | undefined): boolean => has(a, "
 /** Seeing payment status across all orders (Admins and Managers). */
 export const canReadPayments = (a: AccessResponse | undefined): boolean =>
   has(a, "payments:read_status");
+
+/** Posting and withdrawing announcements (Admins and Managers, R39 proposal). */
+export const canPublishAnnouncements = (a: AccessResponse | undefined): boolean =>
+  has(a, "announcements:publish");

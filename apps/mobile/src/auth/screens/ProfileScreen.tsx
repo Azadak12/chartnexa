@@ -6,6 +6,7 @@ import { View } from "react-native";
 import {
   canManageCourses,
   canModerateReviews,
+  canPublishAnnouncements,
   canReadAudit,
   canReadPayments,
   canManageInstructors,
@@ -142,6 +143,18 @@ export function ProfileScreen() {
                 label="Review moderation"
                 variant="secondary"
                 onPress={() => router.push("/profile/reviews")}
+              />
+            ) : null}
+            <Button
+              label="Announcements"
+              variant="secondary"
+              onPress={() => router.push("/profile/announcements")}
+            />
+            {canPublishAnnouncements(access.data) ? (
+              <Button
+                label="Post announcements"
+                variant="secondary"
+                onPress={() => router.push("/profile/staff-announcements")}
               />
             ) : null}
             {canReadPayments(access.data) ? (
