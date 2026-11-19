@@ -219,11 +219,8 @@ export class PaymentsService {
       if (!locked[0]) return "unknown_order";
       const order = await tx.order.findUniqueOrThrow({ where: { id: locked[0].id } });
       await tx.paymentEvent.update({ where: { id: eventRowId }, data: { orderId: order.id } });
-      if (
-        event.type === "paid" &&
-        event.amountCents !== undefined &&
-        event.amountCents !== order.amountCents
-      ) {
+      // A payment must state what was paid, and it must be the price; otherwise nothing is granted.
+      if (event.type === "paid" && event.amountCents !== order.amountCents) {
         return "amount_mismatch";
       }
       const next = TRANSITIONS[event.type]?.[order.status];

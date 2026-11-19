@@ -204,11 +204,26 @@ describe("provider events", () => {
     expect(await enrolled(p, c.id)).toBe(false);
   });
 
+  it("ignore a payment that does not state its amount (security review S1)", async () => {
+    const c = await mkCourse();
+    const p = await person(h);
+    const o = (await buy(p, c.id)).json() as Order;
+    expect(
+      (await event({ id: `e-${randomUUID()}`, type: "paid", checkoutRef: o.checkoutRef })).json(),
+    ).toEqual({ outcome: "amount_mismatch" });
+    expect(await enrolled(p, c.id)).toBe(false);
+  });
+
   it("apply out-of-order events safely: a late failure after payment is ignored", async () => {
     const c = await mkCourse();
     const p = await person(h);
     const o = (await buy(p, c.id)).json() as Order;
-    await event({ id: `e-${randomUUID()}`, type: "paid", checkoutRef: o.checkoutRef });
+    await event({
+      id: `e-${randomUUID()}`,
+      type: "paid",
+      checkoutRef: o.checkoutRef,
+      amountCents: o.amountCents,
+    });
     expect(
       (await event({ id: `e-${randomUUID()}`, type: "failed", checkoutRef: o.checkoutRef })).json(),
     ).toEqual({ outcome: "ignored" });
@@ -221,7 +236,14 @@ describe("provider events", () => {
     const o = (await buy(p, c.id)).json() as Order;
     await event({ id: `e-${randomUUID()}`, type: "failed", checkoutRef: o.checkoutRef });
     expect(
-      (await event({ id: `e-${randomUUID()}`, type: "paid", checkoutRef: o.checkoutRef })).json(),
+      (
+        await event({
+          id: `e-${randomUUID()}`,
+          type: "paid",
+          checkoutRef: o.checkoutRef,
+          amountCents: o.amountCents,
+        })
+      ).json(),
     ).toEqual({ outcome: "paid" });
     expect(await enrolled(p, c.id)).toBe(true);
   });
@@ -260,7 +282,14 @@ describe("provider events", () => {
       },
     });
     expect(
-      (await event({ id: `e-${randomUUID()}`, type: "paid", checkoutRef: o.checkoutRef })).json(),
+      (
+        await event({
+          id: `e-${randomUUID()}`,
+          type: "paid",
+          checkoutRef: o.checkoutRef,
+          amountCents: o.amountCents,
+        })
+      ).json(),
     ).toEqual({ outcome: "duplicate_needs_refund" });
     expect(await active(p.id, c.id)).toBe(1);
   });
@@ -271,7 +300,12 @@ describe("provider events", () => {
     const o = (await buy(p, c.id)).json() as Order;
     const res = await Promise.all(
       Array.from({ length: 6 }, (_, i) =>
-        event({ id: `e-${o.id}-${i}`, type: "paid", checkoutRef: o.checkoutRef }),
+        event({
+          id: `e-${o.id}-${i}`,
+          type: "paid",
+          checkoutRef: o.checkoutRef,
+          amountCents: o.amountCents,
+        }),
       ),
     );
     expect(res.every((r) => r.statusCode === 200)).toBe(true);
@@ -285,12 +319,18 @@ describe("provider events", () => {
     const o = (await buy(p, c.id)).json() as Order;
     const id = `e-${randomUUID()}`;
     await Promise.all(
-      Array.from({ length: 5 }, () => event({ id, type: "paid", checkoutRef: o.checkoutRef })),
+      Array.from({ length: 5 }, () =>
+        event({ id, type: "paid", checkoutRef: o.checkoutRef, amountCents: o.amountCents }),
+      ),
     );
     expect(await h.db.paymentEvent.count({ where: { eventId: id } })).toBe(1);
     expect(await active(p.id, c.id)).toBe(1);
     // A repeat answers what the first delivery did, not a fresh evaluation.
-    expect((await event({ id, type: "paid", checkoutRef: o.checkoutRef })).json()).toEqual({
+    expect(
+      (
+        await event({ id, type: "paid", checkoutRef: o.checkoutRef, amountCents: o.amountCents })
+      ).json(),
+    ).toEqual({
       outcome: "paid",
     });
   });

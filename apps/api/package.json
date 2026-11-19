@@ -14,7 +14,8 @@
     "bench:argon2": "tsx scripts/bench-argon2.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",
-    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts"
+    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts",
+    "load:env": "tsx scripts/load-env.ts"
   },
   "devDependencies": {
     "@nestjs/testing": "12.4.2",

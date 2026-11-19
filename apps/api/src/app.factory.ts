@@ -51,6 +51,18 @@ export async function createApp(
   );
   fastify.addHook("onSend", (req, reply, payload, done) => {
     void reply.header("x-request-id", req.id);
+    // Defaults for every answer (security review S2). Routes that set their own, such as file
+    // and video streams, keep theirs. Answers carry personal data and tokens, so nothing is
+    // stored by browsers or proxies unless a route says otherwise.
+    if (!reply.hasHeader("cache-control")) void reply.header("cache-control", "no-store");
+    if (!reply.hasHeader("x-content-type-options")) {
+      void reply.header("x-content-type-options", "nosniff");
+    }
+    if (!reply.hasHeader("content-security-policy")) {
+      void reply.header("content-security-policy", "default-src 'none'; frame-ancestors 'none'");
+    }
+    void reply.header("referrer-policy", "no-referrer");
+    void reply.header("x-frame-options", "DENY");
     const traceId = (req.raw as { traceId?: string }).traceId;
     if (traceId) void reply.header("x-trace-id", traceId);
     done(null, payload);
