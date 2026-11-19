@@ -15,6 +15,8 @@ import { LocalDiskStorage, OBJECT_STORAGE, type ObjectStorage } from "./storage.
 import { StaffVideoController, PublicVideoController } from "./video.controller.js";
 import { TestVideoProvider, VIDEO_PROVIDER } from "./video-provider.js";
 import { VideoService } from "./video.service.js";
+import { PublicThumbnailController, StaffThumbnailController } from "./thumbnails.controller.js";
+import { ThumbnailsService } from "./thumbnails.service.js";
 
 const CLEANUP_EVERY_MS = 15 * 60 * 1000;
 
@@ -26,6 +28,8 @@ const CLEANUP_EVERY_MS = 15 * 60 * 1000;
     FilesController,
     StaffVideoController,
     PublicVideoController,
+    StaffThumbnailController,
+    PublicThumbnailController,
   ],
   providers: [
     ResourcesService,
@@ -36,13 +40,14 @@ const CLEANUP_EVERY_MS = 15 * 60 * 1000;
     },
     { provide: MALWARE_SCANNER, useClass: NoScanner },
     VideoService,
+    ThumbnailsService,
     {
       provide: VIDEO_PROVIDER,
       useFactory: (storage: ObjectStorage) => new TestVideoProvider(storage),
       inject: [OBJECT_STORAGE],
     },
   ],
-  exports: [ResourcesService, VideoService],
+  exports: [ResourcesService, VideoService, OBJECT_STORAGE],
 })
 export class ResourcesModule implements OnModuleInit, OnModuleDestroy {
   private timer: NodeJS.Timeout | undefined;

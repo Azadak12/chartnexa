@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { testServer } from "./test-server";
 import {
   fromResponse,
   isAppError,
@@ -12,6 +13,9 @@ import {
 export const REQUEST_TIMEOUT_MS = 15000;
 
 export function apiBaseUrl(): string {
+  // A tester's chosen server (test builds only; production ignores it).
+  const override = testServer.current();
+  if (override) return override;
   // EXPO_PUBLIC_ values are inlined into the bundle at build time.
   const fromEnv = process.env.EXPO_PUBLIC_API_BASE_URL;
   if (fromEnv) return fromEnv;

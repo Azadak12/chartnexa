@@ -34,6 +34,21 @@ describe("health", () => {
   });
 });
 
+describe("security headers (security review S2)", () => {
+  it("are sent on successful, failed and unmatched answers", async () => {
+    for (const url of ["/health/live", "/courses/not-a-uuid", "/no-such-route"]) {
+      const res = await get(url);
+      expect(res.headers["cache-control"], url).toBe("no-store");
+      expect(res.headers["x-content-type-options"], url).toBe("nosniff");
+      expect(res.headers["content-security-policy"], url).toBe(
+        "default-src 'none'; frame-ancestors 'none'",
+      );
+      expect(res.headers["referrer-policy"], url).toBe("no-referrer");
+      expect(res.headers["x-frame-options"], url).toBe("DENY");
+    }
+  });
+});
+
 describe("request ids", () => {
   it("echoes a valid supplied id and logs it", async () => {
     const res = await get("/health/live", { "x-request-id": "client-req-12345" });

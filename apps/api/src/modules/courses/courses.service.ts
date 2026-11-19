@@ -20,6 +20,16 @@ import { AuditService, GrantsService } from "../access/index.js";
 import { EntitlementsService } from "../entitlements/index.js";
 
 type Row = Prisma.CourseGetPayload<object>;
+/** A course with the names shown to students. */
+const withNames = {
+  category: { select: { name: true } },
+  instructor: { select: { id: true, displayName: true } },
+} as const;
+type PublicRow = Prisma.CourseGetPayload<{ include: typeof withNames }>;
+
+/** Where the image is served (a public, cacheable path; the id changes on every replace). */
+export const thumbnailUrl = (r: Pick<Row, "thumbnailId" | "thumbnailMime">): string | null =>
+  r.thumbnailId && r.thumbnailMime ? `/courses/thumbnails/${r.thumbnailId}` : null;
 type Tx = Prisma.TransactionClient;
 
 export const STALE_MESSAGE = "This course was changed by someone else. Reload it and try again.";
@@ -37,6 +47,9 @@ export function toStaff(r: Row): StaffCourse {
     currency: "USD",
     coverTone: r.coverTone,
     categoryId: r.categoryId,
+    categoryName: null,
+    thumbnailUrl: thumbnailUrl(r),
+    instructor: null,
     status: r.status,
     version: r.version,
     publishedAt: r.publishedAt ? iso(r.publishedAt) : null,
@@ -53,7 +66,7 @@ export function ratingOf(r: Pick<Row, "ratingCount" | "ratingSum">): CourseRatin
   };
 }
 
-export function toPublic(r: Row): PublicCourse {
+export function toPublic(r: PublicRow): PublicCourse {
   return {
     id: r.id,
     title: r.title,
@@ -64,10 +77,15 @@ export function toPublic(r: Row): PublicCourse {
     coverTone: r.coverTone,
     publishedAt: iso(r.publishedAt as Date),
     categoryId: r.categoryId,
+    categoryName: r.category?.name ?? null,
+    thumbnailUrl: thumbnailUrl(r),
+    instructor: r.instructor
+      ? { id: r.instructor.id, displayName: r.instructor.displayName ?? "Instructor" }
+      : null,
   };
 }
 
-function toSummary(r: Row): PublicCourseSummary {
+function toSummary(r: PublicRow): PublicCourseSummary {
   const { description, ...rest } = toPublic(r);
   const summary =
     description.length > SUMMARY_LENGTH
@@ -105,7 +123,18 @@ export class CoursesService {
     const data = createCourseRequestSchema.parse(input);
     return this.db.$transaction(async (tx) => {
       await this.assertCategory(tx, data.categoryId);
-      const row = await tx.course.create({ data: { ...data, createdBy: actorId } });
+      const creatorRole = await tx.userRole.findFirst({
+        where: { userId: actorId, revokedAt: null },
+        select: { role: true },
+      });
+      const row = await tx.course.create({
+        data: {
+          ...data,
+          createdBy: actorId,
+          // An Instructor's own course shows them as its instructor.
+          ...(creatorRole?.role === "instructor" ? { instructorId: actorId } : {}),
+        },
+      });
       await this.audit.record(tx, {
         actorKind: "user",
         actorUserId: actorId,
@@ -352,7 +381,7 @@ export class CoursesService {
    * access. Drafts and unknown ids look the same to everyone else.
    */
   async getPublished(id: string, viewerId?: string): Promise<PublicCourseDetail> {
-    const row = await this.db.course.findUnique({ where: { id } });
+    const row = await this.db.course.findUnique({ where: { id }, include: withNames });
     const owner = viewerId !== undefined ? await this.entitlements.hasActive(viewerId, id) : false;
     if (!row || (row.status !== "published" && !owner))
       throw new NotFoundException("Course not found.");
@@ -378,6 +407,11 @@ export class CoursesService {
       coverTone: row.coverTone,
       publishedAt: row.publishedAt ? iso(row.publishedAt) : null,
       categoryId: row.categoryId,
+      categoryName: row.category?.name ?? null,
+      thumbnailUrl: thumbnailUrl(row),
+      instructor: row.instructor
+        ? { id: row.instructor.id, displayName: row.instructor.displayName ?? "Instructor" }
+        : null,
       lessonCount: Number(counts?.total ?? 0),
       previewCount: Number(counts?.previews ?? 0),
       enrolled: owner,
@@ -410,18 +444,21 @@ export class CoursesService {
 
   // --- helpers -------------------------------------------------------------------------------
 
-  private async rowsInOrder(ids: string[]): Promise<Row[]> {
+  private async rowsInOrder(ids: string[]): Promise<PublicRow[]> {
     if (ids.length === 0) return [];
-    const rows = await this.db.course.findMany({ where: { id: { in: ids } } });
+    const rows = await this.db.course.findMany({
+      where: { id: { in: ids } },
+      include: withNames,
+    });
     const byId = new Map(rows.map((r) => [r.id, r]));
-    return ids.map((i) => byId.get(i)).filter((r): r is Row => r !== undefined);
+    return ids.map((i) => byId.get(i)).filter((r): r is PublicRow => r !== undefined);
   }
 
-  private mapPage<T>(
-    rows: Row[],
+  private mapPage<T, R extends Row>(
+    rows: R[],
     limit: number,
-    map: (r: Row) => T,
-    key: (r: Row) => (string | number)[],
+    map: (r: R) => T,
+    key: (r: R) => (string | number)[],
   ): Page<T> {
     const page = buildPage(rows, limit, key, this.config.CURSOR_SECRET);
     return { items: page.items.map(map), nextCursor: page.nextCursor };

@@ -56,6 +56,7 @@ export const myCourseSchema = z.object({
   priceCents: z.number().int(),
   currency: z.literal("USD"),
   coverTone: courseToneSchema,
+  thumbnailUrl: z.string().nullable().default(null),
   /** False when the course is unpublished: owners keep access but it is not for sale. */
   onSale: z.boolean(),
   /** When access began. */

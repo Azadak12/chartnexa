@@ -5,9 +5,10 @@ export const PERMISSION_LABEL: Record<GrantablePermission, string> = {
   "course:create": "Create new courses",
   "course:update": "Edit course details",
   "course:publish": "Publish and unpublish courses",
-  "lesson:upload": "Upload lessons (not available yet)",
-  "live:schedule": "Schedule live sessions (not available yet)",
-  "students:read": "See enrolled students (not available yet)",
+  "lesson:upload": "Add lessons, videos and files",
+  "live:schedule": "Schedule live classes",
+  "assignments:manage": "Create assignments and give feedback",
+  "students:read": "See enrolled students",
   "reports:read": "See course reports (not available yet)",
 };
 

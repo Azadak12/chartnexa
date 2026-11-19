@@ -78,10 +78,15 @@ export function CoursePageScreen() {
   };
   return (
     <Screen>
-      <CoverBlock tone={c.coverTone} height={140} />
+      <CoverBlock tone={c.coverTone} height={190} thumbnailUrl={c.thumbnailUrl} />
       <Text variant="title" accessibilityRole="header">
         {c.title}
       </Text>
+      {c.instructor ? (
+        <Text tone="muted" testID="course-instructor">
+          Taught by {c.instructor.displayName}
+        </Text>
+      ) : null}
       <View
         style={{
           flexDirection: "row",
@@ -90,7 +95,10 @@ export function CoursePageScreen() {
           gap: spacing.sm,
         }}
       >
-        <Text tone="muted">{LEVEL_LABEL[c.level]}</Text>
+        <Text tone="muted">
+          {LEVEL_LABEL[c.level]}
+          {c.categoryName ? ` · ${c.categoryName}` : ""}
+        </Text>
         <Text variant="heading" testID="course-price">
           {formatPrice(c.priceCents)}
         </Text>

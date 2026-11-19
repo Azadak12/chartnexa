@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { LightMyRequestResponse } from "fastify";
-import { MAILER, MemoryMailer } from "../src/modules/mailer/index.js";
+import { MAILER, MemoryMailer, type MailMessage } from "../src/modules/mailer/index.js";
 import { PrismaService } from "../src/database/prisma.service.js";
 import { startApp, type TestApp } from "./support.js";
 
@@ -34,7 +34,7 @@ export interface Harness {
     refreshToken: string;
     sessionId: string;
   }>;
-  tokenFor: (email: string, template: "verify_email" | "password_reset") => string;
+  tokenFor: (email: string, template: MailMessage["template"]) => string;
 }
 
 export async function makeHarness(

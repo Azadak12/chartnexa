@@ -76,7 +76,7 @@ export function MyCoursesScreen() {
             style={styles.card}
             testID={`my-course-${item.id}`}
           >
-            <CoverBlock tone={item.coverTone} />
+            <CoverBlock tone={item.coverTone} thumbnailUrl={item.thumbnailUrl} />
             <View style={{ gap: spacing.xs }}>
               <Text variant="subheading">{item.title}</Text>
               <Text variant="caption" tone="muted">

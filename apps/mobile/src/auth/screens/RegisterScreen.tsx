@@ -13,6 +13,7 @@ export function RegisterScreen() {
   const { control, handleSubmit, setError } = useZodForm(registerFormSchema, {
     email: "",
     password: "",
+    confirmPassword: "",
     displayName: "",
   });
   const [message, setMessage] = useState<string | null>(null);
@@ -76,6 +77,12 @@ export function RegisterScreen() {
         autoCorrect={false}
       />
       <FormField control={control} name="password" label="Password" password="new-password" />
+      <FormField
+        control={control}
+        name="confirmPassword"
+        label="Confirm password"
+        password="new-password"
+      />
       <Text variant="caption" tone="muted">
         Use at least 10 characters. Avoid common passwords and your email.
       </Text>

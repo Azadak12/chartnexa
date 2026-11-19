@@ -59,6 +59,11 @@ export const publicCourseSchema = z.object({
   publishedAt: z.string(),
   /** Look the name up in GET /categories. */
   categoryId: z.string().nullable().default(null),
+  categoryName: z.string().nullable().default(null),
+  /** Path of the thumbnail image (append to the API address), or null for the colour cover. */
+  thumbnailUrl: z.string().nullable().default(null),
+  /** The instructor shown on the course, or null when the academy itself runs it. */
+  instructor: z.object({ id: z.string(), displayName: z.string() }).nullable().default(null),
 });
 
 /** The course page: the public course plus how many lessons it has. */
@@ -77,6 +82,9 @@ export const publicCourseDetailSchema = publicCourseSchema.extend({
   nextLessonId: z.string().nullable().default(null),
   rating: courseRatingSchema.default(NO_RATING),
 });
+
+export const THUMBNAIL_MAX_BYTES = 2 * 1024 * 1024;
+export const THUMBNAIL_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 
 export const publicCourseSummarySchema = publicCourseSchema.omit({ description: true }).extend({
   /** First part of the description for cards. */

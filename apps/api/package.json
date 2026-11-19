@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "generate": "prisma generate",
-    "dev": "tsx watch src/main.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/main.ts",
     "start": "node dist/main.js",
     "build": "pnpm generate && tsc -p tsconfig.build.json",
     "typecheck": "pnpm generate && tsc --noEmit",
@@ -14,7 +14,11 @@
     "bench:argon2": "tsx scripts/bench-argon2.ts",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:roundtrip": "tsx scripts/migration-roundtrip.ts",
-    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts"
+    "openapi:export": "pnpm generate && tsx scripts/export-openapi.ts",
+    "load:env": "tsx scripts/load-env.ts",
+    "seed:demo": "tsx --env-file-if-exists=.env scripts/seed-demo.ts",
+    "demo:credentials": "tsx scripts/demo-credentials.ts",
+    "dev:totp": "tsx scripts/dev-totp.ts"
   },
   "devDependencies": {
     "@nestjs/testing": "12.4.2",

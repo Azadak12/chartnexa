@@ -35,3 +35,5 @@ export * from "./video.js";
 export * from "./payments.js";
 export * from "./live.js";
 export * from "./announcements.js";
+export * from "./invitations.js";
+export * from "./assignments.js";

@@ -4,7 +4,7 @@ Updated with each OpenSpec change. Three separate measures; none of them is a pr
 
 - **Feature implementation:** which roadmap changes have code merged.
 - **Verification:** what automated checks and CI prove for them, and what has never been checked (devices, load, restore).
-- **Production readiness:** not assessed. It needs Phase 9 evidence (security review, device QA, load test, backup and restore drill, store compliance), none of which has been executed.
+- **Production readiness:** **not ready.** Phase 9 evidence so far: an internal security review, a load test and a restore drill, all on a development container only. Still missing: an independent security review, device and accessibility QA, load tests on real hosting, production backups, store compliance, and every production provider (`docs/operations/production-dependencies.md`).
 
 ## Roadmap changes (docs/09)
 
@@ -40,9 +40,13 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 7 | reviews-submit / reviews-list-edit | Archived | As `course-reviews-basic` |
 | 7 | reviews-moderation | Archived | CI run 75 |
 | 8 | audit-viewer, ops-lists (orders) | Archived (CI run 84) | `ops-audit-and-orders`: audit log and order status screens for Admins and Managers |
-| 8 | announcements | Built (in-app only), in pull request | `announcements`: post, withdraw, feed, unread count (R39); email and push blocked on Q35 |
+| 8 | announcements | Archived, in-app only (pull request 27) | `announcements`: post, withdraw, feed, unread count (R39); email and push blocked on Q35 |
 | 8 | reports, reports-scoped-access | Not started | Report metrics need owner decisions |
-| 9 | security-review, a11y-device-qa, load-capacity, backup-restore-drill, store-compliance, runbooks-and-staged-release | Not started | Device QA and store work need hardware and accounts |
+| MVP | mvp-demo (thumbnails, instructor invitations, assignments, demo seed, role dashboard) | Built, in pull request | See `docs/demo/README.md` and `docs/demo/feature-status.md`; no physical device verification yet |
+| 9 | security-review | Internal review done; independent review needed | `docs/security/2026-11-19-security-review.md`: S1 (payment amount) and S2 (headers) fixed, S3 route inventory test added |
+| 9 | load-capacity | Tooling ready; development-container runs only | `docs/operations/load-testing.md`; no capacity claim possible without hosting |
+| 9 | backup-restore-drill | Scripts drilled locally | `docs/operations/backup-and-restore.md`; production backups need hosting |
+| 9 | a11y-device-qa, store-compliance, runbooks-and-staged-release | Not started | Need devices, store accounts and hosting |
 
 ## Latest verified test results
 
@@ -57,6 +61,11 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-19 | Local full checks after `live-sessions-schedule` | All pass: 540 API, 486 app, 40 contract; lint, format, builds, secrets, migration round trip (typecheck re-run after fixing two test option types) |
 | 2026-11-19 | Checks after `ops-audit-and-orders` (app only): lint, format, typecheck, app tests, contract tests, app build, secrets | All pass: 493 app, 41 contract |
 | 2026-11-19 | Local full checks after `continue-learning` | All pass: 545 API, 495 app, 42 contract; lint, format, typecheck, builds, secrets, migration round trip |
+| 2026-11-19 | Pull requests 26 and 27 (continue-learning archive, announcements): CI checks api, mobile, check, audit | All success; merged |
+| 2026-11-19 | Local full checks after `security-review-fixes` | All pass: 559 API, 501 app, 43 contract; lint (after adding Node globals for `tools/`), format, typecheck, builds, secrets, migration round trip; `pnpm audit:deps` passes (2 moderate advisories in Expo tooling) |
+| 2026-11-20 | Local full checks after `mvp-demo` | All pass: 68 contract-package, 604 API, 544 app and 45 real-API contract tests; lint, format, typecheck, builds, secrets, migration round trip (24 migrations). Demo seed run twice against a scratch database (idempotent) and the API driven over HTTP as every role. No physical device. |
+| 2026-11-19 | Load runner on the development container (20 and 100 users, 30 s each) | 0 % errors; about 1,050 requests/s at saturation; sign-in p95 3.5 s with 100 at once (see load-testing.md) |
+| 2026-11-19 | Restore drill on local PostgreSQL | Pass: 18/18 migrations, row counts matched; tampered and unverified dumps refused |
 
 ## Never verified
 
@@ -67,9 +76,14 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 
 ## Outstanding owner decisions
 
-Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider and live rules (Q03, R38), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
+See also `docs/operations/production-dependencies.md`.
+
+
+Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider and live rules (Q03, R38), announcement channels and rules (Q35, R39), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
 
 ## Current risks
+
+- Simultaneous sign-ins are CPU bound (argon2): 100 at once took about 3.5 s each on the development container. Size hosting or queue sign-ins before launch.
 
 - Payments are the largest unbuilt area and are blocked on policy.
 - Media delivery depends on providers not yet chosen; storage and scanning need accounts.

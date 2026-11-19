@@ -59,6 +59,12 @@ model User {
   announcementsWritten   Announcement[]     @relation("AnnouncementAuthor")
   announcementsWithdrawn Announcement[]     @relation("AnnouncementWithdrawer")
   announcementReads      AnnouncementRead[]
+  coursesTaught          Course[]           @relation("CourseInstructor")
+  invitationsSent        InstructorInvitation[] @relation("InvitationSender")
+  assignmentsCreated     Assignment[]       @relation("AssignmentCreator")
+  assignmentRecipients   AssignmentRecipient[] @relation("RecipientUser")
+  invitationsAccepted    InstructorInvitation[] @relation("InvitationAcceptor")
+  invitationsRevoked     InstructorInvitation[] @relation("InvitationRevoker")
 
   @@map("users")
 }
@@ -193,6 +199,12 @@ model Course {
   /// Optional; a category in use cannot be deleted (RESTRICT).
   categoryId  String?      @map("category_id") @db.Uuid
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// The instructor shown on the course (set when an Instructor creates it, or by the demo seed).
+  instructorId  String?    @map("instructor_id") @db.Uuid
+  instructor    User?      @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: SetNull, map: "courses_instructor_fkey")
+  /// Public id of the thumbnail image in object storage (thumbnails/<id>); changes on replace.
+  thumbnailId   String?    @unique(map: "courses_thumbnail_id_key") @map("thumbnail_id") @db.Uuid
+  thumbnailMime String?    @map("thumbnail_mime")
   reviews     Review[]
 
   @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
@@ -202,6 +214,7 @@ model Course {
   orders  Order[]
   liveSessions LiveSession[]
   announcements Announcement[]
+  assignments Assignment[]
   lessonKeys LessonCreateKey[]
   entitlements Entitlement[]
 
@@ -680,4 +693,85 @@ model AnnouncementRead {
   @@id([announcementId, userId])
   @@index([userId], map: "announcement_reads_user_idx")
   @@map("announcement_reads")
+}
+
+/// An invitation to become an Instructor. The raw token is only ever in the email.
+model InstructorInvitation {
+  id         String    @id @default(uuid()) @db.Uuid
+  email      String
+  tokenHash  String    @unique(map: "instructor_invitations_token_key") @map("token_hash")
+  status     String    @default("pending")
+  invitedBy  String?   @map("invited_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt DateTime? @map("accepted_at") @db.Timestamptz(6)
+  acceptedBy String?   @map("accepted_by") @db.Uuid
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy  String?   @map("revoked_by") @db.Uuid
+
+  inviter  User? @relation("InvitationSender", fields: [invitedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_inviter_fkey")
+  acceptor User? @relation("InvitationAcceptor", fields: [acceptedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_acceptor_fkey")
+  revoker  User? @relation("InvitationRevoker", fields: [revokedBy], references: [id], onDelete: SetNull, map: "instructor_invitations_revoker_fkey")
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "instructor_invitations_feed_idx")
+  @@map("instructor_invitations")
+}
+
+/// Coursework for a course. `lessonId` only records which lesson it relates to (the database
+/// keeps it in the same course). Students see it once published and assigned to them.
+model Assignment {
+  id              String    @id @default(uuid()) @db.Uuid
+  courseId        String    @map("course_id") @db.Uuid
+  lessonId        String?   @map("lesson_id") @db.Uuid
+  title           String
+  instructions    String
+  dueAt           DateTime? @map("due_at") @db.Timestamptz(6)
+  status          String    @default("draft")
+  version         Int       @default(1)
+  attachmentKey   String?   @map("attachment_key")
+  attachmentName  String?   @map("attachment_name")
+  attachmentMime  String?   @map("attachment_mime")
+  attachmentSize  Int?      @map("attachment_size")
+  createdBy       String?   @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  course     Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "assignments_course_fkey")
+  creator    User?                  @relation("AssignmentCreator", fields: [createdBy], references: [id], onDelete: SetNull, map: "assignments_creator_fkey")
+  recipients AssignmentRecipient[]
+
+  @@index([courseId, createdAt(sort: Desc)], map: "assignments_course_idx")
+  @@map("assignments")
+}
+
+model AssignmentRecipient {
+  assignmentId String   @map("assignment_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  assignedBy   String?  @map("assigned_by") @db.Uuid
+  assignedAt   DateTime @default(now()) @map("assigned_at") @db.Timestamptz(6)
+
+  assignment Assignment             @relation(fields: [assignmentId], references: [id], onDelete: Cascade, map: "assignment_recipients_assignment_fkey")
+  user       User                   @relation("RecipientUser", fields: [userId], references: [id], onDelete: Cascade, map: "assignment_recipients_user_fkey")
+  submission AssignmentSubmission?
+
+  @@id([assignmentId, userId])
+  @@index([userId, assignedAt(sort: Desc)], map: "assignment_recipients_user_idx")
+  @@map("assignment_recipients")
+}
+
+model AssignmentSubmission {
+  assignmentId String    @map("assignment_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  body         String
+  status       String    @default("submitted")
+  late         Boolean   @default(false)
+  submittedAt  DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  feedback     String?
+  reviewedBy   String?   @map("reviewed_by") @db.Uuid
+  reviewedAt   DateTime? @map("reviewed_at") @db.Timestamptz(6)
+
+  recipient AssignmentRecipient @relation(fields: [assignmentId, userId], references: [assignmentId, userId], onDelete: Cascade, map: "assignment_submissions_recipient_fkey")
+
+  @@id([assignmentId, userId])
+  @@map("assignment_submissions")
 }

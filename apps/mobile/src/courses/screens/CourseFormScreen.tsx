@@ -1,3 +1,4 @@
+import { StaffCourseThumbnail } from "../StaffCourseThumbnail";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -26,6 +27,7 @@ import {
   canCreateCourses,
   canAuthorLessons,
   canManageEnrollments,
+  canManageAssignments,
   canScheduleLive,
   canManageCourses,
   canPublishCourse,
@@ -131,6 +133,7 @@ export function CourseFormScreen() {
       canLessons={editing && canAuthorLessons(access.data, String(id))}
       canStudents={editing && canManageEnrollments(access.data)}
       canLive={editing && canScheduleLive(access.data, String(id))}
+      canAssignments={editing && canManageAssignments(access.data, String(id))}
       onSaved={() => qc.invalidateQueries({ queryKey: ["staff-courses"] })}
     />
   );
@@ -142,6 +145,7 @@ function Form({
   canLessons,
   canStudents,
   canLive,
+  canAssignments,
   onSaved,
 }: {
   course: StaffCourse | undefined;
@@ -149,6 +153,7 @@ function Form({
   canLessons: boolean;
   canStudents: boolean;
   canLive: boolean;
+  canAssignments: boolean;
   onSaved: () => unknown;
 }) {
   const router = useRouter();
@@ -385,6 +390,9 @@ function Form({
         loading={pending}
         onPress={() => void handleSubmit((v) => run(v))()}
       />
+      {course ? (
+        <StaffCourseThumbnail courseId={course.id} tone={tone} initialUrl={course.thumbnailUrl} />
+      ) : null}
       {course && status && canPublish ? (
         <View ref={publishRef} collapsable={false} style={{ gap: spacing.sm }}>
           {dirty ? (
@@ -412,6 +420,13 @@ function Form({
           label="Students"
           variant="secondary"
           onPress={() => router.push(`/manage/${course.id}/students`)}
+        />
+      ) : null}
+      {course && canAssignments ? (
+        <Button
+          label="Assignments"
+          variant="secondary"
+          onPress={() => router.push(`/manage/${course.id}/assignments`)}
         />
       ) : null}
       {course && canLive ? (

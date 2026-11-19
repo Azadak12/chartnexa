@@ -112,6 +112,7 @@ describe("who may grant", () => {
       "course:update",
       "lesson:upload",
       "live:schedule",
+      "assignments:manage",
       "students:read",
       "reports:read",
     ]) {
@@ -401,6 +402,7 @@ describe("enforcement on courses", () => {
     expect(audit[0]?.actorKind).toBe("system");
     const auto = (await activeGrants(ins.id)).filter((g) => g.source === "owner_auto");
     expect(auto.map((g) => g.permission).sort()).toEqual([
+      "assignments:manage",
       "course:update",
       "lesson:upload",
       "live:schedule",

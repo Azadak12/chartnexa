@@ -8,6 +8,7 @@ export const GRANTABLE_PERMISSIONS = {
   "course:publish": "course",
   "lesson:upload": "course",
   "live:schedule": "course",
+  "assignments:manage": "course",
   "students:read": "course",
   "reports:read": "course",
 } as const;

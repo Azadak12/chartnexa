@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { View } from "react-native";
 import {
   canManageCourses,
+  canInviteInstructors,
   canModerateReviews,
   canPublishAnnouncements,
   canReadAudit,
@@ -19,6 +20,8 @@ import { sessionStore } from "../../session/session-store";
 import { QueryStateView } from "../../state/StateView";
 import { status as statusColors } from "../../theme";
 import { BottomSheet, Banner, Button, Card, Screen, Text, useSubmitOnce } from "../../ui";
+import { buildLabel } from "../../api/TestServerSheet";
+import { testServer } from "../../api/test-server";
 import { accountApi } from "../account-api";
 import { mfaApi } from "../mfa-api";
 import { formMessage } from "../errors-ui";
@@ -150,6 +153,13 @@ export function ProfileScreen() {
               variant="secondary"
               onPress={() => router.push("/profile/announcements")}
             />
+            {canInviteInstructors(access.data) ? (
+              <Button
+                label="Invite instructors"
+                variant="secondary"
+                onPress={() => router.push("/profile/invitations")}
+              />
+            ) : null}
             {canPublishAnnouncements(access.data) ? (
               <Button
                 label="Post announcements"
@@ -177,6 +187,11 @@ export function ProfileScreen() {
                 variant="secondary"
                 onPress={() => router.push("/profile/two-step")}
               />
+            ) : null}
+            {testServer.allowed() ? (
+              <Text variant="caption" tone="muted" testID="profile-build-label">
+                {buildLabel()}
+              </Text>
             ) : null}
             <Button
               label="Change password"

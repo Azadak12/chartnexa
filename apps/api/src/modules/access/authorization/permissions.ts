@@ -18,6 +18,7 @@ export const PERMISSION_SCOPES = {
   "course:publish": "course",
   "lesson:upload": "course",
   "live:schedule": "course",
+  "assignments:manage": "course",
   "students:read": "course",
   "enrollments:manage": "global",
   "reports:read": "course",
@@ -25,6 +26,7 @@ export const PERMISSION_SCOPES = {
   "payments:read_status": "global",
   "payments:read_full": "global",
   "announcements:publish": "global",
+  "instructors:invite": "global",
 } as const;
 
 export type Permission = keyof typeof PERMISSION_SCOPES;
@@ -46,6 +48,8 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "course:publish": ["admin", "manager"],
   "lesson:upload": ["admin", "manager"],
   "live:schedule": ["admin", "manager"],
+  // R41 proposal: create, publish and assign coursework, and give feedback on submissions.
+  "assignments:manage": ["admin", "manager"],
   "students:read": ["admin", "manager"],
   "enrollments:manage": ["admin", "manager"],
   "reports:read": ["admin", "manager"],
@@ -54,6 +58,8 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "payments:read_full": ["admin"],
   // R39 proposal: Admins and Managers post academy-wide and course announcements.
   "announcements:publish": ["admin", "manager"],
+  // R40 proposal: Admins and Managers invite Instructors; only Admins deactivate them (roles:manage).
+  "instructors:invite": ["admin", "manager"],
 };
 
 export function permissionsForRole(role: Role): Permission[] {

@@ -3,10 +3,12 @@ import type { AppConfig } from "./config/config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
+import { AssignmentsModule } from "./modules/assignments/index.js";
 import { AnnouncementsModule } from "./modules/announcements/index.js";
 import { CategoriesModule } from "./modules/categories/index.js";
 import { CoursesModule } from "./modules/courses/index.js";
 import { EntitlementsModule } from "./modules/entitlements/index.js";
+import { InvitationsModule } from "./modules/invitations/index.js";
 import { LessonsModule } from "./modules/lessons/index.js";
 import { LiveModule } from "./modules/live/index.js";
 import { AccessModule } from "./modules/access/index.js";
@@ -42,6 +44,8 @@ export class AppModule {
         PaymentsModule,
         LiveModule,
         AnnouncementsModule,
+        InvitationsModule,
+        AssignmentsModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

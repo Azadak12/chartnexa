@@ -399,6 +399,7 @@ describe("My Courses", () => {
     expect(Object.keys(page.items[0]!).sort()).toEqual(
       [
         "coverTone",
+        "thumbnailUrl",
         "currency",
         "enrolledAt",
         "id",

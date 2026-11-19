@@ -28,8 +28,13 @@ export function CourseCard({
       style={styles.card}
       testID={`course-${course.id}`}
     >
-      <CoverBlock tone={course.coverTone} />
+      <CoverBlock tone={course.coverTone} height={150} thumbnailUrl={course.thumbnailUrl} />
       <View style={styles.body}>
+        {course.categoryName ? (
+          <Text variant="caption" tone="link">
+            {course.categoryName.toUpperCase()}
+          </Text>
+        ) : null}
         <Text variant="subheading">{course.title}</Text>
         {course.summary ? (
           <Text tone="muted" numberOfLines={3}>
@@ -37,6 +42,11 @@ export function CourseCard({
           </Text>
         ) : null}
         <RatingSummary rating={course.rating} testID={`rating-${course.id}`} />
+        {course.instructor ? (
+          <Text variant="caption" tone="muted">
+            By {course.instructor.displayName}
+          </Text>
+        ) : null}
         <View style={styles.row}>
           <Text variant="caption" tone="muted">
             {LEVEL_LABEL[course.level]}
