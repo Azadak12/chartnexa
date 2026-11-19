@@ -110,6 +110,28 @@ describe("build variants (app.config.ts)", () => {
     expect(JSON.stringify(prod.extra)).not.toMatch(/secret|token|key/i);
   });
 
+  it("links every variant to the existing Expo project, with the environment able to override it", () => {
+    const id = "e8a2dad8-9819-433b-80f3-2ea0da274851";
+    for (const variant of ["development", "preview", "production"]) {
+      const c = buildConfig({
+        APP_VARIANT: variant,
+        EXPO_PUBLIC_API_BASE_URL:
+          variant === "production" ? "https://api.example.com" : "http://10.0.0.5:3000",
+      });
+      expect((c.extra as { eas: { projectId: string } }).eas.projectId).toBe(id);
+      expect(c.owner).toBe("kalam124s-team");
+      expect(c.slug).toBe("chartnexa");
+    }
+    const other = buildConfig({
+      EAS_PROJECT_ID: "11111111-1111-4111-8111-111111111111",
+      EXPO_OWNER: "someone",
+    });
+    expect((other.extra as { eas: { projectId: string } }).eas.projectId).toBe(
+      "11111111-1111-4111-8111-111111111111",
+    );
+    expect(other.owner).toBe("someone");
+  });
+
   it("points EAS Submit at the existing App Store Connect app and Apple team", () => {
     const eas = JSON.parse(readFileSync(join(__dirname, "..", "eas.json"), "utf8"));
     expect(eas.submit.production.ios).toEqual({

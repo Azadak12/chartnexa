@@ -33,14 +33,13 @@ git pull origin main
 pnpm install
 cd apps/mobile
 npx eas-cli login
-npx eas-cli init            # links the Expo project; note the project ID it prints
+npx eas-cli project:info    # should show kalam124s-team / chartnexa
 ```
-Set the project ID and API address for production builds (public values, not secrets):
+The Expo project (`kalam124s-team/chartnexa`, ID `e8a2dad8-9819-433b-80f3-2ea0da274851`) is built into `app.config.ts`; `EAS_PROJECT_ID` and `EXPO_OWNER` can override it. Set the API address for production builds (a public value, not a secret):
 ```bash
-npx eas-cli env:create --environment production --name EAS_PROJECT_ID --value <project-id> --visibility plaintext
 npx eas-cli env:create --environment production --name EXPO_PUBLIC_API_BASE_URL --value https://<your-api-host> --visibility plaintext
 ```
-If the CLI evaluates the config locally and complains, export the same two variables in your shell first.
+If the CLI evaluates the config locally and complains, export `EXPO_PUBLIC_API_BASE_URL` in your shell first.
 
 Build and upload (first run asks for your Apple ID and lets EAS create the distribution certificate and profile):
 ```bash

@@ -22,6 +22,9 @@ const VARIANTS: Record<Variant, { name: string; suffix: string; scheme: string }
 const LOCAL_HOST =
   /^(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|[^.]+\.local)$/i;
 
+export const EAS_PROJECT_ID = "e8a2dad8-9819-433b-80f3-2ea0da274851";
+export const EXPO_OWNER = "kalam124s-team";
+
 export class AppConfigError extends Error {}
 
 function apiUrlFor(variant: Variant, raw: string | undefined): string {
@@ -62,12 +65,16 @@ export function buildConfig(env: Record<string, string | undefined>): ExpoConfig
   const v = VARIANTS[variant];
   const apiBaseUrl = apiUrlFor(variant, env["EXPO_PUBLIC_API_BASE_URL"]);
   const testing = variant !== "production";
-  const projectId = env["EAS_PROJECT_ID"];
+  // The existing Expo project (kalam124s-team/chartnexa). Public identifiers, not secrets; the
+  // environment variables can override them (for example for a different Expo account).
+  const projectId = env["EAS_PROJECT_ID"] || EAS_PROJECT_ID;
+  const owner = env["EXPO_OWNER"] || EXPO_OWNER;
   const appId = `com.chartnexa.academy${v.suffix}`;
 
   return {
     name: v.name,
     slug: "chartnexa",
+    owner,
     scheme: v.scheme,
     version: "0.1.0",
     orientation: "default",
