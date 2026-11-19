@@ -1,13 +1,11 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Feather } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
-import { colors, spacing } from "../../theme";
+import { spacing } from "../../theme";
 import { isAppError } from "../../api/errors";
 import { applyServerErrors, signInSchema } from "../../forms/form-helpers";
 import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
-import { HOME_ROUTE, sanitizeReturnTo } from "../../navigation/return-to";
 import { useSession } from "../../session/session-store";
 import { Banner, Button, Text, useSubmitOnce } from "../../ui";
 import { authHttp } from "../auth-http";
@@ -15,12 +13,13 @@ import { formMessage } from "../errors-ui";
 import { mfaFlow } from "../mfa-flow";
 import { DemoAccountsCard } from "../../dev/DemoAccountsCard";
 import { demoAccountsEnabled, demoEmailOrNull } from "../../dev/demo-accounts";
+import { TestServerSection } from "../../api/TestServerSheet";
 import { AuthLayout } from "../AuthLayout";
 import { sessionManager } from "../session-manager";
 
 export function SignInScreen() {
   const router = useRouter();
-  const { status, notice } = useSession();
+  const { notice } = useSession();
   const { returnTo, email: emailParam } = useLocalSearchParams<{
     returnTo?: string;
     email?: string;
@@ -33,11 +32,6 @@ export function SignInScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [lockedUntil, setLockedUntil] = useState(0);
   const [now, setNow] = useState(Date.now());
-
-  // Once signed in, go where the person was headed (or Home).
-  useEffect(() => {
-    if (status === "signed-in") router.replace((sanitizeReturnTo(returnTo) ?? HOME_ROUTE) as never);
-  }, [status, returnTo, router]);
 
   // The button stays off until the server's wait has passed.
   useEffect(() => {
@@ -82,24 +76,45 @@ export function SignInScreen() {
       subtitle="Learn trading with confidence, step by step."
       footer={
         <View style={{ gap: spacing.lg }}>
-          <View style={{ alignItems: "center", gap: 2 }}>
-            <Text tone="muted">New to ChartNexa Academy?</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+            }}
+          >
+            <Text tone="muted">Don't have an account?</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Create account"
+              accessibilityLabel="Sign up"
               onPress={() => router.push("/register")}
               hitSlop={8}
-              style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 6 }}
+              style={{ minHeight: 44, justifyContent: "center" }}
             >
               <Text variant="bodyStrong" tone="link">
-                Create account
+                Sign up
               </Text>
-              <Feather name="arrow-right" size={18} color={colors.blue} accessible={false} />
+            </Pressable>
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="I have an invitation"
+              onPress={() => router.push("/accept-invitation")}
+              hitSlop={8}
+              style={{ minHeight: 44, justifyContent: "center" }}
+            >
+              <Text variant="caption" tone="link">
+                I have an instructor invitation
+              </Text>
             </Pressable>
           </View>
           {demoAccountsEnabled() ? (
             <DemoAccountsCard onPress={() => router.push("/demo-accounts")} />
           ) : null}
+          <TestServerSection />
         </View>
       }
     >

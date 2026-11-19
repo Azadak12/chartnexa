@@ -232,8 +232,8 @@ describe("staff screen", () => {
 describe("accepting an invitation", () => {
   beforeEach(() => sessionStore.set("signed-out"));
 
-  it("can be reached from the Welcome screen without a link", async () => {
-    await renderRouter(app, { initialUrl: "/welcome" });
+  it("can be reached from the Sign In screen without a link", async () => {
+    await renderRouter(app, { initialUrl: "/sign-in" });
     await fireEvent.press(await screen.findByRole("button", { name: "I have an invitation" }));
     expect(screen).toHavePathname("/accept-invitation");
     expect(await screen.findByLabelText("Invitation code")).toBeTruthy();

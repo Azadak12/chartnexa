@@ -210,10 +210,10 @@ describe("course page", () => {
     api.get.mockResolvedValue(detail);
     await sessionManager.signOut();
     await renderRouter(app, { initialUrl: "/course/c1" });
-    expect(screen).toHavePathname("/sign-in");
+    await waitFor(() => expect(screen).toHavePathname("/sign-in"));
     expect(screen).toHaveSearchParams({ returnTo: "/course/c1" });
     await act(async () => sessionStore.set("signed-in"));
-    expect(screen).toHavePathname("/course/c1");
+    await waitFor(() => expect(screen).toHavePathname("/course/c1"));
     expect(await screen.findByRole("header", { name: "Price Action Basics" })).toBeTruthy();
   });
 });

@@ -1,4 +1,4 @@
-import { act, fireEvent, renderRouter, screen } from "expo-router/testing-library";
+import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { authHttp } from "../src/auth/auth-http";
@@ -84,7 +84,7 @@ describe("sign in", () => {
       password: "correct horse battery",
     });
     expect(sessionStore.get()).toBe("signed-in");
-    expect(screen).toHavePathname("/home");
+    await waitFor(() => expect(screen).toHavePathname("/home"));
   });
 
   it("goes to the remembered destination", async () => {
@@ -93,7 +93,7 @@ describe("sign in", () => {
     await type("Email", "ann@example.com");
     await type("Password", "correct horse battery");
     await press("Sign in");
-    expect(screen).toHavePathname("/course/4");
+    await waitFor(() => expect(screen).toHavePathname("/course/4"));
   });
 
   it("shows one message for a wrong password or unknown email and clears the password", async () => {
@@ -288,7 +288,7 @@ describe("forgot and reset password", () => {
       token: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG",
       newPassword: "a brand new passphrase",
     });
-    expect(screen).toHavePathname("/sign-in");
+    await waitFor(() => expect(screen).toHavePathname("/sign-in"));
     expect(screen.getByTestId("session-notice")).toBeTruthy();
   });
 
@@ -317,7 +317,7 @@ describe("forgot and reset password", () => {
     await press("Change password");
     expect(screen.getByText("This password is too common.")).toBeTruthy();
     expect(screen.queryByTestId("bad-code")).toBeNull();
-    expect(screen).toHavePathname("/reset-password");
+    await waitFor(() => expect(screen).toHavePathname("/reset-password"));
   });
 
   it("shows one generic message for a bad, used or expired code, with a way to ask again", async () => {
@@ -331,7 +331,7 @@ describe("forgot and reset password", () => {
       "Error: This code is invalid or has expired.",
     );
     await press("Request a new reset email");
-    expect(screen).toHavePathname("/forgot-password");
+    await waitFor(() => expect(screen).toHavePathname("/forgot-password"));
   });
 });
 
@@ -344,7 +344,7 @@ describe("verify email", () => {
     expect(http.verifyEmail).toHaveBeenCalledWith("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG");
     expect(screen.getByTestId("verify-done")).toBeTruthy();
     await press("Sign in");
-    expect(screen).toHavePathname("/sign-in");
+    await waitFor(() => expect(screen).toHavePathname("/sign-in"));
   });
 
   it("offers Continue when already signed in", async () => {
@@ -393,17 +393,17 @@ describe("public screens while signed in", () => {
   it("send a signed-in person Home, except the two link screens", async () => {
     await sessionManager.signIn(pair());
     await renderRouter(app, { initialUrl: "/register" });
-    expect(screen).toHavePathname("/home");
+    await waitFor(() => expect(screen).toHavePathname("/home"));
     await act(async () => router.navigate("/forgot-password"));
-    expect(screen).toHavePathname("/home");
+    await waitFor(() => expect(screen).toHavePathname("/home"));
     await act(async () => router.navigate("/verify-email"));
-    expect(screen).toHavePathname("/verify-email");
+    await waitFor(() => expect(screen).toHavePathname("/verify-email"));
     await act(async () => router.navigate("/reset-password"));
-    expect(screen).toHavePathname("/reset-password");
+    await waitFor(() => expect(screen).toHavePathname("/reset-password"));
   });
 
   it("show every public screen to a signed-out person", async () => {
-    for (const path of ["/welcome", "/sign-in", "/register", "/forgot-password"]) {
+    for (const path of ["/sign-in", "/sign-in", "/register", "/forgot-password"]) {
       await renderRouter(app, { initialUrl: path });
       expect(screen).toHavePathname(path);
     }

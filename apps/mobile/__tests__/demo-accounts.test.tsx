@@ -93,10 +93,10 @@ describe("when the hub is available", () => {
   });
 });
 
-describe("the Welcome screen", () => {
+describe("the Sign In screen", () => {
   it("offers Demo accounts, which shows four role cards with email, summary and MFA notes", async () => {
-    await renderRouter(app, { initialUrl: "/welcome" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Demo accounts" }));
+    await renderRouter(app, { initialUrl: "/sign-in" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Try a demo account" }));
     expect(screen).toHavePathname("/demo-accounts");
     for (const r of ["student", "instructor", "manager", "admin"]) {
       expect(screen.getByTestId(`demo-${r}`)).toBeTruthy();
@@ -120,11 +120,11 @@ describe("the Welcome screen", () => {
     expect((await screen.findByLabelText("Email")).props.value).toBe("");
   });
 
-  it("is hidden from Welcome when demo accounts are off", async () => {
+  it("is hidden from Sign In when demo accounts are off", async () => {
     process.env["EXPO_PUBLIC_DEMO_ACCOUNTS"] = "false";
-    await renderRouter(app, { initialUrl: "/welcome" });
+    await renderRouter(app, { initialUrl: "/sign-in" });
     await screen.findByRole("button", { name: "Sign in" });
-    expect(screen.queryByRole("button", { name: "Demo accounts" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Try a demo account" })).toBeNull();
     await screen.unmount();
     await renderRouter(app, { initialUrl: "/demo-accounts" });
     expect(await screen.findByText("Not available")).toBeTruthy();

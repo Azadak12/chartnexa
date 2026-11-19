@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { BackHandler } from "react-native";
 import { ConfirmDialog } from "../ConfirmDialog";
@@ -10,11 +10,10 @@ import { RecoveryCodesView } from "./RecoveryCodesView";
 
 /** Shown once, right after enrollment. The session starts only when the person moves on. */
 export function RecoveryCodesScreen() {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const flow = useMfaFlow();
   const [leaving, setLeaving] = useState(false);
   const acknowledged = useRef(false);
-  useFinishSignIn(returnTo);
+  useFinishSignIn();
 
   const proceed = async () => {
     if (!flow?.done) return;
