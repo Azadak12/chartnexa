@@ -19,6 +19,8 @@ import { sessionStore } from "../../session/session-store";
 import { QueryStateView } from "../../state/StateView";
 import { status as statusColors } from "../../theme";
 import { BottomSheet, Banner, Button, Card, Screen, Text, useSubmitOnce } from "../../ui";
+import { buildLabel } from "../../api/TestServerSheet";
+import { testServer } from "../../api/test-server";
 import { accountApi } from "../account-api";
 import { mfaApi } from "../mfa-api";
 import { formMessage } from "../errors-ui";
@@ -177,6 +179,11 @@ export function ProfileScreen() {
                 variant="secondary"
                 onPress={() => router.push("/profile/two-step")}
               />
+            ) : null}
+            {testServer.allowed() ? (
+              <Text variant="caption" tone="muted" testID="profile-build-label">
+                {buildLabel()}
+              </Text>
             ) : null}
             <Button
               label="Change password"

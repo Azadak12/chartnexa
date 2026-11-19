@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { testServer } from "../src/api/test-server";
 import { queryClientRef } from "../src/auth/query-ref";
 import { sessionManager } from "../src/auth/session-manager";
 import { useAppFonts } from "../src/fonts/use-app-fonts";
@@ -26,7 +27,10 @@ export default function RootLayout() {
   }, [client]);
   // Check secure storage once at launch. Tests set the state themselves and skip this.
   useEffect(() => {
-    if (sessionStore.get() === "restoring") void sessionManager.restore();
+    // The tester's server address (test builds only) must be known before the session refresh.
+    if (sessionStore.get() === "restoring") {
+      void testServer.load().then(() => sessionManager.restore());
+    }
   }, []);
 
   const ready = fontsReady && status !== "restoring";
