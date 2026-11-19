@@ -13,3 +13,7 @@ build/
 # Local OpenAPI export (CI writes its own copy)
 apps/api/openapi.json
 .dev-storage/
+
+# Demo credentials are generated locally and never committed
+apps/api/.dev-credentials.json
+.dev-credentials.json
