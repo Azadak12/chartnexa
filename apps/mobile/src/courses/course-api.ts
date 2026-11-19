@@ -147,3 +147,8 @@ export const canInviteInstructors = (a: AccessResponse | undefined): boolean =>
 
 /** Deactivating Instructors and other role changes (Admins). */
 export const canManageRoles = (a: AccessResponse | undefined): boolean => has(a, "roles:manage");
+
+/** Creating, assigning and reviewing coursework: the role permission, or a grant on that course. */
+export const canManageAssignments = (a: AccessResponse | undefined, courseId: string): boolean =>
+  has(a, "assignments:manage") ||
+  grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("assignments:manage"));

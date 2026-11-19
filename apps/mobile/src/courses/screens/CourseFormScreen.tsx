@@ -27,6 +27,7 @@ import {
   canCreateCourses,
   canAuthorLessons,
   canManageEnrollments,
+  canManageAssignments,
   canScheduleLive,
   canManageCourses,
   canPublishCourse,
@@ -132,6 +133,7 @@ export function CourseFormScreen() {
       canLessons={editing && canAuthorLessons(access.data, String(id))}
       canStudents={editing && canManageEnrollments(access.data)}
       canLive={editing && canScheduleLive(access.data, String(id))}
+      canAssignments={editing && canManageAssignments(access.data, String(id))}
       onSaved={() => qc.invalidateQueries({ queryKey: ["staff-courses"] })}
     />
   );
@@ -143,6 +145,7 @@ function Form({
   canLessons,
   canStudents,
   canLive,
+  canAssignments,
   onSaved,
 }: {
   course: StaffCourse | undefined;
@@ -150,6 +153,7 @@ function Form({
   canLessons: boolean;
   canStudents: boolean;
   canLive: boolean;
+  canAssignments: boolean;
   onSaved: () => unknown;
 }) {
   const router = useRouter();
@@ -416,6 +420,13 @@ function Form({
           label="Students"
           variant="secondary"
           onPress={() => router.push(`/manage/${course.id}/students`)}
+        />
+      ) : null}
+      {course && canAssignments ? (
+        <Button
+          label="Assignments"
+          variant="secondary"
+          onPress={() => router.push(`/manage/${course.id}/assignments`)}
         />
       ) : null}
       {course && canLive ? (

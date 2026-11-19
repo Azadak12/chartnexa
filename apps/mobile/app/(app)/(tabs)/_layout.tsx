@@ -27,6 +27,7 @@ export default function TabsLayout() {
     >
       {tab("home", "Home", "home")}
       {tab("courses", "My Courses", "book-open")}
+      {tab("assignments", "Assignments", "clipboard")}
       {tab("profile", "Profile", "user")}
     </Tabs>
   );
