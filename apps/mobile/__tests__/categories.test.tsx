@@ -80,7 +80,7 @@ beforeEach(async () => {
 
 describe("catalog topic filter", () => {
   it("shows topics that have courses and filters by the chosen one", async () => {
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     expect(await screen.findByTestId("category-filter")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Forex" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Crypto" })).toBeNull();
@@ -103,7 +103,7 @@ describe("catalog topic filter", () => {
   it("still lists courses when categories fail to load", async () => {
     pub.list.mockRejectedValue(appError("server"));
     courses.list.mockResolvedValue({ items: [], nextCursor: null });
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     expect(await screen.findByText("No courses yet")).toBeTruthy();
     expect(screen.queryByTestId("category-filter")).toBeNull();
   });

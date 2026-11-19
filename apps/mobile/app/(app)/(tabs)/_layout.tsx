@@ -33,6 +33,7 @@ export default function TabsLayout() {
       }}
     >
       {tab("home", "Home", "home")}
+      {tab("explore", "Explore", "search")}
       {tab("courses", "My Learning", "book-open")}
       {tab("assignments", "Assignments", "clipboard")}
       {tab("dashboard", "Dashboard", "grid", !staff)}

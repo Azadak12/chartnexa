@@ -136,7 +136,7 @@ export class ProgressService {
       const [course, lesson] = await Promise.all([
         this.db.course.findUnique({
           where: { id: r.course_id },
-          select: { title: true, coverTone: true },
+          select: { title: true, coverTone: true, thumbnailId: true, thumbnailMime: true },
         }),
         this.db.lesson.findUnique({ where: { id: nextId }, select: { title: true } }),
       ]);
@@ -146,6 +146,10 @@ export class ProgressService {
           courseId: r.course_id,
           courseTitle: course.title,
           coverTone: course.coverTone,
+          thumbnailUrl:
+            course.thumbnailId && course.thumbnailMime
+              ? `/courses/thumbnails/${course.thumbnailId}`
+              : null,
           completed: c.completed,
           total: c.total,
           nextLessonId: nextId,

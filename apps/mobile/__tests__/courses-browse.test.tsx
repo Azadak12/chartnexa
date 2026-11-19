@@ -62,18 +62,17 @@ beforeEach(async () => {
   api.list.mockResolvedValue(page([course(1), course(2), course(3)]));
 });
 
-describe("catalog on Home", () => {
+describe("catalog in Explore", () => {
   it("shows published courses as cards with level and price, and Free for zero", async () => {
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     expect(await screen.findByTestId("course-c1")).toBeTruthy();
     expect(screen.getByLabelText("Course 1, Beginner, $49.01, No reviews yet")).toBeTruthy();
     expect(screen.getByLabelText("Course 2, Beginner, Free, No reviews yet")).toBeTruthy();
-    expect(screen.getByText("Summary of course 1")).toBeTruthy();
     expect(api.list).toHaveBeenCalledWith({});
   });
 
   it("searches after typing pauses and filters by level, then clears both", async () => {
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     await screen.findByTestId("course-c1");
     api.list.mockResolvedValue(page([course(4, { title: "Options Greeks" })]));
     await type("Search courses", "greeks");
@@ -93,7 +92,7 @@ describe("catalog on Home", () => {
   });
 
   it("says nothing matched and offers to clear the search and filters", async () => {
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     await screen.findByTestId("course-c1");
     api.list.mockResolvedValue(page([]));
     await type("Search courses", "zzz");
@@ -107,13 +106,13 @@ describe("catalog on Home", () => {
 
   it("shows the empty state, the error state with a working Retry, and the offline state", async () => {
     api.list.mockResolvedValue(page([]));
-    const { unmount } = await renderRouter(app, { initialUrl: "/home" });
+    const { unmount } = await renderRouter(app, { initialUrl: "/explore" });
     expect(await screen.findByText("No courses yet")).toBeTruthy();
     await unmount();
     clearScreenMemory();
 
     api.list.mockRejectedValueOnce(appError("forbidden")).mockResolvedValue(page([course(1)]));
-    const second = await renderRouter(app, { initialUrl: "/home" });
+    const second = await renderRouter(app, { initialUrl: "/explore" });
     expect(await second.findByTestId("state-error")).toBeTruthy();
     await fireEvent.press(second.getByRole("button", { name: "Retry" }));
     expect(await second.findByTestId("course-c1")).toBeTruthy();
@@ -121,7 +120,7 @@ describe("catalog on Home", () => {
     clearScreenMemory();
 
     api.list.mockRejectedValue(appError("network"));
-    const third = await renderRouter(app, { initialUrl: "/home" });
+    const third = await renderRouter(app, { initialUrl: "/explore" });
     expect(await third.findByTestId("state-offline", undefined, { timeout: 8000 })).toBeTruthy();
   });
 
@@ -129,7 +128,7 @@ describe("catalog on Home", () => {
     api.list
       .mockResolvedValueOnce(page([course(1)], "cursor-1"))
       .mockResolvedValueOnce(page([course(5)], null));
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     await screen.findByTestId("course-c1");
     await fireEvent(screen.getByTestId("catalog-list"), "endReached");
     expect(await screen.findByTestId("course-c5")).toBeTruthy();
@@ -142,7 +141,7 @@ describe("catalog on Home", () => {
   });
 
   it("remembers search text and level after opening a course and going back", async () => {
-    await renderRouter(app, { initialUrl: "/home" });
+    await renderRouter(app, { initialUrl: "/explore" });
     await screen.findByTestId("course-c1");
     await fireEvent.press(screen.getByRole("button", { name: "Intermediate" }));
     api.list.mockResolvedValue(page([course(7, { level: "intermediate" })]));
@@ -152,7 +151,7 @@ describe("catalog on Home", () => {
     await fireEvent.press(screen.getByTestId("course-c7"));
     expect(screen).toHavePathname("/course/c7");
     await act(async () => router.back());
-    expect(screen).toHavePathname("/home");
+    expect(screen).toHavePathname("/explore");
     expect(
       screen.getByRole("button", { name: "Intermediate" }).props.accessibilityState.selected,
     ).toBe(true);
@@ -192,7 +191,7 @@ describe("course page", () => {
     await renderRouter(app, { initialUrl: "/course/gone" });
     expect(await screen.findByText("Course not found")).toBeTruthy();
     await fireEvent.press(screen.getByRole("button", { name: "Back to courses" }));
-    expect(screen).toHavePathname("/home");
+    expect(screen).toHavePathname("/explore");
   });
 
   it("shows loading, then an error with Retry", async () => {

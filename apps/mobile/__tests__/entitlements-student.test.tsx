@@ -124,7 +124,7 @@ describe("My Courses", () => {
     await renderRouter(app, { initialUrl: "/courses" });
     expect(await screen.findByText("You have not enrolled in any courses yet")).toBeTruthy();
     await press("Browse courses");
-    expect(screen).toHavePathname("/home");
+    expect(screen).toHavePathname("/explore");
   });
 
   it("shows an error with Retry, and an offline state", async () => {

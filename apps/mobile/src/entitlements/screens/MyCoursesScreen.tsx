@@ -48,7 +48,7 @@ export function MyCoursesScreen() {
         title="You have not enrolled in any courses yet"
         message="Courses you have access to will appear here."
         actionLabel="Browse courses"
-        onAction={() => router.push("/home")}
+        onAction={() => router.push("/explore")}
       />
     );
   }

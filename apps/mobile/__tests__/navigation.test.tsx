@@ -164,7 +164,7 @@ describe("placeholder screens", () => {
   it("shows empty states in the tabs and signs out from Profile", async () => {
     sessionStore.set("signed-in");
     await renderRouter(app, { initialUrl: "/home" });
-    expect(await screen.findByText("No courses yet")).toBeTruthy();
+    expect(await screen.findByTestId("app-header")).toBeTruthy();
     await act(async () => router.navigate("/courses"));
     expect(await screen.findByText("You have not enrolled in any courses yet")).toBeTruthy();
     await act(async () => router.navigate("/profile"));

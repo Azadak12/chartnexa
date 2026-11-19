@@ -27,7 +27,7 @@ export function CoursePageScreen() {
     // Only transient failures are retried; a missing or forbidden course will not appear by retrying.
     retry: shouldRetry,
   });
-  const goHome = () => (router.canGoBack() ? router.back() : router.replace("/home"));
+  const goHome = () => (router.canGoBack() ? router.back() : router.replace("/explore"));
 
   if (query.status === "pending") {
     return (

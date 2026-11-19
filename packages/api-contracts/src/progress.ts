@@ -31,6 +31,7 @@ export const continueLearningSchema = z.object({
       courseId: z.string(),
       courseTitle: z.string(),
       coverTone: z.string(),
+      thumbnailUrl: z.string().nullable().default(null),
       completed: z.number().int().min(0),
       total: z.number().int().min(0),
       nextLessonId: z.string(),
