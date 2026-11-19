@@ -89,6 +89,8 @@ beforeEach(async () => {
 
 describe("readers", () => {
   it("shows a home shortcut only when something is unread", async () => {
+    // Staff start on their dashboard; the student Home is what has the bell.
+    access.mockResolvedValue({ roles: ["student"], permissions: [], courseGrants: [] });
     await renderRouter(app, { initialUrl: "/home" });
     await screen.findByTestId("app-header");
     await waitFor(() => expect(spy.unread).toHaveBeenCalled());

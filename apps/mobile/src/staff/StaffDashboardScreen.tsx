@@ -14,7 +14,12 @@ import {
   canReadPayments,
   fetchAccess,
   isStaff,
+  staffCourseApi,
 } from "../courses/course-api";
+import type { AccessResponse } from "@chartnexa/api-contracts";
+import { invitationApi } from "../invitations/invitation-api";
+import { DashboardMetricCard } from "../kit/Rows";
+import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { Screen, Text } from "../ui";
@@ -29,6 +34,95 @@ interface Tile {
 }
 
 /** A role-aware home for staff. Each tile opens a real screen; the server still checks every call. */
+/** A count from one page of real results: "25+" when there are more pages than were loaded. */
+const countText = (n: number, more: boolean) => (more ? `${n}+` : String(n));
+
+function Metrics({ a }: { a: AccessResponse }) {
+  const router = useRouter();
+  const courses = canManageCourses(a);
+  const people = canInviteInstructors(a);
+  const published = useQuery({
+    queryKey: ["metric-courses", "published"],
+    enabled: courses,
+    queryFn: () => staffCourseApi.list({ status: "published" }),
+    retry: shouldRetry,
+  });
+  const drafts = useQuery({
+    queryKey: ["metric-courses", "draft"],
+    enabled: courses,
+    queryFn: () => staffCourseApi.list({ status: "draft" }),
+    retry: shouldRetry,
+  });
+  const instructors = useQuery({
+    queryKey: ["metric-instructors"],
+    enabled: people,
+    queryFn: () => invitationApi.instructors(),
+    retry: shouldRetry,
+  });
+  const pending = useQuery({
+    queryKey: ["metric-invitations", "pending"],
+    enabled: people,
+    queryFn: () => invitationApi.list("pending"),
+    retry: shouldRetry,
+  });
+  const cards: {
+    label: string;
+    q: { status: string; data?: unknown };
+    value: string;
+    route: string;
+    icon: Icon;
+  }[] = [];
+  if (people) {
+    cards.push({
+      label: "Pending invitations",
+      q: pending,
+      value: pending.data ? countText(pending.data.items.length, !!pending.data.nextCursor) : "",
+      route: "/profile/invitations",
+      icon: "mail",
+    });
+    cards.push({
+      label: "Instructors",
+      q: instructors,
+      value: instructors.data ? String(instructors.data.length) : "",
+      route: "/profile/invitations",
+      icon: "users",
+    });
+  }
+  if (courses) {
+    cards.push({
+      label: "Published courses",
+      q: published,
+      value: published.data
+        ? countText(published.data.items.length, !!published.data.nextCursor)
+        : "",
+      route: "/manage",
+      icon: "book-open",
+    });
+    cards.push({
+      label: "Draft courses",
+      q: drafts,
+      value: drafts.data ? countText(drafts.data.items.length, !!drafts.data.nextCursor) : "",
+      route: "/manage",
+      icon: "edit-3",
+    });
+  }
+  if (cards.length === 0) return null;
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }} testID="metrics">
+      {cards.map((c) => (
+        <DashboardMetricCard
+          key={c.label}
+          label={c.label}
+          icon={c.icon}
+          value={c.q.status === "error" ? "Unavailable" : c.q.status === "pending" ? "…" : c.value}
+          testID={`metric-${c.label}`}
+          onPress={() => router.push(c.route as never)}
+        />
+      ))}
+    </View>
+  );
+}
+
 export function StaffDashboardScreen() {
   const router = useRouter();
   const access = useQuery({ queryKey: ["access"], queryFn: fetchAccess });
@@ -155,6 +249,7 @@ export function StaffDashboardScreen() {
       <Text tone="muted">
         Everything here uses real data. What you see depends on your permissions.
       </Text>
+      <Metrics a={a} />
       {groups.map((g) => {
         const tiles = g.tiles.filter((t) => t.show);
         if (tiles.length === 0) return null;
