@@ -3,7 +3,16 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { BLUE, COURSES, candleSvg, candles, lineSvg, movingAverage, payoffSvg, riskRewardSvg } from "./charts.mjs";
+import {
+  BLUE,
+  COURSES,
+  candleSvg,
+  candles,
+  lineSvg,
+  movingAverage,
+  payoffSvg,
+  riskRewardSvg,
+} from "./charts.mjs";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -29,7 +38,9 @@ function art(c) {
   if (c.kind === "risk") return riskRewardSvg(w, h);
   return payoffSvg(w, h);
 }
-const html = (c) => `<!doctype html><html><body style="margin:0;width:${W}px;height:${H}px;background:#111111;font-family:Inter,'Inter Display',Helvetica,Arial,sans-serif;position:relative;overflow:hidden">
+const html = (
+  c,
+) => `<!doctype html><html><body style="margin:0;width:${W}px;height:${H}px;background:#111111;font-family:Inter,'Inter Display',Helvetica,Arial,sans-serif;position:relative;overflow:hidden">
 <div style="position:absolute;inset:0;background:radial-gradient(900px 500px at 85% 15%, rgba(37,99,235,0.35), rgba(17,17,17,0) 60%)"></div>
 <svg width="450" height="330" viewBox="0 0 450 330" style="position:absolute;right:26px;top:150px;opacity:0.95">${art(c)}</svg>
 <div style="position:absolute;left:48px;top:44px;color:#fff;font-weight:700;letter-spacing:0.4px;font-size:22px">ChartNexa <span style="color:${BLUE}">Academy</span></div>

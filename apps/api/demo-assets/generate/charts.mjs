@@ -30,12 +30,19 @@ export function candles(n, seed, start = 100, drift = 0.15, vol = 1.6) {
 
 export function movingAverage(cs, period) {
   return cs.map((_, i) =>
-    i < period - 1 ? null : cs.slice(i - period + 1, i + 1).reduce((a, c) => a + c.close, 0) / period,
+    i < period - 1
+      ? null
+      : cs.slice(i - period + 1, i + 1).reduce((a, c) => a + c.close, 0) / period,
   );
 }
 
 /** Candlesticks as SVG inside a w x h box. `upTo` limits how many candles are drawn (animation). */
-export function candleSvg(cs, w, h, { upTo = cs.length, pad = 24, up = BLUE, down = "#9CA3AF", ma = [] } = {}) {
+export function candleSvg(
+  cs,
+  w,
+  h,
+  { upTo = cs.length, pad = 24, up = BLUE, down = "#9CA3AF", ma = [] } = {},
+) {
   const lo = Math.min(...cs.map((c) => c.low));
   const hi = Math.max(...cs.map((c) => c.high));
   const x = (i) => pad + (i + 0.5) * ((w - pad * 2) / cs.length);
@@ -122,9 +129,49 @@ export function riskRewardSvg(w, h, { upTo = 1, pad = 40 } = {}) {
 }
 
 export const COURSES = [
-  { slug: "trading-fundamentals", title: "Trading Fundamentals", category: "Trading Basics", level: "Beginner", kind: "line", seed: 11, tag: "Start here" },
-  { slug: "candlestick-chart-mastery", title: "Candlestick Chart Mastery", category: "Charting", level: "Beginner", kind: "candles", seed: 23, tag: "Read the chart" },
-  { slug: "technical-analysis-essentials", title: "Technical Analysis Essentials", category: "Technical Analysis", level: "Intermediate", kind: "ma", seed: 37, tag: "Trends and indicators" },
-  { slug: "risk-management-and-psychology", title: "Risk Management & Psychology", category: "Risk & Psychology", level: "Intermediate", kind: "risk", seed: 41, tag: "Protect your capital" },
-  { slug: "options-trading-fundamentals", title: "Options Trading Fundamentals", category: "Options", level: "Advanced", kind: "payoff", seed: 53, tag: "Calls, puts and Greeks" },
+  {
+    slug: "trading-fundamentals",
+    title: "Trading Fundamentals",
+    category: "Trading Basics",
+    level: "Beginner",
+    kind: "line",
+    seed: 11,
+    tag: "Start here",
+  },
+  {
+    slug: "candlestick-chart-mastery",
+    title: "Candlestick Chart Mastery",
+    category: "Charting",
+    level: "Beginner",
+    kind: "candles",
+    seed: 23,
+    tag: "Read the chart",
+  },
+  {
+    slug: "technical-analysis-essentials",
+    title: "Technical Analysis Essentials",
+    category: "Technical Analysis",
+    level: "Intermediate",
+    kind: "ma",
+    seed: 37,
+    tag: "Trends and indicators",
+  },
+  {
+    slug: "risk-management-and-psychology",
+    title: "Risk Management & Psychology",
+    category: "Risk & Psychology",
+    level: "Intermediate",
+    kind: "risk",
+    seed: 41,
+    tag: "Protect your capital",
+  },
+  {
+    slug: "options-trading-fundamentals",
+    title: "Options Trading Fundamentals",
+    category: "Options",
+    level: "Advanced",
+    kind: "payoff",
+    seed: 53,
+    tag: "Calls, puts and Greeks",
+  },
 ];
