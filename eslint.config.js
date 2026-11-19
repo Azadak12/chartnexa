@@ -47,7 +47,7 @@ export default tseslint.config(
   },
   {
     // Operations tools run on Node directly.
-    files: ["tools/**/*.mjs"],
+    files: ["tools/**/*.mjs", "apps/api/demo-assets/generate/**/*.mjs"],
     languageOptions: {
       globals: {
         console: "readonly",
