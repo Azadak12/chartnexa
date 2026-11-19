@@ -45,6 +45,8 @@ const mount = async (access: Record<string, unknown> = INSTRUCTOR) => {
     manage: () => <Text>screen:manage</Text>,
     "manage/new": () => <Text>screen:new</Text>,
     "manage/[id]": () => <Text>screen:edit</Text>,
+    "manage/[id]/lessons": () => <Text>screen:lessons</Text>,
+    "manage/[id]/live": () => <Text>screen:live</Text>,
     "manage/categories": () => <Text>screen:categories</Text>,
   };
   return renderRouter({
@@ -258,6 +260,26 @@ describe("your courses", () => {
     await mount();
     expect(await screen.findByLabelText("Published courses: 2")).toBeTruthy();
     expect(screen.queryByTestId("preview-course-c1")).toBeNull();
+  });
+});
+
+describe("content shortcuts on the previews", () => {
+  it("shows Lessons & files and Live classes on a previewed course the person may teach, and opens them", async () => {
+    at(393);
+    await mount({
+      ...INSTRUCTOR,
+      courseGrants: [{ courseId: "c1", permissions: ["lesson:upload", "live:schedule"] }],
+    });
+    await fireEvent.press(await screen.findByTestId("content-c1"));
+    expect(screen).toHavePathname("/manage/c1/lessons");
+  });
+
+  it("offers none on a previewed course without a grant", async () => {
+    at(393);
+    await mount();
+    await screen.findByTestId("preview-course-c1");
+    expect(screen.queryByTestId("content-c1")).toBeNull();
+    expect(screen.queryByTestId("live-c1")).toBeNull();
   });
 });
 

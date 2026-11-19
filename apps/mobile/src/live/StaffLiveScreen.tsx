@@ -13,6 +13,7 @@ import { StateView } from "../state/StateView";
 import { neutrals, radii, spacing } from "../theme";
 import { Banner, BottomSheet, Button, Screen, Text, TextField, useSubmitOnce } from "../ui";
 import { durationText, STATE_TEXT, staffLiveApi, whenText } from "./live-api";
+import { liveOpener } from "./use-join";
 
 const joinedText = (n: number) =>
   n === 0 ? "No one has joined yet" : `${n} ${n === 1 ? "person" : "people"} joined`;
@@ -32,6 +33,23 @@ export function StaffLiveScreen() {
   });
   const [cancelling, setCancelling] = useState<StaffLiveSession | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [starting, setStarting] = useState<string | null>(null);
+  /** Opens the class's meeting room (the link you gave when scheduling) so you can host it. */
+  const start = async (s: StaffLiveSession) => {
+    if (starting) return;
+    setStarting(s.id);
+    setProblem(null);
+    try {
+      await liveOpener.open(s.joinUrl);
+    } catch {
+      const text = "The meeting link could not be opened. Check the link by editing the class.";
+      setProblem(text);
+      AccessibilityInfo.announceForAccessibility(text);
+    } finally {
+      setStarting(null);
+    }
+  };
 
   if (access.status === "pending" || (allowed && list.status === "pending")) {
     return (
@@ -103,6 +121,13 @@ export function StaffLiveScreen() {
       {s.state !== "ended" && s.state !== "cancelled" ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
           <Button
+            label="Start class"
+            accessibilityLabel={`Start ${s.title}`}
+            accessibilityHint="Opens your meeting room in the browser"
+            loading={starting === s.id}
+            onPress={() => void start(s)}
+          />
+          <Button
             label="Edit"
             variant="secondary"
             accessibilityLabel={`Edit ${s.title}`}
@@ -128,10 +153,11 @@ export function StaffLiveScreen() {
         Live classes
       </Text>
       <Text tone="muted">
-        Times are in your time zone. Students who own the course can join from 15 minutes before the
-        start.
+        Times are in your time zone. Start a class to open your meeting room; students who own the
+        course can join from 15 minutes before the start.
       </Text>
       {info ? <Banner kind="success" message={info} testID="live-info" /> : null}
+      {problem ? <Banner kind="error" message={problem} testID="live-start-error" /> : null}
       <Button
         label="Schedule a class"
         onPress={() => router.push(`/manage/${courseId}/live/new`)}

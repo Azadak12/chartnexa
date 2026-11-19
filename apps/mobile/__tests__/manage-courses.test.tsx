@@ -54,6 +54,8 @@ const mount = (url = "/") => {
       "manage/new": () => <Text>screen:new</Text>,
       "manage/categories": () => <Text>screen:categories</Text>,
       "manage/[id]": () => <Text>screen:edit</Text>,
+      "manage/[id]/lessons": () => <Text>screen:lessons</Text>,
+      "manage/[id]/live": () => <Text>screen:live</Text>,
     },
     { initialUrl: url },
   );
@@ -260,6 +262,59 @@ describe("the course cards", () => {
       StyleSheet.flatten(host.props["contentContainerStyle"] as never)?.paddingBottom ?? 0,
     );
     expect(padding).toBeGreaterThanOrEqual(32);
+  });
+});
+
+describe("content shortcuts on each course", () => {
+  const grants = (courseId: string, permissions: string[]) => ({
+    roles: ["student", "instructor"],
+    permissions: ["course:update"],
+    courseGrants: [{ courseId, permissions }],
+  });
+
+  it("goes straight to lessons, videos and files, and to live classes, for a course the person may teach", async () => {
+    at(393);
+    access.mockResolvedValue(grants("p1", ["course:update", "lesson:upload", "live:schedule"]));
+    await mount();
+    await screen.findByTestId("staff-course-p1");
+    await fireEvent.press(screen.getByTestId("content-p1"));
+    expect(screen).toHavePathname("/manage/p1/lessons");
+  });
+
+  it("opens live classes from the same card", async () => {
+    at(393);
+    access.mockResolvedValue(grants("p1", ["lesson:upload", "live:schedule"]));
+    await mount();
+    await fireEvent.press(await screen.findByTestId("live-p1"));
+    expect(screen).toHavePathname("/manage/p1/live");
+  });
+
+  it("offers only what this person may do on that course, and nothing on a course they have no grant for", async () => {
+    at(393);
+    access.mockResolvedValue(grants("p1", ["lesson:upload"]));
+    await mount();
+    await screen.findByTestId("staff-course-p1");
+    expect(screen.getByTestId("content-p1")).toBeTruthy();
+    expect(screen.queryByTestId("live-p1")).toBeNull();
+    // The draft has no grant at all.
+    expect(screen.queryByTestId("content-d1")).toBeNull();
+    expect(screen.queryByTestId("actions-d1")).toBeNull();
+  });
+
+  it("keeps the card itself one tap to edit, and each shortcut at least 44dp high with its course in its name", async () => {
+    at(320, 1.6);
+    access.mockResolvedValue(grants("p1", ["lesson:upload", "live:schedule"]));
+    await mount();
+    const card = await screen.findByTestId("staff-course-p1");
+    expect(screen.getByRole("button", { name: "Lessons & files, Course p1" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Live classes, Course p1" })).toBeTruthy();
+    for (const n of all(
+      (n) => n.props["testID"] === "content-p1" || n.props["testID"] === "live-p1",
+    )) {
+      expect(n.props["accessibilityRole"]).toBe("button");
+    }
+    await fireEvent.press(card);
+    expect(screen).toHavePathname("/manage/p1");
   });
 });
 

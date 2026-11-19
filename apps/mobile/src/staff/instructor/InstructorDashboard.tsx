@@ -5,6 +5,7 @@ import { Pressable, View } from "react-native";
 import type { AccessResponse } from "@chartnexa/api-contracts";
 import { accountApi } from "../../auth/account-api";
 import { canCreateCourses, canManageCourses } from "../../courses/course-api";
+import { courseShortcuts } from "../../courses/course-shortcuts";
 import { CourseManageCard } from "../../kit/CourseManageCard";
 import { Grid } from "../../kit/Grid";
 import { Reveal } from "../../kit/Reveal";
@@ -178,6 +179,7 @@ export function InstructorDashboard({ access }: { access: AccessResponse }) {
                     course={c}
                     testID={`preview-course-${c.id}`}
                     onPress={() => router.push(`/manage/${c.id}`)}
+                    actions={courseShortcuts(access, c.id, (p) => router.push(p as never))}
                   />
                 ))}
               </View>

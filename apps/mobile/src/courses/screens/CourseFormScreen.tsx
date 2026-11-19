@@ -410,8 +410,9 @@ function Form({
       ) : null}
       {course && canLessons ? (
         <Button
-          label="Lessons"
+          label="Lessons, videos and files"
           variant="secondary"
+          accessibilityHint="Add lessons and modules, upload videos and PDFs"
           onPress={() => router.push(`/manage/${course.id}/lessons`)}
         />
       ) : null}

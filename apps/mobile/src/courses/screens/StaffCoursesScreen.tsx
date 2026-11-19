@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { isAppError, messageFor } from "../../api/errors";
 import { StateView } from "../../state/StateView";
+import { courseShortcuts } from "../course-shortcuts";
 import { CourseManageCard } from "../../kit/CourseManageCard";
 import { Reveal } from "../../kit/Reveal";
 import { SegmentedControl } from "../../kit/SegmentedControl";
@@ -178,7 +179,11 @@ export function StaffCoursesScreen() {
         initialNumToRender={8}
         windowSize={7}
         renderItem={({ item }) => (
-          <CourseManageCard course={item} onPress={() => router.push(`/manage/${item.id}`)} />
+          <CourseManageCard
+            course={item}
+            onPress={() => router.push(`/manage/${item.id}`)}
+            actions={courseShortcuts(access.data, item.id, (p) => router.push(p as never))}
+          />
         )}
       />
     </Screen>

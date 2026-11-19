@@ -109,7 +109,7 @@ describe("access", () => {
     expect(api.create).not.toHaveBeenCalled();
   });
 
-  it("offers Lessons on the course edit screen to people who may author them", async () => {
+  it("offers Lessons, videos and files on the course edit screen to people who may author them", async () => {
     courseApiMock.get.mockResolvedValue({
       id: "c1",
       title: "Price Action Basics",
@@ -126,7 +126,7 @@ describe("access", () => {
     });
     await renderRouter(app, { initialUrl: "/manage/c1" });
     await screen.findByDisplayValue("Price Action Basics");
-    await press("Lessons");
+    await press("Lessons, videos and files");
     expect(screen).toHavePathname("/manage/c1/lessons");
   });
 });

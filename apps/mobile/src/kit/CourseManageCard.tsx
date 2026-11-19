@@ -45,63 +45,131 @@ export function StatusPill({ status, id }: { status: StaffCourse["status"]; id: 
  * price. The price has a row of its own and never shrinks, so it cannot clip or collide with the
  * title. Only fields the course already has are shown.
  */
+export interface CardAction {
+  label: string;
+  icon: React.ComponentProps<typeof Feather>["name"];
+  onPress: () => void;
+  testID?: string;
+}
+
+/**
+ * A course in the instructor's list: thumbnail, status, title (wraps up to three lines), level and
+ * price. The price has a row of its own and never shrinks, so it cannot clip or collide with the
+ * title. Only fields the course already has are shown. Below the card body there can be one or two
+ * shortcuts (for example "Lessons, videos and files") that go straight to that part of the course.
+ */
 export const CourseManageCard = memo(function CourseManageCard({
   course: c,
   onPress,
   testID,
+  actions = [],
 }: {
   course: StaffCourse;
   onPress: () => void;
   testID?: string;
+  actions?: CardAction[];
 }) {
   const { width } = useWindowDimensions();
   return (
-    <PressableCard
-      testID={testID ?? `staff-course-${c.id}`}
-      accessibilityLabel={`${c.title}, ${c.status === "draft" ? "Draft" : "Published"}, ${LEVEL_LABEL[c.level]}, ${formatPrice(c.priceCents)}`}
-      accessibilityHint="Opens the course to edit"
-      onPress={onPress}
+    <View
       style={{
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: spacing.md,
-        padding: spacing.sm,
         borderRadius: radii.card,
         borderWidth: 1,
         borderColor: neutrals.divider,
         backgroundColor: colors.white,
+        overflow: "hidden",
         shadowColor: colors.black,
         shadowOpacity: 0.06,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
         elevation: 1,
       }}
-      pressedStyle={{ backgroundColor: neutrals.surface, elevation: 0, shadowOpacity: 0.02 }}
     >
-      <View style={{ flexShrink: 0 }}>
-        <CourseThumbnail
-          tone={c.coverTone}
-          thumbnailUrl={c.thumbnailUrl}
-          width={thumbWidth(width)}
-        />
-      </View>
-      <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
-        <StatusPill status={c.status} id={c.id} />
-        <Text variant="bodyStrong" numberOfLines={3}>
-          {c.title}
-        </Text>
-        <Text variant="caption" tone="muted">
-          {LEVEL_LABEL[c.level]}
-        </Text>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
-        >
-          <Text variant="bodyStrong" style={{ flexShrink: 0 }} testID={`price-${c.id}`}>
-            {formatPrice(c.priceCents)}
-          </Text>
-          <Feather name="chevron-right" size={18} color={neutrals.muted} accessible={false} />
+      <PressableCard
+        testID={testID ?? `staff-course-${c.id}`}
+        accessibilityLabel={`${c.title}, ${c.status === "draft" ? "Draft" : "Published"}, ${LEVEL_LABEL[c.level]}, ${formatPrice(c.priceCents)}`}
+        accessibilityHint="Opens the course to edit"
+        onPress={onPress}
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: spacing.md,
+          padding: spacing.sm,
+          backgroundColor: colors.white,
+        }}
+        pressedStyle={{ backgroundColor: neutrals.surface }}
+      >
+        <View style={{ flexShrink: 0 }}>
+          <CourseThumbnail
+            tone={c.coverTone}
+            thumbnailUrl={c.thumbnailUrl}
+            width={thumbWidth(width)}
+          />
         </View>
-      </View>
-    </PressableCard>
+        <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
+          <StatusPill status={c.status} id={c.id} />
+          <Text variant="bodyStrong" numberOfLines={3}>
+            {c.title}
+          </Text>
+          <Text variant="caption" tone="muted">
+            {LEVEL_LABEL[c.level]}
+          </Text>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+          >
+            <Text variant="bodyStrong" style={{ flexShrink: 0 }} testID={`price-${c.id}`}>
+              {formatPrice(c.priceCents)}
+            </Text>
+            <Feather name="chevron-right" size={18} color={neutrals.muted} accessible={false} />
+          </View>
+        </View>
+      </PressableCard>
+      {actions.length > 0 ? (
+        <View
+          testID={`actions-${c.id}`}
+          style={{
+            flexDirection: "row",
+            gap: spacing.sm,
+            padding: spacing.sm,
+            borderTopWidth: 1,
+            borderTopColor: neutrals.divider,
+            backgroundColor: accents.blue.tint,
+          }}
+        >
+          {actions.map((a) => (
+            <View key={a.label} style={{ flex: 1, minWidth: 0 }}>
+              <PressableCard
+                testID={a.testID ?? `action-${a.label}-${c.id}`}
+                accessibilityLabel={`${a.label}, ${c.title}`}
+                onPress={a.onPress}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: spacing.xs,
+                  minHeight: 44,
+                  paddingHorizontal: spacing.sm,
+                  borderRadius: radii.control,
+                  backgroundColor: colors.white,
+                }}
+              >
+                <Feather name={a.icon} size={16} color={accents.blue.ink} accessible={false} />
+                <Text
+                  variant="caption"
+                  style={{
+                    color: accents.blue.ink,
+                    fontWeight: "700",
+                    flexShrink: 1,
+                    textAlign: "center",
+                  }}
+                >
+                  {a.label}
+                </Text>
+              </PressableCard>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
   );
 });

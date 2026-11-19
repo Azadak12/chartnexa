@@ -269,6 +269,27 @@ describe("staff", () => {
     expect(await screen.findByText(/2 people joined/)).toBeTruthy();
   });
 
+  it("starts a class by opening the meeting room with the link given when scheduling", async () => {
+    staff.list.mockResolvedValue([staffSession({ joinUrl: "https://meet.example.com/host-room" })]);
+    await renderRouter(app, { initialUrl: "/manage/c1/live" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Start Opening bell" }));
+    await waitFor(() => expect(open).toHaveBeenCalledWith("https://meet.example.com/host-room"));
+    expect(screen.queryByTestId("live-start-error")).toBeNull();
+  });
+
+  it("says so, in words, when the meeting link cannot be opened, and offers no Start for finished classes", async () => {
+    staff.list.mockResolvedValue([
+      staffSession(),
+      staffSession({ id: "s2", title: "Old one", state: "ended", startsAt: at(-500) }),
+    ]);
+    open.mockRejectedValueOnce(new Error("no browser"));
+    await renderRouter(app, { initialUrl: "/manage/c1/live" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Start Opening bell" }));
+    expect(await screen.findByTestId("live-start-error")).toBeTruthy();
+    expect(screen.getByText(/could not be opened/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Start Old one" })).toBeNull();
+  });
+
   it("separates upcoming from past and cancelled classes, and has an empty state", async () => {
     await renderRouter(app, { initialUrl: "/manage/c1/live" });
     expect(await screen.findByText("No upcoming classes")).toBeTruthy();
