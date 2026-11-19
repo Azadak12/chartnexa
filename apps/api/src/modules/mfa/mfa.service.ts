@@ -75,6 +75,11 @@ export class MfaService implements MfaGate {
   /** Called after a correct password. Returns a challenge, or null for people who sign in as usual. */
   async challengeFor(userId: string, ctx: RequestCtx): Promise<MfaChallenge | null> {
     if (!(await this.isStaffNeedingMfa(userId))) return null;
+    // Local development shortcut (config refuses it anywhere else): password only, and it is logged.
+    if (this.config.MFA_DEV_BYPASS) {
+      logEvent(ctx, "auth.mfa.dev_bypass", { userId, outcome: "skipped" });
+      return null;
+    }
     const enrolled = (await this.db.mfaCredential.findUnique({ where: { userId } })) !== null;
     const kind = enrolled ? "verify" : "setup";
     const token = newOpaqueToken();
@@ -346,7 +351,12 @@ export class MfaService implements MfaGate {
       this.db.mfaCredential.findUnique({ where: { userId }, select: { userId: true } }),
       this.db.mfaRecoveryCode.count({ where: { userId, usedAt: null } }),
     ]);
-    return { required, enabled: credential !== null, recoveryCodesRemaining: remaining };
+    // With the development shortcut on there is nothing to set up, so the app shows no two-step row.
+    return {
+      required: required && !this.config.MFA_DEV_BYPASS,
+      enabled: credential !== null,
+      recoveryCodesRemaining: remaining,
+    };
   }
 
   /** New recovery codes, only with the password and a current authenticator code. */

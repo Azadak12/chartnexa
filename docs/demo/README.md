@@ -24,7 +24,7 @@ openssl rand -hex 32
 pnpm --filter @chartnexa/api exec prisma migrate deploy
 pnpm --filter @chartnexa/api seed:demo
 ```
-The seed loads five courses (30 lessons, 6 preview and lesson videos, 6 PDFs, thumbnails), four demo accounts, ten fictional learners with reviews, two simulated purchases, progress, two assignments, two announcements and one live class. It is safe to run again: it changes nothing that exists. It refuses to run if `NODE_ENV=production` or if the database is not on this computer.
+The seed loads five courses (30 lessons, 6 preview and lesson videos, 6 PDFs, thumbnails), five test accounts, ten fictional learners with reviews, two simulated purchases, progress, two assignments, two announcements and one live class. It is safe to run again: it changes nothing that exists. It refuses to run if `NODE_ENV=production` or if the database is not on this computer.
 
 Start the API (it listens on all network interfaces):
 ```bash
@@ -43,6 +43,7 @@ Expected: `{"status":"ok"}` and JSON for the five courses with `thumbnailUrl`, `
 |---|---|---|
 | Student | `student@chartnexa.test` | Owns Trading Fundamentals (3 of 6 lessons done) and Candlestick Chart Mastery (2 of 6); one assignment handed in, one to do; has a review |
 | Instructor | `instructor@chartnexa.test` | Teaches all five courses; create and edit courses, add lessons, videos, PDFs, assignments; cannot publish |
+| Lecturer | `lecturer@chartnexa.test` | A second Instructor with permissions on two courses only (see `role-accounts.md`) |
 | Manager | `manager@chartnexa.test` | Invites instructors; courses, announcements, reviews, orders (status only); no role management or audit log |
 | Admin | `admin@chartnexa.test` | Everything, including deactivating instructors and the audit log |
 
@@ -51,6 +52,8 @@ Expected: `{"status":"ok"}` and JSON for the five courses with `thumbnailUrl`, `
 pnpm --filter @chartnexa/api demo:credentials
 ```
 To make new ones (this signs the demo accounts out): `pnpm --filter @chartnexa/api seed:demo -- --reset-passwords`.
+
+> For local testing, `MFA_DEV_BYPASS=true` in `apps/api/.env` skips the second step (development only; see `role-accounts.md`).
 
 ### Admin and Manager: two-step sign-in (kept on)
 The first time, after the password the app asks you to set up two-step sign-in:

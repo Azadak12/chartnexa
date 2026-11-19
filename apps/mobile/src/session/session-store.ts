@@ -8,6 +8,8 @@ type Listener = () => void;
 
 let status: SessionStatus = "restoring";
 let notice: string | null = null;
+/** How the last session ended: the person signed out, or it expired or was rejected. */
+let endedBy: "signout" | "expired" | null = null;
 const listeners = new Set<Listener>();
 let snapshot: { status: SessionStatus; notice: string | null } = { status, notice };
 
@@ -30,6 +32,11 @@ export const sessionStore = {
     if (next === "signed-out") clearScreenMemory();
     emit();
   },
+  /** Records how the session is about to end, so Sign In knows whether to return to the same place. */
+  setEndedBy(how: "signout" | "expired" | null): void {
+    endedBy = how;
+  },
+  getEndedBy: (): "signout" | "expired" | null => endedBy,
   /** A message for the next signed-out screen (for example "Your session ended"). */
   setNotice(message: string | null): void {
     notice = message;
@@ -37,6 +44,7 @@ export const sessionStore = {
   },
   /** Ends the session on the device: the sign-in screen is shown and the person returns afterward. */
   expire(): void {
+    endedBy = "expired";
     sessionStore.set("signed-out");
   },
   subscribe(l: Listener): () => void {

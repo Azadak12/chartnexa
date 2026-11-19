@@ -20,6 +20,15 @@ const schema = z.object({
   SESSION_MAX_DAYS: z.coerce.number().int().min(1).max(365).default(90),
   /** 32 bytes, base64. Protects stored authenticator secrets. Required in production. */
   MFA_ENCRYPTION_KEY: z.string().min(1).optional(),
+  /**
+   * Local development only: skip the second sign-in step for Admin and Manager so they can be
+   * tried with just email and password. Off unless set to "true", and refused outside
+   * NODE_ENV=development (the server will not start with it in production or test).
+   */
+  MFA_DEV_BYPASS: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   MFA_CHALLENGE_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(300),
   MFA_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
   RL_MFA_USER_MAX: z.coerce.number().int().min(1).default(10),
@@ -120,6 +129,13 @@ const checked = schema.superRefine((c, ctx) => {
       code: "custom",
       path: ["SCANNER"],
       message: "uploads must be scanned in production; a scanning provider is pending",
+    });
+  }
+  if (c.MFA_DEV_BYPASS && c.NODE_ENV !== "development") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["MFA_DEV_BYPASS"],
+      message: "the two-step shortcut is for local development only and is refused here",
     });
   }
   if (c.MAILER_DRIVER === "resend" && (!c.RESEND_API_KEY || !c.MAIL_FROM)) {

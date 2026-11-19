@@ -27,13 +27,19 @@ import {
   type DemoCourse,
 } from "./content.js";
 
-/** The four demo accounts. Their passwords are generated on first creation and kept in a local file. */
+/** The five test accounts (Instructor and Lecturer are two separate people with the same role). Their passwords are generated on first creation and kept in a local file. */
 export const DEMO_ACCOUNTS = [
   { key: "student", email: "student@chartnexa.test", name: "Sam Student", role: null },
   {
     key: "instructor",
     email: "instructor@chartnexa.test",
     name: "Dana Instructor",
+    role: "instructor",
+  },
+  {
+    key: "lecturer",
+    email: "lecturer@chartnexa.test",
+    name: "Lena Lecturer",
     role: "instructor",
   },
   { key: "manager", email: "manager@chartnexa.test", name: "Morgan Manager", role: "manager" },
@@ -346,6 +352,16 @@ export async function runDemoSeed(
   for (const courseId of courseIds.values()) {
     for (const permission of perms)
       await grants.grant(admin, ids.instructor, { permission, courseId, reason: REASON });
+  }
+
+  // The Lecturer is a second, separate Instructor: the same role, but permissions only on two
+  // courses, so what each person may touch is visibly different.
+  await grants.grant(admin, ids.lecturer, { permission: "course:create", reason: REASON });
+  for (const slug of ["risk-management-and-psychology", "options-trading-fundamentals"]) {
+    const courseId = courseIds.get(slug);
+    if (!courseId) continue;
+    for (const permission of perms)
+      await grants.grant(admin, ids.lecturer, { permission, courseId, reason: REASON });
   }
 
   // --- the student: two simulated purchases, progress, a review ---------------------------

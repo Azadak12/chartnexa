@@ -1,12 +1,12 @@
 import { testServer } from "../api/test-server";
 
 /**
- * A navigation helper for testers, not a way in. It lists the four demo accounts by their public
+ * A navigation helper for testers, not a way in. It lists the five test accounts by their public
  * email and sends the tester to the normal sign-in screen. No password, token, recovery code or
  * authenticator secret is stored here or sent anywhere, and no role is ever granted by the app.
  */
 export interface DemoAccount {
-  role: "student" | "instructor" | "manager" | "admin";
+  role: "student" | "instructor" | "lecturer" | "manager" | "admin";
   title: string;
   email: string;
   summary: string;
@@ -29,6 +29,14 @@ export const DEMO_ACCOUNTS: readonly DemoAccount[] = [
     email: "instructor@chartnexa.test",
     summary:
       "Create and edit courses, modules, lessons, videos, PDFs and thumbnails, set assignments and review submissions.",
+    twoStep: false,
+  },
+  {
+    role: "lecturer",
+    title: "Lecturer",
+    email: "lecturer@chartnexa.test",
+    summary:
+      "A second Instructor account: the same Instructor screens, with access to its own two courses only.",
     twoStep: false,
   },
   {
@@ -56,7 +64,7 @@ export function demoAccountsEnabled(): boolean {
   return testServer.allowed() && process.env["EXPO_PUBLIC_DEMO_ACCOUNTS"] === "true";
 }
 
-/** Only the four public demo addresses may be prefilled from a link or a parameter. */
+/** Only the five public test addresses may be prefilled from a link or a parameter. */
 export function demoEmailOrNull(value: unknown): string | null {
   if (!demoAccountsEnabled() || typeof value !== "string") return null;
   return DEMO_ACCOUNTS.find((a) => a.email === value)?.email ?? null;

@@ -215,4 +215,34 @@ describe("ending a session", () => {
     expect(screen.queryByText("Good morning, Ann")).toBeNull();
     expect(screen.queryByText(/Good (morning|afternoon|evening), Ann/)).toBeNull();
   });
+
+  it("switching accounts opens each role's own page, with no data from the one before", async () => {
+    const order = ["admin", "student", "instructor", "manager"] as const;
+    const landing = {
+      admin: "/dashboard",
+      student: "/home",
+      instructor: "/dashboard",
+      manager: "/dashboard",
+    };
+    await renderRouter(app, { initialUrl: "/" });
+    await waitFor(() => expect(screen).toHavePathname("/sign-in"));
+    for (const who of order) {
+      access.mockResolvedValue(ROLES[who]);
+      await act(async () => {
+        await sessionManager.signIn(pair());
+      });
+      await waitFor(() => expect(screen).toHavePathname(landing[who]));
+      if (who === "admin") expect(await screen.findByText("Admin dashboard")).toBeTruthy();
+      if (who === "manager") expect(await screen.findByText("Manager dashboard")).toBeTruthy();
+      if (who === "instructor")
+        expect(await screen.findByText("Instructor dashboard")).toBeTruthy();
+      // The previous person's dashboard is gone.
+      if (who !== "admin") expect(screen.queryByText("Admin dashboard")).toBeNull();
+      await act(async () => {
+        await sessionManager.signOut();
+      });
+      await waitFor(() => expect(screen).toHavePathname("/sign-in"));
+      expect(router.canGoBack()).toBe(false);
+    }
+  });
 });

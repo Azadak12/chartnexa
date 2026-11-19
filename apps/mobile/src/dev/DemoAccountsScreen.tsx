@@ -11,7 +11,7 @@ import { Banner, Button, Screen, Text, useSubmitOnce } from "../ui";
 import { DEMO_ACCOUNTS, demoAccountsEnabled, type DemoAccount } from "./demo-accounts";
 
 /**
- * Four cards, one per demo role. "Sign in" fills the public email and opens the normal secure
+ * Five cards, one per test account. "Sign in" fills the public email and opens the normal secure
  * sign-in. Switching from another account signs out first, through the normal sign-out. The
  * password, and for staff the two-step code, are always asked for.
  */
@@ -49,7 +49,7 @@ export function DemoAccountsScreen() {
       </Text>
       <Banner
         kind="info"
-        message="For testing only. Pick a role to open the normal sign-in with its email filled in. You still enter the password, and staff also enter a two-step code."
+        message="For testing only. Pick a role to open the normal sign-in with its email filled in. You still enter the password."
         testID="demo-note"
       />
       {DEMO_ACCOUNTS.map((a) => {
@@ -89,7 +89,7 @@ export function DemoAccountsScreen() {
             <Text>{a.summary}</Text>
             {a.twoStep ? (
               <Text variant="caption" tone="warning">
-                Two-step sign-in is required for this role.
+                Asks for a two-step code, unless the local server has the development shortcut on.
               </Text>
             ) : null}
             <Button

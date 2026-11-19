@@ -85,6 +85,7 @@ class SessionManager {
     await this.persistWithRetry();
     this.startWatching();
     sessionStore.setNotice(null);
+    sessionStore.setEndedBy(null);
     sessionStore.set("signed-in");
   }
 
@@ -95,6 +96,7 @@ class SessionManager {
   async signOut(): Promise<{ serverNotified: boolean }> {
     const accessToken = this.currentAccessToken();
     await this.clearLocal();
+    sessionStore.setEndedBy("signout");
     sessionStore.set("signed-out");
     if (!accessToken) return { serverNotified: false };
     try {
@@ -110,6 +112,7 @@ class SessionManager {
   async endSession(notice: string = SESSION_ENDED_NOTICE): Promise<void> {
     await this.clearLocal();
     sessionStore.setNotice(notice);
+    sessionStore.setEndedBy("expired");
     sessionStore.set("signed-out");
   }
 
@@ -117,6 +120,7 @@ class SessionManager {
   async clearAfterServerEnd(notice: string | null): Promise<void> {
     await this.clearLocal();
     sessionStore.setNotice(notice);
+    sessionStore.setEndedBy("signout");
     sessionStore.set("signed-out");
   }
 

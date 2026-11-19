@@ -3,7 +3,7 @@ import { useGlobalSearchParams, usePathname, useRouter, useSegments } from "expo
 import { useEffect, useRef, type ReactNode } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { fetchAccess } from "../courses/course-api";
-import { useSession } from "../session/session-store";
+import { sessionStore, useSession } from "../session/session-store";
 import { colors } from "../theme";
 import { landingFor } from "./landing";
 import { buildReturnTo, sanitizeReturnTo } from "./return-to";
@@ -92,8 +92,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (!signedIn && group === "(app)") {
     // When a session ends mid-use the router is already unwinding, so the last place seen while
     // signed in is the reliable one. A signed-out deep link has no earlier place.
-    const returnTo = lastSignedInHref.current ?? here;
-    target = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+    // Signing out on purpose forgets the place, so whoever signs in next starts at their own
+    // landing page. Only an expired or rejected session returns to where the person was.
+    const wasSignedIn = lastSignedInHref.current !== null;
+    const returnTo = wasSignedIn ? lastSignedInHref.current : here;
+    const forget = wasSignedIn && sessionStore.getEndedBy() === "signout";
+    target = forget ? "/sign-in" : `/sign-in?returnTo=${encodeURIComponent(returnTo ?? here)}`;
     blocked = true;
   } else if (signedIn && group === "(public)") {
     blocked = true;

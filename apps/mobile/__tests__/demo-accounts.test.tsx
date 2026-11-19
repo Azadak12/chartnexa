@@ -78,6 +78,7 @@ describe("when the hub is available", () => {
     expect(DEMO_ACCOUNTS.map((a) => a.email)).toEqual([
       "student@chartnexa.test",
       "instructor@chartnexa.test",
+      "lecturer@chartnexa.test",
       "manager@chartnexa.test",
       "admin@chartnexa.test",
     ]);
@@ -86,7 +87,7 @@ describe("when the hub is available", () => {
     );
   });
 
-  it("prefills only the four demo emails", () => {
+  it("prefills only the five test emails", () => {
     expect(demoEmailOrNull("manager@chartnexa.test")).toBe("manager@chartnexa.test");
     expect(demoEmailOrNull("someone@else.com")).toBeNull();
     expect(demoEmailOrNull(undefined)).toBeNull();
@@ -94,15 +95,19 @@ describe("when the hub is available", () => {
 });
 
 describe("the Sign In screen", () => {
-  it("offers Demo accounts, which shows four role cards with email, summary and MFA notes", async () => {
+  it("offers Demo accounts, which shows five account cards with email, summary and MFA notes", async () => {
     await renderRouter(app, { initialUrl: "/sign-in" });
     await fireEvent.press(await screen.findByRole("button", { name: "Try a demo account" }));
     expect(screen).toHavePathname("/demo-accounts");
-    for (const r of ["student", "instructor", "manager", "admin"]) {
+    for (const r of ["student", "instructor", "lecturer", "manager", "admin"]) {
       expect(screen.getByTestId(`demo-${r}`)).toBeTruthy();
     }
     expect(screen.getByText("manager@chartnexa.test")).toBeTruthy();
-    expect(screen.getAllByText("Two-step sign-in is required for this role.")).toHaveLength(2);
+    expect(
+      screen.getAllByText(
+        "Asks for a two-step code, unless the local server has the development shortcut on.",
+      ),
+    ).toHaveLength(2);
     expect(screen.getByRole("button", { name: "Sign in as Instructor" })).toBeTruthy();
   });
 

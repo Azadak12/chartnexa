@@ -59,7 +59,7 @@ const creds = async () =>
   ).accounts;
 
 describe("the demo seed", () => {
-  it("creates five complete published courses with real content, and four accounts", async () => {
+  it("creates five complete published courses with real content, and five accounts", async () => {
     const report = await run();
     expect(report).toMatchObject({
       courses: 5,
@@ -68,7 +68,7 @@ describe("the demo seed", () => {
       resources: 6,
       assignments: 2,
     });
-    expect(report.createdAccounts).toHaveLength(4);
+    expect(report.createdAccounts).toHaveLength(5);
     const courses = await h.db.course.findMany({
       include: { lessons: true, modules: true, category: true },
     });
@@ -112,7 +112,7 @@ describe("the demo seed", () => {
     const pw = await creds();
     expect(Object.keys(pw).sort()).toEqual(DEMO_ACCOUNTS.map((a) => a.email).sort());
     for (const a of Object.values(pw)) expect(a.password.length).toBeGreaterThanOrEqual(16);
-    expect(new Set(Object.values(pw).map((a) => a.password)).size).toBe(4);
+    expect(new Set(Object.values(pw).map((a) => a.password)).size).toBe(DEMO_ACCOUNTS.length);
     const hashes = (
       await h.db.user.findMany({ where: { email: { endsWith: "@chartnexa.test" } } })
     ).map((u) => u.passwordHash ?? "");
