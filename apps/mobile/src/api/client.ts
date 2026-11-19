@@ -43,6 +43,8 @@ export interface ApiOptions {
   body?: unknown;
   /** Raw bytes sent as application/octet-stream (upload parts). Takes the place of `body`. */
   rawBody?: Uint8Array;
+  /** Extra request headers (for example Idempotency-Key). */
+  headers?: Record<string, string>;
   signal?: AbortSignal;
   /** Supplies the access token. `mobile-auth` will provide this; none exists yet. */
   getToken?: () => string | null;
@@ -74,6 +76,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
             ? { "content-type": "application/json" }
             : {}),
         ...(token ? { authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
       },
       ...(options.rawBody !== undefined
         ? { body: options.rawBody as unknown as BodyInit }

@@ -32,3 +32,4 @@ export * from "./reviews.js";
 export * from "./categories.js";
 export * from "./resources.js";
 export * from "./video.js";
+export * from "./payments.js";

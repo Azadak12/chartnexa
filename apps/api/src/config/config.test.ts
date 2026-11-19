@@ -58,6 +58,13 @@ describe("loadConfig", () => {
     );
   });
 
+  it("refuses the development providers in production, naming each setting", () => {
+    for (const key of ["STORAGE_DRIVER", "SCANNER", "VIDEO_PROVIDER", "PAYMENT_PROVIDER"]) {
+      expect(() => loadConfig({ ...valid, NODE_ENV: "production" })).toThrow(new RegExp(key));
+    }
+    expect(loadConfig({ ...valid, NODE_ENV: "development" }).PAYMENT_PROVIDER).toBe("test");
+  });
+
   it("rejects dev and memory mail senders in production, naming the setting", () => {
     for (const driver of ["dev", "memory"]) {
       expect(() => loadConfig({ ...valid, NODE_ENV: "production", MAILER_DRIVER: driver })).toThrow(

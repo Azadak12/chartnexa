@@ -172,7 +172,7 @@ describe("course page", () => {
     publishedAt: "2026-11-17T00:00:00.000Z",
   };
 
-  it("shows the cover, title, level, price, description and the enrollment notice with no buy button", async () => {
+  it("shows the cover, title, level, price, description and a test-mode buy button", async () => {
     api.get.mockResolvedValue(detail);
     await renderRouter(app, { initialUrl: "/course/c1" });
     expect(await screen.findByRole("header", { name: "Price Action Basics" })).toBeTruthy();
@@ -180,9 +180,10 @@ describe("course page", () => {
     expect(screen.getByTestId("course-price").props.children).toBe("$49.50");
     expect(screen.getByText("Learn to read charts the simple way.")).toBeTruthy();
     expect(screen.getByTestId("enroll-notice").props.accessibilityLabel).toMatch(
-      /Enrollment is coming soon/,
+      /Buy this course|free/,
     );
-    expect(screen.queryByRole("button", { name: /buy|enroll|purchase/i })).toBeNull();
+    expect(await screen.findByRole("button", { name: "Buy for $49.50" })).toBeTruthy();
+    expect(screen.getByText("Test mode: no money is charged.")).toBeTruthy();
     expect(api.get).toHaveBeenCalledWith("c1");
   });
 

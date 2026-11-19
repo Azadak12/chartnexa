@@ -241,3 +241,11 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 |---|---|
 | R36 | A video lesson completes when its owner has watched 90 percent of it (Q07 proposal, `VIDEO_COMPLETION_PERCENT`), credited at no more than twice real time; such lessons cannot be marked complete by hand. Text lessons keep manual marking (R18). |
 | Q09 (still open) | Video provider: needed for transcoding, adaptive streaming, protected playback at scale and a CDN. Only a test adapter exists and production refuses it. |
+
+## Payments (change `payments-foundation`, 2026-11-19)
+
+| ID | Question or decision | Status |
+|---|---|---|
+| R37 | Test-mode purchases (C17): a priced, published course can be bought once per person; failed and cancelled checkouts give nothing; a reversal removes access and a won dispute restores it (N01); a second payment for an owned course becomes `duplicate_needs_refund` without a second access (Q19 still decides what operators do then). | Built. |
+| Q34 | How does a student get a free course (price 0): automatic enrollment, a "Get for free" order, or staff grants only? | Pending. Checkout refuses free courses (`COURSE_FREE`); staff grants work. |
+| ADR-0008 (still open) | Real payment strategy: Stripe, Apple, Google or a hybrid. | Pending; only the test provider exists and production refuses it. |

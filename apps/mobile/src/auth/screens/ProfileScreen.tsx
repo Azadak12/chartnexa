@@ -155,6 +155,11 @@ export function ProfileScreen() {
               onPress={() => router.push("/profile/change-password")}
             />
             <Button
+              label="Purchases"
+              variant="secondary"
+              onPress={() => router.push("/profile/purchases")}
+            />
+            <Button
               label="Active sessions"
               variant="secondary"
               onPress={() => router.push("/profile/sessions")}

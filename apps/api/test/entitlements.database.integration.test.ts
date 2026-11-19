@@ -32,7 +32,7 @@ describe("the database refuses bad entitlements on its own", () => {
     const p = await person(h);
     const c = await mkCourse();
     const bad: Record<string, unknown>[] = [
-      { source: "stripe" },
+      { source: "paypal" },
       { source: "" },
       { status: "suspended", revokedAt: new Date(), revokeReason: "Direct revoke" },
       { grantReason: "ab" },

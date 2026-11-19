@@ -170,3 +170,9 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 - **Staff (`lesson:upload`):** `POST /staff/courses/:courseId/lessons/:lessonId/video/uploads` `{ fileName, size }` (MP4, up to 1 GB), the same part endpoint as files, then `POST .../uploads/:uploadId/complete-video`; `GET` and `DELETE .../lessons/:lessonId/video`.
 - **Viewers:** `GET /courses/:courseId/lessons/:lessonId/video` answers the ready video with a playback link (valid `VIDEO_LINK_TTL_SECONDS`, default 4 h) and, for owners, progress. `PUT /me/courses/:courseId/lessons/:lessonId/video-progress` `{ positionSeconds, watchedDeltaSeconds }`; credited time is capped by elapsed time (2x plus 5 s) and the duration; at `VIDEO_COMPLETION_PERCENT` (default 90) the lesson is completed. Manual completion of a video lesson answers 409 `VIDEO_LESSON`.
 - **Provider:** `VIDEO_PROVIDER=test` keeps the MP4 in object storage and serves `/videos/:id/stream?t=...` with HTTP ranges; no transcoding or adaptive streaming. Production refuses it (Q09).
+
+## Payments, test mode (change `payments-foundation`)
+- **Buyers:** `POST /me/orders` `{ courseId }` with an `Idempotency-Key` header (8 to 100 letters, digits, `-`, `_`); `GET /me/orders?courseId=&cursor=`; `GET /me/orders/:orderId`.
+- **Test provider:** `POST /payments/test/checkouts/:ref/complete` `{ outcome: paid | failed | cancelled }` sends a signed event to the webhook handler. `POST /payments/webhooks/:provider` takes signed events (`x-payment-signature`, HMAC-SHA256 of the event JSON with `PAYMENT_TEST_WEBHOOK_SECRET`) of type paid, failed, cancelled, reversed or dispute_won.
+- **Staff (`payments:read_status`):** `GET /staff/orders?status=`.
+- **Rules:** one pending checkout per person and course; events applied once under a lock on the order; access only through `entitlements` (source `test_purchase`). `PAYMENT_PROVIDER=test` is refused in production (ADR-0008 pending).

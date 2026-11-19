@@ -36,6 +36,13 @@ const schema = z.object({
   VIDEO_LINK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(14_400),
   /** Share of a video to watch for the lesson to count as complete (Q07 proposal: 90). */
   VIDEO_COMPLETION_PERCENT: z.coerce.number().int().min(50).max(100).default(90),
+  /** Payments run in test mode only (owner decision C17); production refuses the test provider. */
+  PAYMENT_PROVIDER: z.enum(["test"]).default("test"),
+  /** Signs test-provider events. Development default only; a real provider has its own secret. */
+  PAYMENT_TEST_WEBHOOK_SECRET: z
+    .string()
+    .min(32)
+    .default("test-webhook-secret-test-webhook-secret"),
   /** Lifetime of a signed link to read a file. */
   FILE_LINK_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
   APP_LINK_BASE: z.string().min(1).default("chartnexa://"),
@@ -83,6 +90,14 @@ const checked = schema.superRefine((c, ctx) => {
       code: "custom",
       path: ["STORAGE_DRIVER"],
       message: "local-disk storage is not allowed in production; a storage provider is pending",
+    });
+  }
+  if (c.NODE_ENV === "production" && c.PAYMENT_PROVIDER === "test") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["PAYMENT_PROVIDER"],
+      message:
+        "the test payment provider is not allowed in production; the payment strategy is pending",
     });
   }
   if (c.NODE_ENV === "production" && c.VIDEO_PROVIDER === "test") {

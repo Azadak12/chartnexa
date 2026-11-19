@@ -15,6 +15,7 @@ import { ProgressBar } from "../../progress/ProgressBar";
 import { RatingSummary } from "../../reviews/RatingSummary";
 import { ReviewsSection } from "../../reviews/ReviewsSection";
 import { formatPrice } from "../money";
+import { BuySection } from "../../payments/BuySection";
 
 export function CoursePageScreen() {
   const router = useRouter();
@@ -108,11 +109,7 @@ export function CoursePageScreen() {
           )}
         </>
       ) : (
-        <Banner
-          kind="info"
-          message="Enrollment is coming soon. You will be able to buy this course here."
-          testID="enroll-notice"
-        />
+        <BuySection courseId={c.id} priceCents={c.priceCents} />
       )}
       {c.description ? <Text>{c.description}</Text> : null}
       {c.enrolled && c.progress ? (

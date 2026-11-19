@@ -11,6 +11,7 @@ import { AccessModule } from "./modules/access/index.js";
 import { IdentityModule } from "./modules/identity/index.js";
 import { MailerModule } from "./modules/mailer/index.js";
 import { MfaModule } from "./modules/mfa/index.js";
+import { PaymentsModule } from "./modules/payments/index.js";
 import { ResourcesModule } from "./modules/resources/index.js";
 import { ReviewsModule } from "./modules/reviews/index.js";
 import { ProgressModule } from "./modules/progress/index.js";
@@ -36,6 +37,7 @@ export class AppModule {
         ProgressModule,
         ReviewsModule,
         ResourcesModule,
+        PaymentsModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

@@ -118,7 +118,8 @@ export function LessonOutlineSection({
         openerRef={openerRef}
       >
         <Text>
-          {locked ? `"${locked.title}" ` : ""}is part of the full course. Enrollment is coming soon.
+          {locked ? `"${locked.title}" ` : ""}is part of the full course. Buy the course on this
+          page to unlock it.
         </Text>
         <Button label="Close" variant="secondary" onPress={() => setLocked(null)} />
       </BottomSheet>

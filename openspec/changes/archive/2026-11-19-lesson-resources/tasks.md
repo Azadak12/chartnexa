@@ -15,7 +15,7 @@
 
 ## 3. Closing
 
-- [ ] 3.1 Full checks, docs, decisions; archive after CI passes.
+- [x] 3.1 Full checks, docs, decisions; CI on `main` passed (run 79 server, run 80 app); archived.
 
 ## Evidence (server part)
 
