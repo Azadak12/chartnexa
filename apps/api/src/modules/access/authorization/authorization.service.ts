@@ -1,7 +1,13 @@
 import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { PrismaService } from "../../../database/prisma.service.js";
-import { permissionsForRole, type Permission, type Role, type StaffRole } from "./permissions.js";
+import {
+  CONFIGURABLE_ROLES,
+  permissionsForRole,
+  type Permission,
+  type Role,
+  type StaffRole,
+} from "./permissions.js";
 
 export interface Access {
   userId: string;
@@ -45,12 +51,34 @@ export class AuthorizationService {
     }
     const staffRole = user.roles[0]?.role ?? null;
     const roles: Role[] = staffRole ? ["student", staffRole] : ["student"];
-    const permissions = new Set<Permission>([...roles].flatMap((r) => permissionsForRole(r)));
+    const now = new Date();
+    const [defaults, denials] = await Promise.all([
+      this.db.rolePermissionDefault.findMany({
+        where: { role: { in: roles.filter((r) => CONFIGURABLE_ROLES.some((c) => c === r)) } },
+        select: { role: true, permission: true, enabled: true },
+      }),
+      this.db.userPermissionDenial.findMany({
+        where: { userId, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+        select: { permission: true },
+      }),
+    ]);
+    // Role defaults: the built-in list for each role, overlaid by what an Admin switched.
+    const permissions = new Set<Permission>();
+    for (const r of roles) {
+      const set = new Set<Permission>(permissionsForRole(r));
+      for (const d of defaults) {
+        if (d.role !== r) continue;
+        if (d.enabled) set.add(d.permission as Permission);
+        else set.delete(d.permission as Permission);
+      }
+      for (const p of set) permissions.add(p);
+    }
     const grants: Array<{ permission: Permission; courseId: string }> = [];
-    // Grants count only while the account is an active Instructor, whatever rows exist.
+    // Grants count only while the account is an active Instructor, whatever rows exist, and only
+    // until they expire.
     if (staffRole === "instructor") {
       const rows = await this.db.instructorGrant.findMany({
-        where: { userId, revokedAt: null },
+        where: { userId, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
         select: { permission: true, courseId: true },
       });
       for (const g of rows) {
@@ -59,7 +87,11 @@ export class AuthorizationService {
         else grants.push({ permission, courseId: g.courseId });
       }
     }
-    return { userId, roles, staffRole, permissions, grants };
+    // An individual "switched off" wins over the role default and over every grant.
+    const off = new Set(denials.map((d) => d.permission));
+    for (const p of off) permissions.delete(p as Permission);
+    const kept = grants.filter((g) => !off.has(g.permission));
+    return { userId, roles, staffRole, permissions, grants: kept };
   }
 
   /** Same as access() but reads the database once per request however many checks run. */

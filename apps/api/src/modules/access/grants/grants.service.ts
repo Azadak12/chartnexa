@@ -25,16 +25,6 @@ export interface GrantActor {
   requestId?: string;
 }
 
-/**
- * What a Manager may hand out: everything grantable except publishing (proposal R08).
- * Admins may grant everything grantable. This list is the single place to change the ceiling.
- */
-export const MANAGER_CEILING: ReadonlySet<GrantablePermission> = new Set(
-  (Object.keys(GRANTABLE_PERMISSIONS) as GrantablePermission[]).filter(
-    (p) => p !== "course:publish",
-  ),
-);
-
 /** Given automatically to an Instructor on a course they create (proposal R09). Never publish. */
 export const OWNER_AUTO_PERMISSIONS: readonly GrantablePermission[] = [
   "course:update",
@@ -61,6 +51,7 @@ function toGrant(r: GrantRow): Grant {
     source: r.source as "manual" | "owner_auto",
     reason: r.reason,
     grantedAt: r.createdAt.toISOString(),
+    expiresAt: r.expiresAt?.toISOString() ?? null,
   };
 }
 
@@ -91,8 +82,9 @@ export class GrantsService {
     return rows[0]?.role === "instructor";
   }
 
-  private allowedFor(role: "admin" | "manager" | null, p: GrantablePermission): boolean {
-    return role === "admin" || (role === "manager" && MANAGER_CEILING.has(p));
+  /** Q38: for now only Admins grant or revoke individual permissions. */
+  private allowedFor(role: "admin" | "manager" | null): boolean {
+    return role === "admin";
   }
 
   private async deny(
@@ -131,7 +123,11 @@ export class GrantsService {
     const actor = await this.db.userRole.findFirst({ where: { userId: actorId, revokedAt: null } });
     const role = actor?.role === "admin" || actor?.role === "manager" ? actor.role : null;
     const rows = await this.db.instructorGrant.findMany({
-      where: { userId: targetId, revokedAt: null },
+      where: {
+        userId: targetId,
+        revokedAt: null,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
       include: { course: { select: { title: true } } },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     });
@@ -143,7 +139,7 @@ export class GrantsService {
         (permission) => ({
           permission,
           scope: GRANTABLE_PERMISSIONS[permission],
-          allowedForYou: this.allowedFor(role, permission),
+          allowedForYou: this.allowedFor(role),
         }),
       ),
     };
@@ -156,7 +152,7 @@ export class GrantsService {
     }
     type Out = { kind: "ok"; id: string; created: boolean } | { kind: "denied"; reason: string };
     const out = await this.db.$transaction<Out>(async (tx) => {
-      if (!this.allowedFor(await this.actorRole(tx, actor.userId), body.permission)) {
+      if (!this.allowedFor(await this.actorRole(tx, actor.userId))) {
         return { kind: "denied", reason: "above_ceiling_or_not_authorized" };
       }
       if (!(await this.targetIsInstructor(tx, targetId))) {
@@ -171,39 +167,13 @@ export class GrantsService {
         });
         if (!course) throw new NotFoundException("Course not found.");
       }
-      const inserted = await tx.$queryRaw<Array<{ id: string }>>`
-        INSERT INTO instructor_grants (id, user_id, permission, course_id, source, granted_by, reason)
-        VALUES (gen_random_uuid(), ${targetId}::uuid, ${body.permission}, ${body.courseId ?? null}::uuid,
-                'manual', ${actor.userId}::uuid, ${body.reason})
-        ON CONFLICT (user_id, permission, (COALESCE(course_id, '00000000-0000-0000-0000-000000000000'::uuid)))
-          WHERE revoked_at IS NULL
-        DO NOTHING
-        RETURNING id`;
-      const created = inserted[0];
-      if (created) {
-        await this.audit.record(tx, {
-          actorKind: "user",
-          actorUserId: actor.userId,
-          action: "grant.create",
-          targetType: "user",
-          targetId,
-          outcome: "success",
-          reason: body.reason,
-          after: detail,
-          requestId: actor.requestId ?? null,
-        });
-        return { kind: "ok", id: created.id, created: true };
-      }
-      const existing = await tx.instructorGrant.findFirstOrThrow({
-        where: {
-          userId: targetId,
-          permission: body.permission,
-          courseId: body.courseId ?? null,
-          revokedAt: null,
-        },
-        select: { id: true },
+      const r = await this.insertGrant(tx, actor, targetId, {
+        permission: body.permission,
+        courseId: body.courseId ?? null,
+        reason: body.reason,
+        expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
       });
-      return { kind: "ok", id: existing.id, created: false };
+      return { kind: "ok", id: r.id, created: r.created };
     });
     if (out.kind === "denied")
       return this.deny(actor, "grant.create", targetId, out.reason, detail);
@@ -212,6 +182,112 @@ export class GrantsService {
       include: { course: { select: { title: true } } },
     });
     return { grant: toGrant(row), created: out.created };
+  }
+
+  /**
+   * Gives one permission inside the caller's transaction, audited. Repeating it changes nothing
+   * (a longer or shorter expiry on an existing grant is applied and audited). An ended-by-time
+   * row is closed first so a fresh grant can be made.
+   */
+  async insertGrant(
+    tx: Tx,
+    actor: GrantActor,
+    targetId: string,
+    g: { permission: string; courseId: string | null; reason: string; expiresAt: Date | null },
+  ): Promise<{ id: string; created: boolean }> {
+    await tx.$executeRaw`
+      UPDATE instructor_grants SET revoked_at = now(), revoke_reason = 'Expired'
+      WHERE user_id = ${targetId}::uuid AND permission = ${g.permission}
+        AND course_id IS NOT DISTINCT FROM ${g.courseId}::uuid
+        AND revoked_at IS NULL AND expires_at IS NOT NULL AND expires_at <= now()`;
+    const inserted = await tx.$queryRaw<Array<{ id: string }>>`
+      INSERT INTO instructor_grants (id, user_id, permission, course_id, source, granted_by, reason, expires_at)
+      VALUES (gen_random_uuid(), ${targetId}::uuid, ${g.permission}, ${g.courseId}::uuid,
+              'manual', ${actor.userId}::uuid, ${g.reason}, ${g.expiresAt})
+      ON CONFLICT (user_id, permission, (COALESCE(course_id, '00000000-0000-0000-0000-000000000000'::uuid)))
+        WHERE revoked_at IS NULL
+      DO NOTHING
+      RETURNING id`;
+    const created = inserted[0];
+    const detail = {
+      permission: g.permission,
+      courseId: g.courseId,
+      expiresAt: g.expiresAt?.toISOString() ?? null,
+    };
+    if (created) {
+      await this.audit.record(tx, {
+        actorKind: "user",
+        actorUserId: actor.userId,
+        action: "grant.create",
+        targetType: "user",
+        targetId,
+        outcome: "success",
+        reason: g.reason,
+        after: detail,
+        requestId: actor.requestId ?? null,
+      });
+      return { id: created.id, created: true };
+    }
+    const existing = await tx.instructorGrant.findFirstOrThrow({
+      where: {
+        userId: targetId,
+        permission: g.permission,
+        courseId: g.courseId,
+        revokedAt: null,
+      },
+      select: { id: true, expiresAt: true },
+    });
+    const same = (existing.expiresAt?.getTime() ?? null) === (g.expiresAt?.getTime() ?? null);
+    if (!same) {
+      await tx.instructorGrant.update({
+        where: { id: existing.id },
+        data: { expiresAt: g.expiresAt },
+      });
+      await this.audit.record(tx, {
+        actorKind: "user",
+        actorUserId: actor.userId,
+        action: "grant.expiry_change",
+        targetType: "user",
+        targetId,
+        outcome: "success",
+        reason: g.reason,
+        before: {
+          permission: g.permission,
+          courseId: g.courseId,
+          expiresAt: existing.expiresAt?.toISOString() ?? null,
+        },
+        after: detail,
+        requestId: actor.requestId ?? null,
+      });
+    }
+    return { id: existing.id, created: false };
+  }
+
+  /** Ends the active grant of (permission, course), audited. False when there was none. */
+  async revokeByKey(
+    tx: Tx,
+    actor: GrantActor,
+    targetId: string,
+    k: { permission: string; courseId: string | null; reason: string },
+  ): Promise<boolean> {
+    const ended = await tx.instructorGrant.updateManyAndReturn({
+      where: { userId: targetId, permission: k.permission, courseId: k.courseId, revokedAt: null },
+      data: { revokedAt: new Date(), revokedBy: actor.userId, revokeReason: k.reason },
+      select: { permission: true, courseId: true },
+    });
+    if (ended.length === 0) return false;
+    await this.audit.record(tx, {
+      actorKind: "user",
+      actorUserId: actor.userId,
+      action: "grant.revoke",
+      targetType: "user",
+      targetId,
+      outcome: "success",
+      reason: k.reason,
+      before: { permission: k.permission, courseId: k.courseId },
+      requestId: actor.requestId ?? null,
+    });
+    return true;
   }
 
   async revoke(
@@ -224,7 +300,7 @@ export class GrantsService {
       return this.deny(actor, "grant.revoke", targetId, "self_change", { grantId });
     }
     const denied = await this.db.$transaction(async (tx) => {
-      if ((await this.actorRole(tx, actor.userId)) === null) return true;
+      if ((await this.actorRole(tx, actor.userId)) !== "admin") return true;
       const ended = await tx.instructorGrant.updateManyAndReturn({
         where: { id: grantId, userId: targetId, revokedAt: null },
         data: { revokedAt: new Date(), revokedBy: actor.userId, revokeReason: reason },

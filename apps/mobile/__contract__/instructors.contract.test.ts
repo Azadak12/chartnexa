@@ -12,6 +12,7 @@ import {
   staffCourseApi,
 } from "../src/courses/course-api";
 import { instructorApi } from "../src/instructors/instructor-api";
+import { permissionApi } from "../src/permissions/permission-api";
 import { sessionStore } from "../src/session/session-store";
 import {
   GOOD_PASSWORD,
@@ -52,7 +53,7 @@ const failure = async (p: Promise<unknown>): Promise<AppError> => {
 };
 
 describe("Instructor permissions against the real API", () => {
-  it("appoints, grants within the Manager ceiling, enforces, and revokes", async () => {
+  it("appoints, grants (Admin only), enforces, manages from the permission screens, and revokes", async () => {
     const adminEmail = await newAccount();
     const managerEmail = await newAccount();
     const instructorEmail = await newAccount();
@@ -77,14 +78,46 @@ describe("Instructor permissions against the real API", () => {
     expect(canManageCourses(none)).toBe(false);
     expect((await failure(staffCourseApi.list())).kind).toBe("forbidden");
 
-    // The Manager grants create-course but cannot grant publishing.
+    // A Manager cannot see or change anyone's permissions (decision Q38).
     await signInAs(managerEmail);
-    const before = await instructorApi.permissions(person.id);
-    expect(before.grants).toEqual([]);
-    expect(before.grantable.find((g) => g.permission === "course:publish")?.allowedForYou).toBe(
-      false,
-    );
-    await instructorApi.grant(person.id, { permission: "course:create", reason: "Trusted author" });
+    expect(canManageInstructors(await fetchAccess())).toBe(false);
+    expect((await failure(instructorApi.permissions(person.id))).kind).toBe("forbidden");
+    expect(
+      (
+        await failure(
+          instructorApi.grant(person.id, { permission: "course:create", reason: "Trusted author" }),
+        )
+      ).kind,
+    ).toBe("forbidden");
+    expect((await failure(permissionApi.users("instructor", "", null))).kind).toBe("forbidden");
+
+    // The Admin gives create-course through the Permission Management screen's API, with an end
+    // date, and sees it listed as an individual grant.
+    await signInAs(adminEmail);
+    const page = await permissionApi.users("instructor", "", null);
+    expect(page.items.some((u) => u.id === person.id)).toBe(true);
+    const d0 = await permissionApi.detail(person.id);
+    const end = new Date(Date.now() + 30 * 86_400_000).toISOString();
+    const d1 = await permissionApi.save(person.id, {
+      reason: "Trusted author",
+      expectedVersion: d0.version,
+      changes: [{ permission: "course:create", enabled: true, expiresAt: end }],
+    });
+    expect(d1.permissions.find((p) => p.permission === "course:create")).toMatchObject({
+      enabled: true,
+      source: "individual",
+    });
+    expect(
+      (
+        await failure(
+          permissionApi.save(person.id, {
+            reason: "Stale screen",
+            expectedVersion: d0.version,
+            changes: [{ permission: "course:create", enabled: false }],
+          }),
+        )
+      ).kind,
+    ).toBe("conflict");
 
     // The Instructor creates and edits a course, and cannot publish it.
     await signInAs(instructorEmail);
@@ -105,17 +138,6 @@ describe("Instructor permissions against the real API", () => {
     const edited = await staffCourseApi.update(made.id, { expectedVersion: 1, priceCents: 1900 });
     expect(edited.priceCents).toBe(1900);
     expect((await failure(staffCourseApi.publish(made.id))).kind).toBe("forbidden");
-
-    // The Manager is stopped at the ceiling.
-    await signInAs(managerEmail);
-    const refused = await failure(
-      instructorApi.grant(person.id, {
-        permission: "course:publish",
-        courseId: made.id,
-        reason: "Please",
-      }),
-    );
-    expect(refused.kind).toBe("forbidden");
 
     // The Admin grants publishing; the Instructor publishes; the public sees it.
     await signInAs(adminEmail);

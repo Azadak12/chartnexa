@@ -27,6 +27,7 @@ export const PERMISSION_SCOPES = {
   "payments:read_full": "global",
   "announcements:publish": "global",
   "instructors:invite": "global",
+  "reviews:write": "global",
 } as const;
 
 export type Permission = keyof typeof PERMISSION_SCOPES;
@@ -41,7 +42,8 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "roles:manage": ["admin"],
   "audit:read": ["admin"],
   "users:read": ["admin", "manager"],
-  "instructor_permissions:manage": ["admin", "manager"],
+  // Q38: for now only Admins grant or revoke individual permissions.
+  "instructor_permissions:manage": ["admin"],
   "course:create": ["admin", "manager"],
   "categories:manage": ["admin", "manager"],
   "course:update": ["admin", "manager"],
@@ -60,7 +62,42 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "announcements:publish": ["admin", "manager"],
   // R40 proposal: Admins and Managers invite Instructors; only Admins deactivate them (roles:manage).
   "instructors:invite": ["admin", "manager"],
+  // Writing a course review. Switchable per person or per role (Admin permission management).
+  // Everyone is a Student, so the Student role carries it; staff get it through that.
+  "reviews:write": ["admin", "student"],
 };
+
+/**
+ * Never switchable through individual checkboxes or role defaults (decision Q38). The same four
+ * names are in the CHECK constraints of role_permission_defaults and user_permission_denials.
+ */
+export const RESTRICTED_PERMISSIONS: readonly Permission[] = [
+  "roles:manage",
+  "audit:read",
+  "payments:read_full",
+  "instructor_permissions:manage",
+];
+
+export const CONFIGURABLE_ROLES = ["manager", "instructor", "student"] as const;
+export type ConfigurableRole = (typeof CONFIGURABLE_ROLES)[number];
+
+/**
+ * What an Admin may switch for a whole role. A Manager's built-in permissions can be switched
+ * off or back on. Instructors and Students may only gain permissions listed here: academy-wide
+ * ones, never a course permission (those stay tied to explicitly assigned courses).
+ */
+export function configurablePermissionsForRole(role: ConfigurableRole): Permission[] {
+  if (role === "manager") {
+    return permissionsForRole("manager").filter((p) => !RESTRICTED_PERMISSIONS.includes(p));
+  }
+  if (role === "instructor") return ["course:create"];
+  return ["reviews:write"];
+}
+
+/** The role's built-in answer, before any Admin override. */
+export function builtInHolds(role: Role, permission: Permission): boolean {
+  return PERMISSION_HOLDERS[permission].includes(role);
+}
 
 export function permissionsForRole(role: Role): Permission[] {
   return ALL_PERMISSIONS.filter((p) => PERMISSION_HOLDERS[p].includes(role));

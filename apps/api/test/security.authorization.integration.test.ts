@@ -193,6 +193,36 @@ describe("the sensitive routes, by name", () => {
   }[] = [
     { label: "audit log", method: "GET", path: "/staff/audit-events", allowed: ["admin"] },
     {
+      label: "permission directory",
+      method: "GET",
+      path: "/staff/permissions/users?role=student",
+      allowed: ["admin"],
+    },
+    {
+      label: "one person's permissions",
+      method: "GET",
+      path: `/staff/permissions/users/${ZERO}`,
+      allowed: ["admin"],
+    },
+    {
+      label: "role defaults",
+      method: "GET",
+      path: "/staff/permissions/roles",
+      allowed: ["admin"],
+    },
+    {
+      label: "change role defaults",
+      method: "PUT",
+      path: "/staff/permissions/roles/manager",
+      allowed: ["admin"],
+    },
+    {
+      label: "an instructor's grants",
+      method: "GET",
+      path: `/staff/instructors/${ZERO}/permissions`,
+      allowed: ["admin"],
+    },
+    {
       label: "instructor list",
       method: "GET",
       path: "/staff/instructors",

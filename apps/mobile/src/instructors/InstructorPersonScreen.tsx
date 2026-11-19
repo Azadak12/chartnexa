@@ -49,7 +49,7 @@ export function InstructorPersonScreen() {
         <StateView
           state="empty"
           title="You do not have access"
-          message="Only Admins and Managers can manage Instructor permissions."
+          message="Only Admins can manage Instructor permissions."
           actionLabel="Back"
           onAction={goBack}
         />

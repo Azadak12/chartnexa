@@ -86,7 +86,7 @@ describe("who may grant", () => {
     expect(JSON.stringify(rows[0])).not.toMatch(/@/);
   });
 
-  it("stops a Manager at the ceiling (publishing) and audits the denial", async () => {
+  it("stops a Manager from granting, even a permission it once could, and audits the denial", async () => {
     const ins = await person(h, "instructor");
     const c = await course();
     const res = await grant(manager, ins.id, {
@@ -105,11 +105,12 @@ describe("who may grant", () => {
     expect(denied).toHaveLength(1);
   });
 
-  it("lets a Manager grant everything below the ceiling", async () => {
+  it("refuses a Manager on every grantable permission (Admin only, decision Q38)", async () => {
     const ins = await person(h, "instructor");
     const c = await course();
     for (const permission of [
       "course:update",
+      "course:publish",
       "lesson:upload",
       "live:schedule",
       "assignments:manage",
@@ -121,13 +122,14 @@ describe("who may grant", () => {
         courseId: c.id,
         reason: "Teaches it",
       });
-      expect(res.statusCode, permission).toBe(200);
+      expect(res.statusCode, permission).toBe(403);
     }
     const create = await grant(manager, ins.id, {
       permission: "course:create",
       reason: "Trusted author",
     });
-    expect(create.statusCode).toBe(200);
+    expect(create.statusCode).toBe(403);
+    expect(await activeGrants(ins.id)).toHaveLength(0);
   });
 
   it("refuses Students, Instructors and signed-out callers on every endpoint", async () => {
@@ -188,11 +190,8 @@ describe("validation and eligibility", () => {
   it("accepts only active Instructors and existing courses", async () => {
     const c = await course();
     const mgr = await person(h, "manager");
-    for (const target of [student, mgr, admin]) {
-      const r = await grant(admin === target ? manager : admin, target.id, {
-        permission: "course:create",
-        reason: "Trying",
-      });
+    for (const target of [student, mgr]) {
+      const r = await grant(admin, target.id, { permission: "course:create", reason: "Trying" });
       expect(r.statusCode).toBe(400);
     }
     const unknown = await grant(admin, "5b1c1a6e-3b7a-4a0c-9d3e-2f1a6b8c9d01", {
@@ -256,12 +255,12 @@ describe("idempotency and concurrency", () => {
     const r = (
       await grant(admin, ins.id, { permission: "course:create", reason: "Trusted author" })
     ).json() as GrantResponse;
-    expect((await endGrant(manager, ins.id, r.grant.id)).statusCode).toBe(200);
-    const second = await endGrant(manager, ins.id, r.grant.id);
+    expect((await endGrant(admin, ins.id, r.grant.id)).statusCode).toBe(200);
+    const second = await endGrant(admin, ins.id, r.grant.id);
     expect(second.statusCode).toBe(404);
     const rows = await h.db.instructorGrant.findMany({ where: { userId: ins.id } });
     expect(rows).toHaveLength(1);
-    expect(rows[0]?.revokedBy).toBe(manager.id);
+    expect(rows[0]?.revokedBy).toBe(admin.id);
     expect(await auditRows(h, { action: "grant.revoke", targetId: ins.id })).toHaveLength(1);
   });
 });
@@ -275,19 +274,13 @@ describe("listing", () => {
       courseId: c.id,
       reason: "Teaches it",
     });
-    const asManager = (await list(manager, ins.id)).json() as InstructorPermissionsResponse;
-    expect(asManager.grants).toHaveLength(1);
-    expect(asManager.grants[0]).toMatchObject({
+    expect((await list(manager, ins.id)).statusCode).toBe(403);
+    const asAdmin = (await list(admin, ins.id)).json() as InstructorPermissionsResponse;
+    expect(asAdmin.grants[0]).toMatchObject({
       courseTitle: "Listed course",
       permission: "course:update",
+      expiresAt: null,
     });
-    expect(asManager.grantable.find((g) => g.permission === "course:publish")?.allowedForYou).toBe(
-      false,
-    );
-    expect(asManager.grantable.find((g) => g.permission === "course:update")?.allowedForYou).toBe(
-      true,
-    );
-    const asAdmin = (await list(admin, ins.id)).json() as InstructorPermissionsResponse;
     expect(asAdmin.grantable.every((g) => g.allowedForYou)).toBe(true);
     expect(JSON.stringify(asAdmin)).not.toMatch(/@|password|token/i);
   });

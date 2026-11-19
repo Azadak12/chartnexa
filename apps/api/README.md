@@ -9,13 +9,15 @@ NestJS 12.4.2 (12.5.1 was inside pnpm's release-age window, so it is intentional
 ## Run
 
 ```bash
-cp ../../.env.example .env        # then set CURSOR_SECRET (openssl rand -hex 32)
+pnpm env:init                     # creates .env with NODE_ENV=development and new local secrets
 createdb chartnexa_dev            # PostgreSQL 16
 pnpm migrate:deploy               # apply migrations (DATABASE_URL from your environment)
 pnpm dev
 ```
 
 The process exits nonzero if a required variable is missing, naming the variable but never its value.
+
+**`NODE_ENV` has no default (decision Q37).** The server will not start unless `NODE_ENV` is set to `development`, `test` or `production`, so development-mode behaviour is never switched on by omission. On your own computer the `.env` file sets it (`pnpm env:init` creates one; an existing `.env` is never overwritten). On a server, set `NODE_ENV=production` in the real environment.
 
 ## Test
 

@@ -5,6 +5,7 @@ import { AccessTokenService } from "./access-token.service.js";
 import { hashToken, newOpaqueToken } from "./token-util.js";
 
 const base = {
+  NODE_ENV: "test",
   DATABASE_URL: "postgresql://localhost/x",
   CURSOR_SECRET: "c".repeat(32),
   ACCESS_TOKEN_SECRET: "a".repeat(32),

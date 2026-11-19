@@ -21,9 +21,13 @@ describe("permission catalog", () => {
     expect(manager).toContain("users:read");
   });
 
-  it("gives Instructors and Students nothing by default", () => {
+  it("gives Instructors nothing by default and Students only writing reviews", () => {
     expect(permissionsForRole("instructor")).toEqual([]);
-    expect(permissionsForRole("student")).toEqual([]);
+    expect(permissionsForRole("student")).toEqual(["reviews:write"]);
+  });
+
+  it("keeps instructor_permissions:manage with Admins only", () => {
+    expect(PERMISSION_HOLDERS["instructor_permissions:manage"]).toEqual(["admin"]);
   });
 
   it("has a holder decision and a scope for every catalog entry, and only known roles", () => {

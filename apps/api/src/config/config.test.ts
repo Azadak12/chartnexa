@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ConfigError, loadConfig, securityWarnings } from "./config.js";
 
 const valid = {
+  NODE_ENV: "development",
   DATABASE_URL: "postgresql://localhost:5432/db",
   CURSOR_SECRET: "x".repeat(32),
   ACCESS_TOKEN_SECRET: "y".repeat(32),
@@ -12,6 +13,16 @@ describe("loadConfig", () => {
     const c = loadConfig(valid);
     expect(c.PORT).toBe(3000);
     expect(c.NODE_ENV).toBe("development");
+  });
+
+  it("refuses to start when NODE_ENV is missing, empty or unknown, and says how to fix it", () => {
+    const { NODE_ENV: _omit, ...without } = valid;
+    void _omit;
+    expect(() => loadConfig(without)).toThrow(/NODE_ENV: is required and has no default/);
+    expect(() => loadConfig(without)).toThrow(/env:init/);
+    expect(() => loadConfig({ ...valid, NODE_ENV: "" })).toThrow(/NODE_ENV/);
+    expect(() => loadConfig({ ...valid, NODE_ENV: "prod" })).toThrow(/NODE_ENV/);
+    expect(() => loadConfig({ ...valid, NODE_ENV: "Development" })).toThrow(/NODE_ENV/);
   });
 
   it("names a missing variable without leaking any secret value", () => {
@@ -112,12 +123,6 @@ describe("loadConfig", () => {
 
   describe("start-up security warnings", () => {
     const base = { ...valid, NODE_ENV: "development" };
-    it("warns when NODE_ENV was never set, because the default is development", () => {
-      const env = { ...valid };
-      delete (env as Record<string, string | undefined>)["NODE_ENV"];
-      const w = securityWarnings(loadConfig(env), env);
-      expect(w.some((x) => /NODE_ENV is not set/.test(x))).toBe(true);
-    });
     it("warns loudly when the shortcut is on, and says nothing for a clean local setup", () => {
       const on = { ...base, MFA_DEV_BYPASS: "true" };
       expect(securityWarnings(loadConfig(on), on).join(" ")).toMatch(/MFA_DEV_BYPASS is on/);

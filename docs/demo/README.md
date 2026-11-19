@@ -14,9 +14,9 @@ Nothing here uses real payments, real email or a production service. Purchases a
 ```bash
 pnpm install
 createdb chartnexa_dev
-cp .env.example apps/api/.env
+pnpm --filter @chartnexa/api env:init
 ```
-Edit `apps/api/.env`: set `DATABASE_URL` for your Mac's PostgreSQL user, and fill the two secrets. Generate each with:
+This creates `apps/api/.env` with `NODE_ENV=development` and new random secrets (the server refuses to start when `NODE_ENV` is not set). Edit `apps/api/.env`: set `DATABASE_URL` for your Mac's PostgreSQL user, and fill the two secrets. Generate each with:
 ```bash
 openssl rand -hex 32
 ```

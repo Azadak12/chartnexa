@@ -5,6 +5,7 @@ import { DEV_MFA_KEY, open, parseKey, seal } from "./secret-box.js";
 
 const key = randomBytes(32);
 const base = {
+  NODE_ENV: "test",
   DATABASE_URL: "postgresql://x@localhost/x",
   CURSOR_SECRET: "c".repeat(32),
   ACCESS_TOKEN_SECRET: "a".repeat(32),

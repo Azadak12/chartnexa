@@ -4,7 +4,8 @@ import { DEV_MFA_KEY, parseKey } from "../platform/secret-box.js";
 export const CONFIG = Symbol("CONFIG");
 
 const schema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // No default (decision Q37): development-mode behaviour is never switched on by omission.
+  NODE_ENV: z.enum(["development", "test", "production"]),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   DATABASE_URL: z
@@ -181,11 +182,7 @@ export function securityWarnings(
   env: Record<string, string | undefined>,
 ): string[] {
   const out: string[] = [];
-  if (env["NODE_ENV"] === undefined) {
-    out.push(
-      "NODE_ENV is not set, so the server is running as development: production safeguards are OFF. Set NODE_ENV=production on any shared or public server.",
-    );
-  }
+  void env;
   if (config.MFA_DEV_BYPASS) {
     out.push(
       "MFA_DEV_BYPASS is on: Admin and Manager sign in without a second step. Local development only.",
@@ -208,12 +205,16 @@ export class ConfigError extends Error {
   }
 }
 
+const NODE_ENV_MISSING =
+  "NODE_ENV: is required and has no default. Set NODE_ENV=production on a server, or NODE_ENV=development on your own computer (copy .env.example to apps/api/.env, or run: pnpm --filter @chartnexa/api env:init)";
+
 /** Validates environment variables. Messages name variables only, never their values. */
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
   const result = checked.safeParse(env);
   if (!result.success) {
     const issues = result.error.issues.map((i) => {
       const key = i.path.join(".") || "(root)";
+      if (key === "NODE_ENV" && env[key] === undefined) return NODE_ENV_MISSING;
       return `${key}: ${i.code === "invalid_type" && env[key] === undefined ? "is required" : i.message}`;
     });
     throw new ConfigError(issues);

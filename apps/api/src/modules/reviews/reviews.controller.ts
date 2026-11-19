@@ -143,7 +143,7 @@ export class MyReviewController {
 
   @Put()
   @HttpCode(200)
-  @Authenticated()
+  @RequirePermission("reviews:write")
   @ApiOperation({ summary: "Write or replace your review (one per course; repeating it is safe)" })
   @ApiZodBody(writeReviewRequestSchema)
   @ApiErrors(400, 401, 403, 429)

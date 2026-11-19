@@ -10,7 +10,7 @@ import {
   canPublishAnnouncements,
   canReadAudit,
   canReadPayments,
-  canManageInstructors,
+  canManageRoles,
   fetchAccess,
 } from "../../courses/course-api";
 import { applyServerErrors, nameSchema } from "../../forms/form-helpers";
@@ -99,7 +99,7 @@ export function ProfileScreen() {
   const access = useQuery({ queryKey: ["access"], queryFn: fetchAccess });
   // Only Admins and Managers see two-step settings; the server decides who needs it.
   const staffAccess =
-    canManageInstructors(access.data) ||
+    canManageRoles(access.data) ||
     (access.data?.roles ?? []).some((r) => r === "admin" || r === "manager");
   const mfa = useQuery({ queryKey: ["mfa"], queryFn: mfaApi.status, enabled: staffAccess });
   const [editing, setEditing] = useState(false);
@@ -116,10 +116,10 @@ export function ProfileScreen() {
       icon: "book-open",
       href: "/manage",
     },
-    canManageInstructors(access.data) && {
-      label: "Instructor permissions",
+    canManageRoles(access.data) && {
+      label: "Permission management",
       icon: "users",
-      href: "/profile/instructors",
+      href: "/profile/permissions",
     },
     canModerateReviews(access.data) && {
       label: "Review moderation",

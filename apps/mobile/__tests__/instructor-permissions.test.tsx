@@ -50,10 +50,14 @@ const hidden = { includeHiddenElements: true };
 
 const ADMIN = {
   roles: ["student", "admin"],
-  permissions: ["instructor_permissions:manage", "course:update"],
+  permissions: ["roles:manage", "instructor_permissions:manage", "course:update"],
   courseGrants: [],
 };
-const MANAGER = { ...ADMIN, roles: ["student", "manager"] };
+// A Manager no longer holds either permission (decision Q38: only Admins change permissions).
+const MANAGER = { roles: ["student", "manager"], permissions: ["course:update"], courseGrants: [] };
+// Not possible with the real server (Admin only); proves the screens do not offer Admin actions
+// to anyone without the Admin role even if the permission were somehow present.
+const MANAGER_WITH_ENTRY = { ...MANAGER, permissions: ["instructor_permissions:manage"] };
 const INSTRUCTOR = { roles: ["student", "instructor"], permissions: [], courseGrants: [] };
 const STUDENT = { roles: ["student"], permissions: [], courseGrants: [] };
 
@@ -132,18 +136,15 @@ const findPerson = async (email = "ira@example.com") => {
 };
 
 describe("entry point and access", () => {
-  it("shows the entry to Admins and Managers only", async () => {
+  it("shows the entry to Admins only", async () => {
     await renderRouter(app, { initialUrl: "/profile" });
-    expect(await screen.findByRole("button", { name: "Instructor permissions" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Permission management" })).toBeTruthy();
     await screen.unmount();
-    access.mockResolvedValue(MANAGER);
-    await renderRouter(app, { initialUrl: "/profile" });
-    expect(await screen.findByRole("button", { name: "Instructor permissions" })).toBeTruthy();
-    await screen.unmount();
-    for (const who of [INSTRUCTOR, STUDENT]) {
+    for (const who of [MANAGER, INSTRUCTOR, STUDENT]) {
       access.mockResolvedValue(who);
       const view = await renderRouter(app, { initialUrl: "/profile" });
       await view.findByText("Ann");
+      expect(view.queryByRole("button", { name: "Permission management" })).toBeNull();
       expect(view.queryByRole("button", { name: "Instructor permissions" })).toBeNull();
       await view.unmount();
     }
@@ -184,7 +185,7 @@ describe("finding a person", () => {
     expect(screen.getByRole("button", { name: "Make Instructor" })).toBeTruthy();
     await screen.unmount();
 
-    access.mockResolvedValue(MANAGER);
+    access.mockResolvedValue(MANAGER_WITH_ENTRY);
     await openSearch();
     await findPerson();
     await screen.findByTestId("not-instructor");
@@ -340,8 +341,7 @@ describe("the person page", () => {
     expect(api.grant).not.toHaveBeenCalled();
   });
 
-  it("dims Publish for a Manager with an explanation, and cannot choose it", async () => {
-    access.mockResolvedValue(MANAGER);
+  it("dims a permission the server says you may not give, with an explanation", async () => {
     await open();
     await screen.findByText("Edit course details");
     await press("Add permission");
@@ -442,7 +442,7 @@ describe("the person page", () => {
     );
     await screen.unmount();
 
-    access.mockResolvedValue(MANAGER);
+    access.mockResolvedValue(MANAGER_WITH_ENTRY);
     await open();
     await screen.findByText("Edit course details");
     expect(screen.queryByRole("button", { name: "Remove Instructor role" })).toBeNull();

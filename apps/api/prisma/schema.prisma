@@ -43,6 +43,7 @@ model User {
   tokens   OneTimeToken[]
   roles    UserRole[]
   grants   InstructorGrant[]
+  permissionDenials UserPermissionDenial[]
   entitlements Entitlement[]
   completions  LessonCompletion[]
   mfaCredential MfaCredential?
@@ -239,6 +240,8 @@ model InstructorGrant {
   revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(6)
   revokedBy    String?   @map("revoked_by") @db.Uuid
   revokeReason String?   @map("revoke_reason")
+  /// Optional end time. After it the grant counts for nothing (see AuthorizationService.access).
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(6)
 
   user   User    @relation(fields: [userId], references: [id])
   course Course? @relation(fields: [courseId], references: [id])
@@ -246,6 +249,42 @@ model InstructorGrant {
   @@index([userId, revokedAt])
   @@index([courseId])
   @@map("instructor_grants")
+}
+
+/// An Admin's change to what a whole role holds by default (student, instructor or manager).
+/// Absent row = the built-in default in permissions.ts. The four restricted permissions are
+/// excluded by a CHECK.
+model RolePermissionDefault {
+  role       String
+  permission String
+  enabled    Boolean
+  setBy      String?  @map("set_by") @db.Uuid
+  reason     String
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([role, permission])
+  @@map("role_permission_defaults")
+}
+
+/// A permission that the person's role gives them, switched off for this one person. Wins over
+/// the role default and over any grant. A partial unique index allows one active row per
+/// (user, permission).
+model UserPermissionDenial {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  permission   String
+  reason       String
+  createdBy    String?   @map("created_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(6)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy    String?   @map("revoked_by") @db.Uuid
+  revokeReason String?   @map("revoke_reason")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, revokedAt])
+  @@map("user_permission_denials")
 }
 
 /// A text lesson in one course. Positions run 1..N without gaps; the deferrable unique constraint

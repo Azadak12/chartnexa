@@ -25,6 +25,12 @@ export const grantRequestSchema = z
     permission: grantablePermissionSchema,
     courseId: z.uuid().optional(),
     reason,
+    /** Optional end time (for example a guest Lecturer). Must be in the future. */
+    expiresAt: z
+      .string()
+      .datetime({ offset: true })
+      .refine((v) => new Date(v).getTime() > Date.now(), "Choose a date in the future")
+      .optional(),
   })
   .superRefine((v, ctx) => {
     const scope = GRANTABLE_PERMISSIONS[v.permission];
@@ -49,6 +55,7 @@ export const grantSchema = z.object({
   source: z.enum(["manual", "owner_auto"]),
   reason: z.string(),
   grantedAt: z.string(),
+  expiresAt: z.string().nullable(),
 });
 export const instructorPermissionsResponseSchema = z.object({
   userId: z.string(),

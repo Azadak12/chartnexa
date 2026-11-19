@@ -103,10 +103,15 @@ describe("own access and staff lookup", () => {
     const student = await person(h);
     const manager = await person(h, "manager");
     const a = (await h.call("GET", "/me/access", { token: student.accessToken })).json();
-    expect(a).toEqual({ roles: ["student"], permissions: [], courseGrants: [] });
+    expect(a).toEqual({
+      roles: ["student"],
+      permissions: ["reviews:write"],
+      courseGrants: [],
+    });
     const m = (await h.call("GET", "/me/access", { token: manager.accessToken })).json();
     expect(m.roles).toEqual(["student", "manager"]);
-    expect(m.permissions).toEqual(permissionsForRole("manager").sort());
+    // Staff are Students too, so they also hold the Student permission (writing reviews).
+    expect(m.permissions).toEqual([...permissionsForRole("manager"), "reviews:write"].sort());
     expect(m.permissions).toContain("payments:read_status");
     expect(m.permissions).not.toContain("payments:read_full");
     expect((await h.call("GET", "/me/access")).statusCode).toBe(401);

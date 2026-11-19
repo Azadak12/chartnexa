@@ -19,6 +19,7 @@
     "seed:demo": "tsx --env-file-if-exists=.env scripts/seed-demo.ts",
     "demo:credentials": "tsx scripts/demo-credentials.ts",
     "account:update": "tsx --env-file-if-exists=.env scripts/account-update.ts",
+    "env:init": "tsx scripts/init-env.ts",
     "dev:totp": "tsx scripts/dev-totp.ts"
   },
   "devDependencies": {

@@ -57,6 +57,8 @@ const STAFF_URLS = [
   "/profile/orders",
   "/profile/invitations",
   "/profile/instructors",
+  "/profile/permissions",
+  "/profile/permissions/p1",
   "/profile/reviews",
   "/profile/staff-announcements",
 ];
@@ -91,6 +93,8 @@ describe("an Instructor reaching for the Admin and Manager screens", () => {
     "/profile/orders",
     "/profile/invitations",
     "/profile/instructors",
+    "/profile/permissions",
+    "/profile/permissions/p1",
     "/profile/staff-announcements",
     "/profile/reviews",
     "/manage/categories",

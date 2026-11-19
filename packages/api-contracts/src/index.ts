@@ -24,6 +24,7 @@ export * from "./auth.js";
 export * from "./access.js";
 export * from "./courses.js";
 export * from "./grants.js";
+export * from "./permission-management.js";
 export * from "./lessons.js";
 export * from "./entitlements.js";
 export * from "./progress.js";
