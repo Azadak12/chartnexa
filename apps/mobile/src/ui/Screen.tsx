@@ -1,5 +1,12 @@
-import type { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { useState, type ReactNode } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OfflineBanner } from "../state/OfflineBanner";
 import { colors, spacing } from "../theme";
@@ -11,10 +18,19 @@ export interface ScreenProps {
   padded?: boolean;
   /** Lift content above the on-screen keyboard (forms). */
   keyboard?: boolean;
+  /** Pull down to refresh. The promise settles when the new data has arrived. */
+  onRefresh?: () => Promise<unknown>;
 }
 
 /** White page with safe-area handling. The app is light by default (docs/04). */
-export function Screen({ children, scroll = true, padded = true, keyboard = false }: ScreenProps) {
+export function Screen({
+  children,
+  scroll = true,
+  padded = true,
+  keyboard = false,
+  onRefresh,
+}: ScreenProps) {
+  const [refreshing, setRefreshing] = useState(false);
   const content = (
     <>
       <OfflineBanner />
@@ -23,7 +39,23 @@ export function Screen({ children, scroll = true, padded = true, keyboard = fals
   );
   const body = padded ? <View style={styles.padded}>{content}</View> : content;
   const inner = scroll ? (
-    <ScrollView contentContainerStyle={styles.grow} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      contentContainerStyle={styles.grow}
+      keyboardShouldPersistTaps="handled"
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              void onRefresh().finally(() => setRefreshing(false));
+            }}
+            tintColor={colors.blue}
+            colors={[colors.blue]}
+          />
+        ) : undefined
+      }
+    >
       {body}
     </ScrollView>
   ) : (

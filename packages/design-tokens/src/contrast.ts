@@ -1,4 +1,4 @@
-import { colors, market, neutrals, status } from "./colors.js";
+import { accents, colors, market, neutrals, status } from "./colors.js";
 
 function channel(c: number): number {
   const s = c / 255;
@@ -34,7 +34,24 @@ export interface Pairing {
 export const MIN_RATIO: Record<PairingKind, number> = { text: 4.5, largeText: 3, control: 3 };
 
 /** Every foreground and background combination the app is allowed to use. */
+const accentPairings: Pairing[] = Object.entries(accents).flatMap(([name, a]) => [
+  { name: `${name} ink on its tint`, foreground: a.ink, background: a.tint, kind: "text" as const },
+  {
+    name: `${name} ink on white`,
+    foreground: a.ink,
+    background: colors.white,
+    kind: "text" as const,
+  },
+  {
+    name: `body on ${name} tint`,
+    foreground: colors.black,
+    background: a.tint,
+    kind: "text" as const,
+  },
+]);
+
 export const APPROVED_PAIRINGS: readonly Pairing[] = [
+  ...accentPairings,
   { name: "text on navy", foreground: market.onNavy, background: market.navy, kind: "text" },
   { name: "muted on navy", foreground: market.onNavyMuted, background: market.navy, kind: "text" },
   {

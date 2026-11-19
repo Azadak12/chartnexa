@@ -138,7 +138,7 @@ describe("the staff dashboard", () => {
   it("gives an Admin everything, and every tile opens its screen", async () => {
     access.mockResolvedValue(ADMIN);
     await alone();
-    expect(await screen.findByText("Admin dashboard")).toBeTruthy();
+    expect(await screen.findByText("Admin Dashboard")).toBeTruthy();
     await fireEvent.press(screen.getByTestId("tile-Audit log"));
     expect(screen).toHavePathname("/profile/audit");
     expect(screen.getByText("Audit screen")).toBeTruthy();

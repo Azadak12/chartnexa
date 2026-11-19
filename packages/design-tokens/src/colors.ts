@@ -52,3 +52,17 @@ export const market = {
   upText: "#34D399",
   downText: "#F87171",
 } as const;
+
+/**
+ * Accent pairs for dashboards: an `ink` colour for icons and labels and a soft `tint` behind it.
+ * Each pair meets 4.5:1 (see contrast.ts), so the ink can carry text as well as icons. Colour is
+ * always shown with an icon and words, never alone. Sky is the secondary accent next to brand blue.
+ */
+export const accents = {
+  blue: { ink: "#2563EB", tint: "#EFF6FF" },
+  sky: { ink: "#0369A1", tint: "#E0F2FE" },
+  emerald: { ink: "#047857", tint: "#D1FAE5" },
+  amber: { ink: "#B45309", tint: "#FEF3C7" },
+  purple: { ink: "#6D28D9", tint: "#EDE9FE" },
+} as const;
+export type AccentName = keyof typeof accents;

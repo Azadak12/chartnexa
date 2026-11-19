@@ -3,6 +3,7 @@ export {
   neutrals,
   status,
   market,
+  accents,
   spacing,
   radii,
   typeScale,

@@ -1,4 +1,4 @@
-export { colors, neutrals, status, market } from "./colors.js";
+export { colors, neutrals, status, market, accents, type AccentName } from "./colors.js";
 export { spacing, radii, MIN_TOUCH_SIZE } from "./spacing.js";
 export {
   fontFamilies,

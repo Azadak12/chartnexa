@@ -1,4 +1,5 @@
 import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { StyleSheet } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { fetchAccess, staffCourseApi } from "../src/courses/course-api";
 import { invitationApi } from "../src/invitations/invitation-api";
@@ -124,7 +125,7 @@ describe("the tab bar", () => {
 
   it("gives an Admin Dashboard, Users, Courses and More", async () => {
     await bar(ADMIN);
-    expect(await screen.findByText("Admin dashboard")).toBeTruthy();
+    expect(await screen.findByText("Admin Dashboard")).toBeTruthy();
     for (const n of ["Dashboard", "Users", "Courses", "More"]) {
       expect(screen.getByRole("button", { name: n })).toBeTruthy();
     }
@@ -180,5 +181,22 @@ describe("dashboard metrics come from real lists", () => {
     await renderRouter(app, { initialUrl: "/dashboard" });
     expect(await screen.findByLabelText("Pending invitations: 2+")).toBeTruthy();
     expect(screen.queryByLabelText(/^Published courses/)).toBeNull();
+  });
+
+  it("uses explicit rows for every role's numbers, so the heading below can never be overlapped", async () => {
+    access.mockResolvedValue(INSTRUCTOR);
+    await renderRouter(app, { initialUrl: "/dashboard" });
+    await screen.findByTestId("metrics");
+    const wrapping: unknown[] = [];
+    const visit = (n: unknown) => {
+      if (!n || typeof n === "string") return;
+      const node = n as { props?: { style?: unknown }; children?: unknown[] };
+      const st = StyleSheet.flatten(node.props?.style as never) ?? {};
+      if (st.flexWrap === "wrap") wrapping.push(node);
+      (node.children ?? []).forEach(visit);
+    };
+    const j = screen.toJSON();
+    (Array.isArray(j) ? j : [j]).forEach(visit);
+    expect(wrapping).toHaveLength(0);
   });
 });

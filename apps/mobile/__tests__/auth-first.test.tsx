@@ -232,12 +232,12 @@ describe("ending a session", () => {
         await sessionManager.signIn(pair());
       });
       await waitFor(() => expect(screen).toHavePathname(landing[who]));
-      if (who === "admin") expect(await screen.findByText("Admin dashboard")).toBeTruthy();
+      if (who === "admin") expect(await screen.findByText("Admin Dashboard")).toBeTruthy();
       if (who === "manager") expect(await screen.findByText("Manager dashboard")).toBeTruthy();
       if (who === "instructor")
         expect(await screen.findByText("Instructor dashboard")).toBeTruthy();
       // The previous person's dashboard is gone.
-      if (who !== "admin") expect(screen.queryByText("Admin dashboard")).toBeNull();
+      if (who !== "admin") expect(screen.queryByText("Admin Dashboard")).toBeNull();
       await act(async () => {
         await sessionManager.signOut();
       });
