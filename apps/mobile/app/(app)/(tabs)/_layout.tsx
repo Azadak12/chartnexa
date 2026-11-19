@@ -1,28 +1,15 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Redirect, Tabs, usePathname } from "expo-router";
 import { fetchAccess } from "../../../src/courses/course-api";
 import { ALL_TAB_NAMES, roleOf, tabsFor, type TabSpec } from "../../../src/staff/role-tabs";
-import { colors, neutrals } from "../../../src/theme";
+import { ResponsiveTabBar, type TabMeta } from "../../../src/kit/ResponsiveTabBar";
 
-type Icon = React.ComponentProps<typeof Feather>["name"];
 /** Titles for hidden tabs, which still need a label if they are ever opened by a link. */
 const ALL_SPECS: TabSpec[] = (["student", "instructor", "manager", "admin"] as const).flatMap((r) =>
   tabsFor(r),
 );
-const tab = (name: string, title: string, icon: Icon, hidden = false) => (
-  <Tabs.Screen
-    key={name}
-    name={name}
-    options={{
-      title,
-      tabBarAccessibilityLabel: title,
-      // A hidden tab keeps its route (a link or the current screen can still be on it) but has no
-      // button. Using href: null here would drop the screen when the role loads after the first render.
-      ...(hidden ? { tabBarButton: () => null } : {}),
-      tabBarIcon: ({ color, size }) => <Feather name={icon} size={size} color={color as string} />,
-    }}
-  />
+const tab = (name: string, title: string) => (
+  <Tabs.Screen key={name} name={name} options={{ title, tabBarAccessibilityLabel: title }} />
 );
 
 export default function TabsLayout() {
@@ -37,20 +24,21 @@ export default function TabsLayout() {
   const titles = new Map(visible.map((t) => [t.name, t]));
   const spec = (name: string): TabSpec =>
     titles.get(name) ??
-    ALL_SPECS.find((t) => t.name === name) ?? { name, title: name, icon: "grid" };
+    ALL_SPECS.find((t) => t.name === name) ?? { name, title: name, label: name, icon: "grid" };
+  const meta: Record<string, TabMeta> = Object.fromEntries(
+    ALL_TAB_NAMES.map((n) => {
+      const t = spec(n);
+      return [n, { label: t.label, icon: t.icon, hidden: !shown.has(n) }];
+    }),
+  );
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.blue,
-        tabBarInactiveTintColor: neutrals.muted,
-        tabBarStyle: { backgroundColor: colors.white },
-      }}
+      screenOptions={{ headerShown: false }}
+      // Hidden tabs keep their route (a link or the current screen can still be on it) but have no
+      // item. href: null would drop the screen when the role loads after the first render.
+      tabBar={(props) => <ResponsiveTabBar {...props} meta={meta} />}
     >
-      {ALL_TAB_NAMES.map((name) => {
-        const t = spec(name);
-        return tab(name, t.title, t.icon, !shown.has(name));
-      })}
+      {ALL_TAB_NAMES.map((name) => tab(name, spec(name).title))}
     </Tabs>
   );
 }

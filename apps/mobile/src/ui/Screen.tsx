@@ -48,5 +48,5 @@ export function Screen({ children, scroll = true, padded = true, keyboard = fals
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   grow: { flexGrow: 1 },
-  padded: { padding: spacing.lg, gap: spacing.lg, flexGrow: 1 },
+  padded: { padding: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.lg, flexGrow: 1 },
 });

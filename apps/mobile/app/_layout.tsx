@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { hideDevToolsButton } from "../src/dev/dev-tools";
 import { testServer } from "../src/api/test-server";
 import { queryClientRef } from "../src/auth/query-ref";
 import { sessionManager } from "../src/auth/session-manager";
@@ -21,6 +22,7 @@ export default function RootLayout() {
   queryClientRef.current = client;
 
   useEffect(() => connectOnlineManager(), []);
+  useEffect(() => hideDevToolsButton(), []);
   // Cached account data must never outlive the session that fetched it.
   useEffect(() => {
     sessionManager.onCleared(() => client.clear());
