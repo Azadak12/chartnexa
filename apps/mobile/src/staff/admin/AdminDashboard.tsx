@@ -200,7 +200,7 @@ export function NavCard({
 }
 
 /** Which colour each entry wears. Variety helps scanning; the labels carry the meaning. */
-const ACCENT_FOR: Record<string, AccentName> = {
+export const ACCENT_FOR: Record<string, AccentName> = {
   Courses: "sky",
   Categories: "purple",
   "Students and access": "emerald",
@@ -211,12 +211,12 @@ const ACCENT_FOR: Record<string, AccentName> = {
   Orders: "emerald",
   "Audit log": "blue",
 };
-const CAPTION_FOR: Record<string, string> = {
+export const CAPTION_FOR: Record<string, string> = {
   "Courses and teaching": "Build and organise what students learn",
   People: "Invite and manage the teaching team",
   "Community and operations": "Keep the academy running smoothly",
 };
-const TITLE_FOR: Record<string, string> = {
+export const TITLE_FOR: Record<string, string> = {
   "Courses and teaching": "Course management",
   People: "People management",
   "Community and operations": "Community and operations",

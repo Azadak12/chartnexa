@@ -97,7 +97,7 @@ describe("navigation by role", () => {
     access.mockResolvedValue(MANAGER);
     await renderRouter(app, { initialUrl: "/home" });
     await fireEvent.press(await screen.findByRole("button", { name: "Dashboard" }));
-    expect(await screen.findByText("Manager dashboard")).toBeTruthy();
+    expect(await screen.findByText("Manager Dashboard")).toBeTruthy();
   });
 });
 

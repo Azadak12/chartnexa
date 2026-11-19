@@ -134,7 +134,7 @@ describe("the tab bar", () => {
 
   it("gives a Manager Dashboard, Invitations and Profile, with no Courses or Users", async () => {
     await bar(MANAGER);
-    expect(await screen.findByText("Manager dashboard")).toBeTruthy();
+    expect(await screen.findByText("Manager Dashboard")).toBeTruthy();
     for (const n of ["Dashboard", "Invitations", "Profile"]) {
       expect(screen.getByRole("button", { name: n })).toBeTruthy();
     }
@@ -186,7 +186,7 @@ describe("dashboard metrics come from real lists", () => {
   it("uses explicit rows for every role's numbers, so the heading below can never be overlapped", async () => {
     access.mockResolvedValue(MANAGER);
     await renderRouter(app, { initialUrl: "/dashboard" });
-    await screen.findByTestId("metrics");
+    await screen.findByTestId("academy-stats");
     const wrapping: unknown[] = [];
     const visit = (n: unknown) => {
       if (!n || typeof n === "string") return;
