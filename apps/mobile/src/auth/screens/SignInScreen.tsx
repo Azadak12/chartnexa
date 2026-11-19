@@ -1,17 +1,21 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { Pressable, View } from "react-native";
+import { colors, spacing } from "../../theme";
 import { isAppError } from "../../api/errors";
 import { applyServerErrors, signInSchema } from "../../forms/form-helpers";
 import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
 import { HOME_ROUTE, sanitizeReturnTo } from "../../navigation/return-to";
 import { useSession } from "../../session/session-store";
-import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
+import { Banner, Button, Text, useSubmitOnce } from "../../ui";
 import { authHttp } from "../auth-http";
 import { formMessage } from "../errors-ui";
 import { mfaFlow } from "../mfa-flow";
-import { demoEmailOrNull } from "../../dev/demo-accounts";
+import { DemoAccountsCard } from "../../dev/DemoAccountsCard";
+import { demoAccountsEnabled, demoEmailOrNull } from "../../dev/demo-accounts";
+import { AuthLayout } from "../AuthLayout";
 import { sessionManager } from "../session-manager";
 
 export function SignInScreen() {
@@ -73,16 +77,40 @@ export function SignInScreen() {
   });
 
   return (
-    <Screen keyboard>
-      <Text variant="title" accessibilityRole="header">
-        Sign in
-      </Text>
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Learn trading with confidence, step by step."
+      footer={
+        <View style={{ gap: spacing.lg }}>
+          <View style={{ alignItems: "center", gap: 2 }}>
+            <Text tone="muted">New to ChartNexa Academy?</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Create account"
+              onPress={() => router.push("/register")}
+              hitSlop={8}
+              style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <Text variant="bodyStrong" tone="link">
+                Create account
+              </Text>
+              <Feather name="arrow-right" size={18} color={colors.blue} accessible={false} />
+            </Pressable>
+          </View>
+          {demoAccountsEnabled() ? (
+            <DemoAccountsCard onPress={() => router.push("/demo-accounts")} />
+          ) : null}
+        </View>
+      }
+    >
       {notice ? <Banner kind="info" message={notice} testID="session-notice" /> : null}
       {message ? <Banner kind="error" message={message} testID="form-error" /> : null}
       <FormField
         control={control}
         name="email"
         label="Email"
+        placeholder="Email address"
+        icon="mail"
         keyboardType="email-address"
         autoComplete="email"
         textContentType="emailAddress"
@@ -93,27 +121,29 @@ export function SignInScreen() {
         control={control}
         name="password"
         label="Password"
+        icon="lock"
         password="current-password"
         returnKeyType="go"
       />
+      <View style={{ alignItems: "flex-end" }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Forgot password?"
+          onPress={() => router.push("/forgot-password")}
+          hitSlop={8}
+          style={{ minHeight: 44, justifyContent: "center" }}
+        >
+          <Text variant="bodyStrong" tone="link">
+            Forgot password?
+          </Text>
+        </Pressable>
+      </View>
       <Button
         label="Sign in"
         loading={pending}
         disabled={locked}
         onPress={() => void handleSubmit((v) => run(v as { email: string; password: string }))()}
       />
-      <View style={{ gap: 8 }}>
-        <Button
-          label="Forgot password?"
-          variant="tertiary"
-          onPress={() => router.push("/forgot-password")}
-        />
-        <Button
-          label="Create account"
-          variant="secondary"
-          onPress={() => router.push("/register")}
-        />
-      </View>
-    </Screen>
+    </AuthLayout>
   );
 }

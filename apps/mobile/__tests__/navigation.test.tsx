@@ -42,7 +42,7 @@ describe("protected area and sign-in return", () => {
     await renderRouter(app, { initialUrl: "/course/42?tab=reviews" });
     expect(screen).toHavePathname("/sign-in");
     expect(screen).toHaveSearchParams({ returnTo: "/course/42?tab=reviews" });
-    expect(screen.getByRole("header", { name: "Sign in" })).toBeTruthy();
+    expect(screen.getByRole("header", { name: "Welcome back" })).toBeTruthy();
 
     await act(async () => sessionStore.set("signed-in"));
     expect(screen).toHavePathname("/course/42");

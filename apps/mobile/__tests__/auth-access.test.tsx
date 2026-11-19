@@ -199,7 +199,7 @@ describe("create account", () => {
     await type("Email", "new@example.com");
     await type("Password", "correct horse battery");
     await type("Confirm password", "correct horse battery");
-    await press("Create account");
+    await press("Sign up");
     expect(http.register).toHaveBeenCalledWith({
       email: "new@example.com",
       password: "correct horse battery",
@@ -217,7 +217,7 @@ describe("create account", () => {
     await type("Email", "new@example.com");
     await type("Password", "correct horse battery");
     await type("Confirm password", "correct horse battery");
-    await press("Create account");
+    await press("Sign up");
     expect(http.register).toHaveBeenCalledWith({
       email: "new@example.com",
       password: "correct horse battery",
@@ -235,7 +235,7 @@ describe("create account", () => {
     await type("Email", "new@example.com");
     await type("Password", "Password123");
     await type("Confirm password", "Password123");
-    await press("Create account");
+    await press("Sign up");
     expect(screen.getByText("This password is too common.")).toBeTruthy();
     expect(screen.getByLabelText("Email").props.value).toBe("new@example.com");
     expect(screen.getByLabelText("Password").props.accessibilityHint).toBe(
@@ -247,10 +247,10 @@ describe("create account", () => {
     await renderRouter(app, { initialUrl: "/register" });
     await type("Email", "new@example.com");
     await type("Password", "correct horse battery");
-    await press("Create account");
+    await press("Sign up");
     expect(await screen.findByText("Enter the password again")).toBeTruthy();
     await type("Confirm password", "correct horse batter");
-    await press("Create account");
+    await press("Sign up");
     expect(await screen.findByText("The passwords do not match")).toBeTruthy();
     expect(http.register).not.toHaveBeenCalled();
     expect(screen.getByLabelText("Email").props.value).toBe("new@example.com");
