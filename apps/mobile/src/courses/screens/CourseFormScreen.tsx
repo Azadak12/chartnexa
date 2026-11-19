@@ -82,20 +82,39 @@ export function CourseFormScreen() {
   const editing = id !== undefined && id !== "new";
 
   const access = useQuery({ queryKey: ["access"], queryFn: fetchAccess });
+  // Nothing is requested for someone who may not manage courses; the server refuses them anyway.
+  const mayManage = canManageCourses(access.data);
   const existing = useQuery({
     queryKey: ["staff-course", id],
-    enabled: editing,
+    enabled: editing && mayManage,
     queryFn: () => staffCourseApi.get(String(id)),
   });
 
-  if (access.status === "pending" || (editing && existing.status === "pending")) {
+  if (access.status === "pending" || (editing && mayManage && existing.status === "pending")) {
     return (
       <Screen>
         <StateView state="loading" />
       </Screen>
     );
   }
-  if (access.status === "error" || (editing && existing.status === "error")) {
+  if (editing && mayManage && existing.status === "error") {
+    const e = existing.error;
+    // A course they were not given, or one that is gone, is "no access", not a technical error.
+    if (isAppError(e) && (e.kind === "forbidden" || e.kind === "not_found")) {
+      return (
+        <Screen>
+          <StateView
+            state="empty"
+            title="You do not have access"
+            message="This course is not available to you."
+            actionLabel="Back to courses"
+            onAction={() => router.replace("/manage")}
+          />
+        </Screen>
+      );
+    }
+  }
+  if (access.status === "error" || (editing && mayManage && existing.status === "error")) {
     const e = access.error ?? existing.error;
     return (
       <Screen>
@@ -110,7 +129,7 @@ export function CourseFormScreen() {
       </Screen>
     );
   }
-  if (!canManageCourses(access.data) || (!editing && !canCreateCourses(access.data))) {
+  if (!mayManage || (!editing && !canCreateCourses(access.data))) {
     return (
       <Screen>
         <StateView

@@ -131,6 +131,13 @@ const checked = schema.superRefine((c, ctx) => {
       message: "uploads must be scanned in production; a scanning provider is pending",
     });
   }
+  if (c.MFA_DEV_BYPASS && !isLocalDatabase(c.DATABASE_URL)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["MFA_DEV_BYPASS"],
+      message: "the two-step shortcut needs a database on this computer; refused for a remote one",
+    });
+  }
   if (c.MFA_DEV_BYPASS && c.NODE_ENV !== "development") {
     ctx.addIssue({
       code: "custom",
@@ -154,6 +161,43 @@ const checked = schema.superRefine((c, ctx) => {
     });
   }
 });
+
+/** True for a database on this computer: localhost, a loopback address or a .local name. */
+export function isLocalDatabase(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.replace(/^\[|\]$/g, "");
+    return ["localhost", "127.0.0.1", "::1"].includes(host) || host.endsWith(".local");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Plain-language warnings to print at start-up, for settings that are legal but dangerous if they
+ * reach a shared or public server. Names only, never values.
+ */
+export function securityWarnings(
+  config: { NODE_ENV: string; MFA_DEV_BYPASS: boolean; DATABASE_URL: string },
+  env: Record<string, string | undefined>,
+): string[] {
+  const out: string[] = [];
+  if (env["NODE_ENV"] === undefined) {
+    out.push(
+      "NODE_ENV is not set, so the server is running as development: production safeguards are OFF. Set NODE_ENV=production on any shared or public server.",
+    );
+  }
+  if (config.MFA_DEV_BYPASS) {
+    out.push(
+      "MFA_DEV_BYPASS is on: Admin and Manager sign in without a second step. Local development only.",
+    );
+  }
+  if (config.NODE_ENV === "development" && !isLocalDatabase(config.DATABASE_URL)) {
+    out.push(
+      "Running as development against a database that is not on this computer. Use NODE_ENV=production for a shared server.",
+    );
+  }
+  return out;
+}
 
 export type AppConfig = z.infer<typeof schema>;
 

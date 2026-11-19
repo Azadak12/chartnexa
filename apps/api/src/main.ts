@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { createApp } from "./app.factory.js";
-import { ConfigError, loadConfig } from "./config/config.js";
+import { ConfigError, loadConfig, securityWarnings } from "./config/config.js";
 
 async function main(): Promise<void> {
   let config;
@@ -11,6 +11,7 @@ async function main(): Promise<void> {
     console.error(e instanceof ConfigError ? e.message : "Failed to load configuration");
     process.exit(1);
   }
+  for (const w of securityWarnings(config, process.env)) console.warn(`SECURITY WARNING: ${w}`);
   const app = await createApp(config);
   app.enableShutdownHooks();
   await app.listen({ port: config.PORT, host: "0.0.0.0" });

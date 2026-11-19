@@ -272,3 +272,12 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | R41 | Assignments: new course-scoped permission `assignments:manage` (grantable, given automatically on an Instructor's own courses, held by Admins and Managers); students see only published assignments assigned to them for courses they own; text hand-in; feedback locks the work. | Built; pending owner confirmation. |
 | R42 | Demo data is development only: generated passwords in an ignored local file, two-step sign-in unchanged, fictional reviewers who cannot sign in, simulated purchases only. | Built. |
 | Q36 | Should students be able to attach files to submissions, and should people who enrol after an assignment is assigned receive it automatically? | Pending. Text only; assignment applies to students enrolled at that moment. |
+
+## Login security and access review (2026-11-19)
+
+| ID | Question or decision | Status |
+|---|---|---|
+| R43 | The development two-step shortcut (`MFA_DEV_BYPASS`) is allowed only with `NODE_ENV=development` and a database on this computer; the server refuses it otherwise and warns at start-up when it is on. | Built. |
+| Q37 | Make `NODE_ENV` default to production (development only when set explicitly)? | Pending; recommended. Changes how the server is started. |
+| Q38 | Permission-management structure: which permissions may be granted to individuals, who may grant (Admin, Manager, course owner), expiry, and the never-grantable list. See `docs/security/2026-11-19-login-and-rbac-review.md`. | Pending; to be discussed before building. |
+
