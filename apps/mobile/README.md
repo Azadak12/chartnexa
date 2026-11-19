@@ -147,3 +147,6 @@ EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
 
 ## Live classes
 `src/live`: the course page lists live classes for owners and joins through the browser while a class is open; home shows the next class. Staff open "Live classes" from a course's management screen to schedule (local date and 24-hour time; the device time zone is stated), edit and cancel with a reason.
+
+## Operations
+`src/ops`: Profile shows "Audit log" (Admins, `audit:read`) and "Orders" (Admins and Managers, `payments:read_status`). Both read existing staff endpoints, filter, page, and always refetch on a filter change.

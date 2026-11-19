@@ -35,10 +35,11 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 5 | stripe-web-checkout | Blocked | Payment strategy |
 | 5 | store-billing-ios / store-billing-android | Blocked | Payment strategy and store accounts |
 | 5 | reversals-reconciliation | Blocked | Payment strategy and refund policy (N01) |
-| 6 | live-sessions-schedule / join / cancel | Built (manual-link adapter), awaiting CI | `live-sessions-schedule`: scheduling, join window, cancel with reason, staff and student screens (R38); hosted provider blocked on Q03 |
+| 6 | live-sessions-schedule / join / cancel | Built (manual-link adapter), CI pending | `live-sessions-schedule`: scheduling, join window, cancel with reason, staff and student screens (R38); hosted provider blocked on Q03 |
 | 7 | reviews-submit / reviews-list-edit | Archived | As `course-reviews-basic` |
 | 7 | reviews-moderation | Archived | CI run 75 |
-| 8 | ops-lists-reports, audit-viewer, announcements, reports-scoped-access | Not started | Audit API exists; no viewer screen |
+| 8 | audit-viewer, ops-lists (orders) | Built, awaiting CI | `ops-audit-and-orders`: audit log and order status screens for Admins and Managers |
+| 8 | reports, announcements, reports-scoped-access | Not started | Report metrics and announcement channels need owner decisions |
 | 9 | security-review, a11y-device-qa, load-capacity, backup-restore-drill, store-compliance, runbooks-and-staged-release | Not started | Device QA and store work need hardware and accounts |
 
 ## Latest verified test results
@@ -52,6 +53,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-19 | Local full checks after `lesson-resources` | All pass: 484 API, 446 app, 37 contract; audit gate passes (2 moderate advisories in Expo tooling) |
 | 2026-11-19 | CI on `main` runs 80, 81, 82 (files app, video, payments) | Success |
 | 2026-11-19 | Local full checks after `live-sessions-schedule` | All pass: 540 API, 486 app, 40 contract; lint, format, builds, secrets, migration round trip (typecheck re-run after fixing two test option types) |
+| 2026-11-19 | Checks after `ops-audit-and-orders` (app only): lint, format, typecheck, app tests, contract tests, app build, secrets | All pass: 493 app, 41 contract |
 
 ## Never verified
 

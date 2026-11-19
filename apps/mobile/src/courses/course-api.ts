@@ -129,3 +129,10 @@ export const canManageEnrollments = (a: AccessResponse | undefined): boolean =>
 export const canScheduleLive = (a: AccessResponse | undefined, courseId: string): boolean =>
   has(a, "live:schedule") ||
   grantsOf(a).some((g) => g.courseId === courseId && g.permissions.includes("live:schedule"));
+
+/** Reading the audit log (Admins only by default). */
+export const canReadAudit = (a: AccessResponse | undefined): boolean => has(a, "audit:read");
+
+/** Seeing payment status across all orders (Admins and Managers). */
+export const canReadPayments = (a: AccessResponse | undefined): boolean =>
+  has(a, "payments:read_status");

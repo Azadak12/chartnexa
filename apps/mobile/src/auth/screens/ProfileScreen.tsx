@@ -6,6 +6,8 @@ import { View } from "react-native";
 import {
   canManageCourses,
   canModerateReviews,
+  canReadAudit,
+  canReadPayments,
   canManageInstructors,
   fetchAccess,
 } from "../../courses/course-api";
@@ -140,6 +142,20 @@ export function ProfileScreen() {
                 label="Review moderation"
                 variant="secondary"
                 onPress={() => router.push("/profile/reviews")}
+              />
+            ) : null}
+            {canReadPayments(access.data) ? (
+              <Button
+                label="Orders"
+                variant="secondary"
+                onPress={() => router.push("/profile/orders")}
+              />
+            ) : null}
+            {canReadAudit(access.data) ? (
+              <Button
+                label="Audit log"
+                variant="secondary"
+                onPress={() => router.push("/profile/audit")}
               />
             ) : null}
             {mfa.data?.required ? (
