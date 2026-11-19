@@ -17,6 +17,8 @@ import { videoApi } from "../../video/video-api";
 import { CompletionControl } from "../../progress/CompletionControl";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
+import { LessonNeighbours } from "../LessonNeighbours";
+import { relatedToChartLab } from "../lab-link";
 import { clampStep, splitLessonText } from "../steps";
 
 /** A free-preview lesson, full screen. Back returns to the course page where it was left. */
@@ -149,8 +151,13 @@ export function LessonReaderScreen() {
   const last = step === steps.length - 1;
   return (
     <Screen>
+      {course.status === "success" ? (
+        <Text variant="caption" tone="link" testID="lesson-course" numberOfLines={1}>
+          {course.data.title}
+        </Text>
+      ) : null}
       <Text variant="caption" tone="muted">
-        Lesson {l.position} · Free preview
+        Lesson {l.position} · {owner ? "Included" : "Free preview"}
         {stepping ? ` · Step ${step + 1} of ${steps.length}` : ""}
       </Text>
       <Text variant="title" accessibilityRole="header">
@@ -220,6 +227,14 @@ export function LessonReaderScreen() {
         </>
       )}
       <LessonFilesSection courseId={String(id)} lessonId={String(lessonId)} />
+      {relatedToChartLab(l.title, l.body) ? (
+        <Button
+          label="Practice on a chart in the Learning Lab"
+          variant="secondary"
+          accessibilityHint="Opens simulated candlesticks to practise what this lesson covers"
+          onPress={() => router.push("/lab")}
+        />
+      ) : null}
       {owner && steps.length > 0 && !hasVideo ? (
         progress.status === "success" ? (
           <CompletionControl courseId={String(id)} lessonId={String(lessonId)} completed={done} />
@@ -227,6 +242,12 @@ export function LessonReaderScreen() {
           <Banner kind="error" message="Progress could not be loaded." testID="progress-error" />
         ) : null
       ) : null}
+      <LessonNeighbours
+        courseId={String(id)}
+        lessonId={String(lessonId)}
+        enrolled={owner}
+        onOpen={(target) => router.replace(`/course/${id}/lesson/${target}`)}
+      />
       {stepping && !last ? (
         <Button label="Back to course" variant="tertiary" onPress={back} />
       ) : null}

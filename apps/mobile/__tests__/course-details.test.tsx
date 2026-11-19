@@ -152,3 +152,53 @@ describe("course details", () => {
     expect(screen.getByTestId("lesson-l1")).toBeTruthy();
   });
 });
+
+describe("lesson player context", () => {
+  const lesson = (over: Record<string, unknown> = {}) => ({
+    id: "l1",
+    courseId: "c1",
+    title: "What is a candle?",
+    position: 1,
+    isPreview: true,
+    body: "A candlestick shows open, high, low and close.",
+    ...over,
+  });
+  beforeEach(() => {
+    (lessons.get as jest.Mock).mockResolvedValue(lesson());
+  });
+
+  it("shows the course name, a Lab link for chart lessons, and only the next lesson that can be opened", async () => {
+    await renderRouter(app, { initialUrl: "/course/c1/lesson/l1" });
+    expect(await screen.findByTestId("lesson-course")).toBeTruthy();
+    expect(screen.getByText("Price Action Basics")).toBeTruthy();
+    // Lesson 2 is locked for someone who has not enrolled, so there is no Next lesson.
+    await waitFor(() => expect(lessons.outline).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: "Next lesson" })).toBeNull();
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Practice on a chart in the Learning Lab" }),
+    );
+    expect(screen).toHavePathname("/lab");
+  });
+
+  it("offers Previous and Next lesson to an enrolled student and moves between them", async () => {
+    courses.get.mockResolvedValue(detail({ enrolled: true, onSale: true }));
+    (lessons.get as jest.Mock).mockResolvedValue(
+      lesson({ id: "l2", title: "Trends", position: 2, isPreview: false }),
+    );
+    await renderRouter(app, { initialUrl: "/course/c1/lesson/l2" });
+    expect(await screen.findByRole("button", { name: "Next lesson" })).toBeTruthy();
+    await fireEvent.press(screen.getByRole("button", { name: "Previous lesson" }));
+    expect(screen).toHavePathname("/course/c1/lesson/l1");
+  });
+
+  it("leaves out the Lab link for a lesson that is not about charts", async () => {
+    (lessons.get as jest.Mock).mockResolvedValue(
+      lesson({ title: "Welcome", body: "Meet your instructor." }),
+    );
+    await renderRouter(app, { initialUrl: "/course/c1/lesson/l1" });
+    await screen.findByTestId("lesson-course");
+    expect(
+      screen.queryByRole("button", { name: "Practice on a chart in the Learning Lab" }),
+    ).toBeNull();
+  });
+});
