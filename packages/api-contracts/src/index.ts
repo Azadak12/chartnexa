@@ -34,3 +34,4 @@ export * from "./resources.js";
 export * from "./video.js";
 export * from "./payments.js";
 export * from "./live.js";
+export * from "./announcements.js";

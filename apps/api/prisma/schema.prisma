@@ -56,6 +56,9 @@ model User {
   orders         Order[]
   liveSessionsCreated LiveSession[]   @relation("LiveSessionCreator")
   liveAttendance      LiveAttendance[]
+  announcementsWritten   Announcement[]     @relation("AnnouncementAuthor")
+  announcementsWithdrawn Announcement[]     @relation("AnnouncementWithdrawer")
+  announcementReads      AnnouncementRead[]
 
   @@map("users")
 }
@@ -198,6 +201,7 @@ model Course {
   modules CourseModule[]
   orders  Order[]
   liveSessions LiveSession[]
+  announcements Announcement[]
   lessonKeys LessonCreateKey[]
   entitlements Entitlement[]
 
@@ -639,4 +643,41 @@ model LiveAttendance {
   @@id([sessionId, userId])
   @@index([userId], map: "live_attendance_user_idx")
   @@map("live_attendance")
+}
+
+/// An in-app announcement: academy-wide (no course) or for one course's owners. Plain text.
+model Announcement {
+  id             String    @id @default(uuid()) @db.Uuid
+  courseId       String?   @map("course_id") @db.Uuid
+  title          String
+  body           String
+  status         String    @default("published")
+  authorId       String?   @map("author_id") @db.Uuid
+  idempotencyKey String    @map("idempotency_key")
+  publishedAt    DateTime  @default(now()) @map("published_at") @db.Timestamptz(6)
+  withdrawnAt    DateTime? @map("withdrawn_at") @db.Timestamptz(6)
+  withdrawReason String?   @map("withdraw_reason")
+  withdrawnBy    String?   @map("withdrawn_by") @db.Uuid
+
+  course     Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "announcements_course_fkey")
+  author     User?              @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: SetNull, map: "announcements_author_fkey")
+  withdrawer User?              @relation("AnnouncementWithdrawer", fields: [withdrawnBy], references: [id], onDelete: SetNull, map: "announcements_withdrawer_fkey")
+  reads      AnnouncementRead[]
+
+  @@unique([authorId, idempotencyKey], map: "announcements_author_key")
+  @@index([courseId], map: "announcements_course_idx")
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  announcementId String   @map("announcement_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  readAt         DateTime @default(now()) @map("read_at") @db.Timestamptz(6)
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade, map: "announcement_reads_announcement_fkey")
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade, map: "announcement_reads_user_fkey")
+
+  @@id([announcementId, userId])
+  @@index([userId], map: "announcement_reads_user_idx")
+  @@map("announcement_reads")
 }

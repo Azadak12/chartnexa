@@ -24,6 +24,7 @@ export const PERMISSION_SCOPES = {
   "reviews:moderate": "global",
   "payments:read_status": "global",
   "payments:read_full": "global",
+  "announcements:publish": "global",
 } as const;
 
 export type Permission = keyof typeof PERMISSION_SCOPES;
@@ -51,6 +52,8 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "reviews:moderate": ["admin", "manager"],
   "payments:read_status": ["admin", "manager"],
   "payments:read_full": ["admin"],
+  // R39 proposal: Admins and Managers post academy-wide and course announcements.
+  "announcements:publish": ["admin", "manager"],
 };
 
 export function permissionsForRole(role: Role): Permission[] {

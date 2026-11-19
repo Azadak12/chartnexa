@@ -184,3 +184,7 @@ pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com
 
 ## Continue learning (change `continue-learning`)
 `GET /me/continue-learning` answers `{ item: { courseId, courseTitle, coverTone, completed, total, nextLessonId, nextLessonTitle, lastActivityAt } | null }`: the owned, unfinished course with the latest completion or video progress (else the newest access).
+
+## Announcements (change `announcements`)
+- **Staff (`announcements:publish`, Admins and Managers):** `GET /staff/announcements`, `POST /staff/announcements` `{ title, body, courseId?, idempotencyKey }`, `POST /staff/announcements/:id/withdraw` `{ reason }`.
+- **Everyone signed in:** `GET /me/announcements?cursor=`, `GET /me/announcements/unread-count`, `PUT /me/announcements/:id/read`. Course announcements reach only people with active access. Plain text; in-app only (Q35).

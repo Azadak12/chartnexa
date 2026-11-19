@@ -150,3 +150,6 @@ EXPO_PUBLIC_API_BASE_URL="http://<your-computer-lan-ip>:3000" pnpm start
 
 ## Operations
 `src/ops`: Profile shows "Audit log" (Admins, `audit:read`) and "Orders" (Admins and Managers, `payments:read_status`). Both read existing staff endpoints, filter, page, and always refetch on a filter change.
+
+## Announcements
+`src/announcements`: Profile → Announcements (opening one marks it read) and a home shortcut when something is unread. Admins and Managers get "Post announcements": read counts, a full-screen post form (everyone or one course) and a withdraw sheet.
