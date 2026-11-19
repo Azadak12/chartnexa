@@ -41,6 +41,8 @@ export function CompletionControl({
       void qc.invalidateQueries({ queryKey: ["progress", courseId] });
       void qc.invalidateQueries({ queryKey: ["course", courseId] });
       void qc.invalidateQueries({ queryKey: ["my-courses"] });
+      // Home's Continue Learning card and its percentage.
+      void qc.invalidateQueries({ queryKey: ["continue-learning"] });
       AccessibilityInfo.announceForAccessibility(
         result.completed ? "Lesson marked complete" : "Lesson marked not complete",
       );

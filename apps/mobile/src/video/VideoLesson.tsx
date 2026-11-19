@@ -56,6 +56,7 @@ export function VideoLesson({ courseId, lessonId }: { courseId: string; lessonId
           qc.invalidateQueries({ queryKey: ["progress", courseId] }),
           qc.invalidateQueries({ queryKey: ["course", courseId] }),
           qc.invalidateQueries({ queryKey: ["my-courses"] }),
+          qc.invalidateQueries({ queryKey: ["continue-learning"] }),
         ]);
       }
     } catch {

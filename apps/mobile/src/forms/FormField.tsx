@@ -10,6 +10,7 @@ interface Props extends Omit<TextInputProps, "value" | "onChangeText" | "style">
   name: string;
   label: string;
   password?: "current-password" | "new-password";
+  icon?: React.ComponentProps<typeof TextField>["icon"];
 }
 
 /** A labelled input wired to a form: errors appear beside it and failed submits focus it. */
