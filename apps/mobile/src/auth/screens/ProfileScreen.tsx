@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
 import {
@@ -18,7 +18,8 @@ import { FormField } from "../../forms/FormField";
 import { useZodForm } from "../../forms/use-zod-form";
 import { sessionStore } from "../../session/session-store";
 import { QueryStateView } from "../../state/StateView";
-import { status as statusColors } from "../../theme";
+import { MenuGroup, ProfileMenuRow } from "../../kit/Rows";
+import { colors, spacing, status as statusColors } from "../../theme";
 import { BottomSheet, Banner, Button, Card, Screen, Text, useSubmitOnce } from "../../ui";
 import { buildLabel } from "../../api/TestServerSheet";
 import { testServer } from "../../api/test-server";
@@ -83,6 +84,14 @@ function EditNameSheet({
   );
 }
 
+/** Two letters for the avatar: from the name when there is one, else from the email. */
+export function initialsOf(name: string | null, email: string): string {
+  const words = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return (words[0]![0]! + words[words.length - 1]![0]!).toUpperCase();
+  if (words.length === 1) return words[0]!.slice(0, 2).toUpperCase();
+  return (email.trim()[0] ?? "?").toUpperCase();
+}
+
 export function ProfileScreen() {
   const router = useRouter();
   const query = useQuery({ queryKey: ["me"], queryFn: accountApi.me });
@@ -96,6 +105,43 @@ export function ProfileScreen() {
   const [deleting, setDeleting] = useState(false);
   const editRef = useRef(null);
   const deleteRef = useRef(null);
+  const staffRows: {
+    label: string;
+    icon: React.ComponentProps<typeof Feather>["name"];
+    href: Href;
+  }[] = [
+    canManageCourses(access.data) && {
+      label: "Manage courses",
+      icon: "book-open",
+      href: "/manage",
+    },
+    canManageInstructors(access.data) && {
+      label: "Instructor permissions",
+      icon: "users",
+      href: "/profile/instructors",
+    },
+    canModerateReviews(access.data) && {
+      label: "Review moderation",
+      icon: "message-square",
+      href: "/profile/reviews",
+    },
+    canInviteInstructors(access.data) && {
+      label: "Invite instructors",
+      icon: "user-plus",
+      href: "/profile/invitations",
+    },
+    canPublishAnnouncements(access.data) && {
+      label: "Post announcements",
+      icon: "volume-2",
+      href: "/profile/staff-announcements",
+    },
+    canReadPayments(access.data) && {
+      label: "Orders",
+      icon: "credit-card",
+      href: "/profile/orders",
+    },
+    canReadAudit(access.data) && { label: "Audit log", icon: "clipboard", href: "/profile/audit" },
+  ].filter((r): r is NonNullable<typeof r> => !!r) as never;
   const out = useSubmitOnce(async () => {
     const { serverNotified } = await sessionManager.signOut();
     sessionStore.setNotice(serverNotified ? null : SIGNED_OUT_OFFLINE_NOTICE);
@@ -110,104 +156,110 @@ export function ProfileScreen() {
         {(me) => (
           <>
             <Card>
-              <Text variant="subheading">{me.displayName ?? "No name set"}</Text>
-              <Text tone="muted">{me.email}</Text>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
-                testID="verified-indicator"
-              >
-                <Feather
-                  name={me.emailVerified ? "check-circle" : "alert-triangle"}
-                  size={16}
-                  color={me.emailVerified ? statusColors.success : statusColors.warning}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+                <View
                   accessible={false}
-                />
-                <Text variant="caption" tone={me.emailVerified ? "success" : "warning"}>
-                  {me.emailVerified ? "Email verified" : "Email not verified"}
-                </Text>
+                  importantForAccessibility="no-hide-descendants"
+                  testID="profile-avatar"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: colors.blue,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text variant="heading" tone="onBlue">
+                    {initialsOf(me.displayName, me.email)}
+                  </Text>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="subheading" numberOfLines={1}>
+                    {me.displayName ?? "No name set"}
+                  </Text>
+                  <Text tone="muted" numberOfLines={1}>
+                    {me.email}
+                  </Text>
+                  <View
+                    style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                    testID="verified-indicator"
+                  >
+                    <Feather
+                      name={me.emailVerified ? "check-circle" : "alert-triangle"}
+                      size={16}
+                      color={me.emailVerified ? statusColors.success : statusColors.warning}
+                      accessible={false}
+                    />
+                    <Text variant="caption" tone={me.emailVerified ? "success" : "warning"}>
+                      {me.emailVerified ? "Email verified" : "Email not verified"}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </Card>
             {!me.emailVerified ? <VerifyNotice /> : null}
-            <View ref={editRef} collapsable={false}>
-              <Button label="Edit name" variant="secondary" onPress={() => setEditing(true)} />
-            </View>
-            {canManageCourses(access.data) ? (
-              <Button label="Manage courses" onPress={() => router.push("/manage")} />
-            ) : null}
-            {canManageInstructors(access.data) ? (
-              <Button
-                label="Instructor permissions"
-                variant="secondary"
-                onPress={() => router.push("/profile/instructors")}
+
+            <MenuGroup title="Account">
+              <View ref={editRef} collapsable={false}>
+                <ProfileMenuRow icon="edit-2" label="Edit name" onPress={() => setEditing(true)} />
+              </View>
+              <ProfileMenuRow
+                icon="bell"
+                label="Announcements"
+                onPress={() => router.push("/profile/announcements")}
+                last
               />
-            ) : null}
-            {canModerateReviews(access.data) ? (
-              <Button
-                label="Review moderation"
-                variant="secondary"
-                onPress={() => router.push("/profile/reviews")}
+            </MenuGroup>
+
+            <MenuGroup title="Learning & Purchases">
+              <ProfileMenuRow
+                icon="shopping-bag"
+                label="Purchases"
+                onPress={() => router.push("/profile/purchases")}
+                last
               />
-            ) : null}
-            <Button
-              label="Announcements"
-              variant="secondary"
-              onPress={() => router.push("/profile/announcements")}
-            />
-            {canInviteInstructors(access.data) ? (
-              <Button
-                label="Invite instructors"
-                variant="secondary"
-                onPress={() => router.push("/profile/invitations")}
+            </MenuGroup>
+
+            <MenuGroup title="Security">
+              <ProfileMenuRow
+                icon="lock"
+                label="Change password"
+                onPress={() => router.push("/profile/change-password")}
               />
-            ) : null}
-            {canPublishAnnouncements(access.data) ? (
-              <Button
-                label="Post announcements"
-                variant="secondary"
-                onPress={() => router.push("/profile/staff-announcements")}
+              {mfa.data?.required ? (
+                <ProfileMenuRow
+                  icon="shield"
+                  label={`Two-step sign-in: ${mfa.data.enabled ? "On" : "Off"}`}
+                  onPress={() => router.push("/profile/two-step")}
+                />
+              ) : null}
+              <ProfileMenuRow
+                icon="smartphone"
+                label="Active sessions"
+                onPress={() => router.push("/profile/sessions")}
+                last
               />
-            ) : null}
-            {canReadPayments(access.data) ? (
-              <Button
-                label="Orders"
-                variant="secondary"
-                onPress={() => router.push("/profile/orders")}
-              />
-            ) : null}
-            {canReadAudit(access.data) ? (
-              <Button
-                label="Audit log"
-                variant="secondary"
-                onPress={() => router.push("/profile/audit")}
-              />
-            ) : null}
-            {mfa.data?.required ? (
-              <Button
-                label={`Two-step sign-in: ${mfa.data.enabled ? "On" : "Off"}`}
-                variant="secondary"
-                onPress={() => router.push("/profile/two-step")}
-              />
+            </MenuGroup>
+
+            {staffRows.length > 0 ? (
+              <MenuGroup title="Staff tools">
+                {staffRows.map((r, i) => (
+                  <ProfileMenuRow
+                    key={r.label}
+                    icon={r.icon}
+                    label={r.label}
+                    onPress={() => router.push(r.href)}
+                    last={i === staffRows.length - 1}
+                  />
+                ))}
+              </MenuGroup>
             ) : null}
             {testServer.allowed() ? (
               <Text variant="caption" tone="muted" testID="profile-build-label">
                 {buildLabel()}
               </Text>
             ) : null}
-            <Button
-              label="Change password"
-              variant="secondary"
-              onPress={() => router.push("/profile/change-password")}
-            />
-            <Button
-              label="Purchases"
-              variant="secondary"
-              onPress={() => router.push("/profile/purchases")}
-            />
-            <Button
-              label="Active sessions"
-              variant="secondary"
-              onPress={() => router.push("/profile/sessions")}
-            />
             <EditNameSheet
               visible={editing}
               current={me.displayName ?? ""}
