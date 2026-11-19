@@ -50,6 +50,8 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-18 | Local full checks after `course-categories` | All pass: 449 API, 427 app, 35 contract |
 | 2026-11-18 | CI on `main` runs 77, 78, 79 (categories, modules, files server) | Success |
 | 2026-11-19 | Local full checks after `lesson-resources` | All pass: 484 API, 446 app, 37 contract; audit gate passes (2 moderate advisories in Expo tooling) |
+| 2026-11-19 | CI on `main` runs 80, 81, 82 (files app, video, payments) | Success |
+| 2026-11-19 | Local full checks after `live-sessions-schedule` | All pass: 540 API, 486 app, 40 contract; lint, format, builds, secrets, migration round trip (typecheck re-run after fixing two test option types) |
 
 ## Never verified
 

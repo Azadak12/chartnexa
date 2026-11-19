@@ -384,7 +384,7 @@ describe("staff", () => {
     await renderRouter(app, { initialUrl: "/manage/c1/live" });
     await fireEvent.press(await screen.findByRole("button", { name: "Cancel Opening bell" }));
     await fireEvent.press(screen.getByRole("button", { name: "Cancel class", ...hidden }));
-    expect(await screen.findByText("Write 3 to 300 characters", {}, hidden)).toBeTruthy();
+    expect(await screen.findByText("Write 3 to 300 characters", hidden)).toBeTruthy();
     expect(staff.cancel).not.toHaveBeenCalled();
     await fireEvent.changeText(
       screen.getByLabelText("Reason students will see", hidden),
@@ -408,7 +408,7 @@ describe("staff", () => {
       "Too late",
     );
     await fireEvent.press(screen.getByRole("button", { name: "Cancel class", ...hidden }));
-    expect(await screen.findByText(/This class has already ended/, {}, hidden)).toBeTruthy();
+    expect(await screen.findByText(/This class has already ended/, hidden)).toBeTruthy();
     await waitFor(() => expect(staff.list.mock.calls.length).toBeGreaterThanOrEqual(2));
   });
 });

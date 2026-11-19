@@ -5,7 +5,7 @@
 - [x] 1.2 Contracts (`live.ts`): limits, error codes, request and response schemas
 - [x] 1.3 Provider boundary and manual-link adapter; `LIVE_PROVIDER`, `LIVE_JOIN_OPENS_MINUTES`
 - [x] 1.4 Service and controllers: staff list/create/update/cancel, owner list/mine/join; audit without links; account-deletion hook
-- [x] 1.5 Integration tests (19) incl. races, windows, permissions, database constraints; mutation checks (15 mutations, all caught after one new test)
+- [x] 1.5 Integration tests (18) incl. races, windows, permissions, database constraints; mutation checks (15 mutations, all caught after one new test)
 
 ## 2. App
 - [x] 2.1 API client and local time helpers
