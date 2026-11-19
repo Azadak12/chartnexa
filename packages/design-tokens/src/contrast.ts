@@ -1,4 +1,4 @@
-import { colors, neutrals, status } from "./colors.js";
+import { colors, market, neutrals, status } from "./colors.js";
 
 function channel(c: number): number {
   const s = c / 255;
@@ -35,6 +35,30 @@ export const MIN_RATIO: Record<PairingKind, number> = { text: 4.5, largeText: 3,
 
 /** Every foreground and background combination the app is allowed to use. */
 export const APPROVED_PAIRINGS: readonly Pairing[] = [
+  { name: "text on navy", foreground: market.onNavy, background: market.navy, kind: "text" },
+  { name: "muted on navy", foreground: market.onNavyMuted, background: market.navy, kind: "text" },
+  {
+    name: "muted on raised navy",
+    foreground: market.onNavyMuted,
+    background: market.navyRaised,
+    kind: "text",
+  },
+  { name: "blue on navy", foreground: market.blueOnNavy, background: market.navy, kind: "text" },
+  { name: "up text on navy", foreground: market.upText, background: market.navy, kind: "text" },
+  { name: "down text on navy", foreground: market.downText, background: market.navy, kind: "text" },
+  { name: "up candle on navy", foreground: market.up, background: market.navy, kind: "control" },
+  {
+    name: "down candle on navy",
+    foreground: market.down,
+    background: market.navy,
+    kind: "control",
+  },
+  {
+    name: "chart line on navy",
+    foreground: market.blueOnNavy,
+    background: market.navy,
+    kind: "control",
+  },
   { name: "body on white", foreground: colors.black, background: colors.white, kind: "text" },
   { name: "body on surface", foreground: colors.black, background: neutrals.surface, kind: "text" },
   { name: "body on tint", foreground: colors.black, background: colors.blueTint, kind: "text" },

@@ -8,9 +8,9 @@ export const colors = {
 
 /** Neutrals derived for borders, surfaces and muted text. */
 export const neutrals = {
-  surface: "#F9FAFB",
+  surface: "#F8FAFC",
   /** Decorative dividers; not used as the only boundary of a control. */
-  divider: "#E4E7EC",
+  divider: "#E2E8F0",
   /** Control borders: at least 3:1 on white. */
   border: "#7A8394",
   /** Secondary text: at least 4.5:1 on white and on the tint. */
@@ -32,4 +32,23 @@ export const status = {
   warningTint: "#FFFAEB",
   /** Pressed state of the primary blue. */
   bluePressed: "#1D4ED8",
+} as const;
+
+/**
+ * Chart and "market learning" surfaces (Phase 2 design). The navy surface is reserved for charts
+ * and hero panels. Up and down colours are for meaningful price direction only and are always
+ * paired with a symbol or word. `upText` and `downText` are the lighter text versions that meet
+ * 4.5:1 on the navy surface; `up` and `down` are for filled shapes (3:1).
+ */
+export const market = {
+  navy: "#0F172A",
+  navyRaised: "#1E293B",
+  grid: "#334155",
+  onNavy: "#F8FAFC",
+  onNavyMuted: "#94A3B8",
+  blueOnNavy: "#60A5FA",
+  up: "#10B981",
+  down: "#EF4444",
+  upText: "#34D399",
+  downText: "#F87171",
 } as const;
