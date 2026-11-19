@@ -1,11 +1,11 @@
-import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 import * as SecureStore from "expo-secure-store";
 import { courseApi } from "../src/courses/course-api";
 import { lessonApi } from "../src/lessons/lesson-api";
 import { sessionManager } from "../src/auth/session-manager";
 import { sessionStore } from "../src/session/session-store";
 import { clearScreenMemory } from "../src/navigation/screen-memory";
-import { appError, pair } from "../test-utils/auth-mocks";
+import { pair } from "../test-utils/auth-mocks";
 
 jest.mock("../src/courses/course-api", () => ({
   ...jest.requireActual("../src/courses/course-api"),

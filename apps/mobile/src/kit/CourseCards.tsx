@@ -1,4 +1,3 @@
-import { Feather } from "@expo/vector-icons";
 import { memo } from "react";
 import { Pressable, View } from "react-native";
 import type { PublicCourseSummary } from "@chartnexa/api-contracts";
