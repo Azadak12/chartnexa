@@ -53,9 +53,14 @@ export function useAcademyMetrics(a: AccessResponse) {
     value,
     retry: () => void q.refetch(),
   });
+  // The same two lists also give the instructor's own courses, so showing them costs no request.
+  const courseItems = [...(published.data?.items ?? []), ...(drafts.data?.items ?? [])].sort(
+    (a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""),
+  );
   return {
     courses,
     people,
+    courseItems,
     pending: metric(
       pending,
       pending.data ? countText(pending.data.items.length, !!pending.data.nextCursor) : "",

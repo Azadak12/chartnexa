@@ -105,7 +105,7 @@ describe("the staff dashboard", () => {
   it("offers an Instructor only teaching tools, never people or operations", async () => {
     access.mockResolvedValue(INSTRUCTOR);
     await alone();
-    expect(await screen.findByText("Instructor dashboard")).toBeTruthy();
+    expect(await screen.findByText("Instructor Studio")).toBeTruthy();
     expect(screen.getByTestId("tile-Courses")).toBeTruthy();
     for (const tile of [
       "Instructors",

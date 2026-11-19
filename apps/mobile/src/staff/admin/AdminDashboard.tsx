@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 import type { AccessResponse } from "@chartnexa/api-contracts";
 import { canCreateCourses, canInviteInstructors, canManageCourses } from "../../courses/course-api";
+import { CountUp } from "../../kit/CountUp";
 import { Grid } from "../../kit/Grid";
 import { PressableCard } from "../../kit/PressableCard";
 import { accents, colors, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
@@ -10,7 +11,7 @@ import type { AccentName } from "@chartnexa/design-tokens";
 import { Screen, Skeleton, Text } from "../../ui";
 import { dashboardGroups, type DashboardTile, type Icon } from "../groups";
 import { useAcademyMetrics, type Metric } from "../metrics";
-import { AdminHeader } from "./AdminHeader";
+import { StudioHeader } from "../../kit/StudioHeader";
 
 /** An icon in a soft coloured square. The colour is never the only cue: words always sit beside it. */
 function IconBadge({ icon, accent, size = 40 }: { icon: Icon; accent: AccentName; size?: number }) {
@@ -33,7 +34,19 @@ function IconBadge({ icon, accent, size = 40 }: { icon: Icon; accent: AccentName
   );
 }
 
-function SectionHeader({ title, caption }: { title: string; caption?: string }) {
+const VALUE_STYLE = { fontSize: 28, lineHeight: 34 } as const;
+function ValueText({ value, animate, muted }: { value: string; animate: boolean; muted: boolean }) {
+  const style = { ...VALUE_STYLE, color: muted ? neutrals.muted : colors.black };
+  return animate ? (
+    <CountUp value={value} variant="title" style={style} />
+  ) : (
+    <Text variant="title" style={style}>
+      {value}
+    </Text>
+  );
+}
+
+export function SectionHeader({ title, caption }: { title: string; caption?: string }) {
   return (
     <View style={{ gap: 2 }}>
       <Text variant="subheading" accessibilityRole="header">
@@ -60,6 +73,7 @@ export function StatTile({
   metric,
   route,
   testID,
+  animate = false,
 }: {
   label: string;
   accent: AccentName;
@@ -67,6 +81,8 @@ export function StatTile({
   metric: Metric;
   route: string;
   testID?: string;
+  /** Count the number up when it first arrives and after a refresh. */
+  animate?: boolean;
 }) {
   const router = useRouter();
   const failed = metric.status === "error";
@@ -95,12 +111,11 @@ export function StatTile({
         {metric.status === "pending" ? (
           <Skeleton height={28} />
         ) : (
-          <Text
-            variant="title"
-            style={{ fontSize: 28, lineHeight: 34, color: failed ? neutrals.muted : colors.black }}
-          >
-            {failed ? "—" : metric.value}
-          </Text>
+          <ValueText
+            value={failed ? "—" : metric.value}
+            animate={animate && !failed}
+            muted={failed}
+          />
         )}
       </View>
       <Text variant="caption" tone={failed ? "error" : "muted"}>
@@ -110,7 +125,7 @@ export function StatTile({
   );
 }
 
-function QuickAction({
+export function QuickAction({
   label,
   icon,
   accent,
@@ -243,7 +258,11 @@ export function AdminDashboard({ access }: { access: AccessResponse }) {
 
   return (
     <Screen onRefresh={() => m.refetchAll()}>
-      <AdminHeader title="Admin Dashboard" subtitle="Manage your academy at a glance." />
+      <StudioHeader
+        testID="admin-header"
+        title="Admin Dashboard"
+        subtitle="Manage your academy at a glance."
+      />
 
       {m.courses || m.people ? (
         <View style={{ gap: spacing.md }} testID="academy-stats">

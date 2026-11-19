@@ -114,7 +114,7 @@ describe("the tab bar", () => {
 
   it("sends an Instructor to their dashboard, with Dashboard, Courses, Assignments and Profile", async () => {
     await bar(INSTRUCTOR);
-    expect(await screen.findByText("Instructor dashboard")).toBeTruthy();
+    expect(await screen.findByText("Instructor Studio")).toBeTruthy();
     for (const n of ["Dashboard", "Courses", "Assignments", "Profile"]) {
       expect(screen.getByRole("button", { name: n })).toBeTruthy();
     }
@@ -171,7 +171,7 @@ describe("dashboard metrics come from real lists", () => {
     access.mockResolvedValue(INSTRUCTOR);
     (staffCourseApi.list as jest.Mock).mockRejectedValue(appError("unknown"));
     await renderRouter(app, { initialUrl: "/dashboard" });
-    expect(await screen.findByLabelText("Published courses: Unavailable")).toBeTruthy();
+    expect(await screen.findByLabelText("Published courses: unavailable")).toBeTruthy();
     expect(screen.queryByLabelText(/^Pending invitations/)).toBeNull();
     expect(screen.queryByLabelText(/^Instructors:/)).toBeNull();
   });
@@ -184,7 +184,7 @@ describe("dashboard metrics come from real lists", () => {
   });
 
   it("uses explicit rows for every role's numbers, so the heading below can never be overlapped", async () => {
-    access.mockResolvedValue(INSTRUCTOR);
+    access.mockResolvedValue(MANAGER);
     await renderRouter(app, { initialUrl: "/dashboard" });
     await screen.findByTestId("metrics");
     const wrapping: unknown[] = [];

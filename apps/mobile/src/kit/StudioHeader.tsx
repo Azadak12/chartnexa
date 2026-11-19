@@ -1,8 +1,9 @@
 import { useId } from "react";
 import { View, useWindowDimensions } from "react-native";
 import Svg, { Defs, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
-import { market, radii, spacing, status } from "../../theme";
-import { Text } from "../../ui";
+import { market, radii, spacing, status } from "../theme";
+import { Text } from "../ui";
+import type { ReactNode } from "react";
 
 /**
  * Purely decorative: a few invented candles and a line on a fine grid. It carries no prices,
@@ -68,20 +69,29 @@ function ChartMark({ width, height }: { width: number; height: number }) {
  * The page header: a navy-to-blue surface with the brand, the title and one line of support. The
  * gradient and the chart mark are decoration behind and beside the text, which sits in normal flow.
  * The mark leaves when the screen is narrow or the system text is large, so text keeps its room.
+ * `greeting` adds a short line above the title; `children` is an optional row below (an action).
  */
-export function AdminHeader({ title, subtitle }: { title: string; subtitle: string }) {
+export function StudioHeader({
+  title,
+  subtitle,
+  greeting,
+  children,
+  testID = "studio-header",
+}: {
+  title: string;
+  subtitle: string;
+  greeting?: string | undefined;
+  children?: ReactNode;
+  testID?: string;
+}) {
   const { width, fontScale } = useWindowDimensions();
   const gradientId = useId().replace(/:/g, "");
   const showMark = width >= 340 && fontScale < 1.4;
   const markW = Math.round(Math.min(120, Math.max(84, width * 0.28)));
   return (
     <View
-      testID="admin-header"
-      style={{
-        borderRadius: radii.card,
-        overflow: "hidden",
-        backgroundColor: market.navy,
-      }}
+      testID={testID}
+      style={{ borderRadius: radii.card, overflow: "hidden", backgroundColor: market.navy }}
     >
       <View
         accessible={false}
@@ -100,37 +110,42 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle: stri
           <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradientId})`} />
         </Svg>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.md,
-          padding: spacing.lg,
-        }}
-      >
-        <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
-          <Text variant="caption" style={{ color: market.blueOnNavy, letterSpacing: 0.8 }}>
-            CHARTNEXA ACADEMY
-          </Text>
-          <Text
-            variant="title"
-            accessibilityRole="header"
-            style={{ color: market.onNavy, fontSize: 26, lineHeight: 32 }}
-          >
-            {title}
-          </Text>
-          <Text style={{ color: market.onNavyMuted }}>{subtitle}</Text>
-        </View>
-        {showMark ? (
-          <View
-            accessible={false}
-            importantForAccessibility="no-hide-descendants"
-            testID="admin-header-mark"
-            style={{ width: markW, height: Math.round(markW * 0.8), flexShrink: 0 }}
-          >
-            <ChartMark width={markW} height={Math.round(markW * 0.8)} />
+      <View style={{ gap: spacing.md, padding: spacing.lg }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+          <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
+            <Text variant="caption" style={{ color: market.blueOnNavy, letterSpacing: 0.8 }}>
+              CHARTNEXA ACADEMY
+            </Text>
+            {greeting ? (
+              <Text
+                variant="caption"
+                style={{ color: market.onNavyMuted }}
+                testID={`${testID}-greeting`}
+              >
+                {greeting}
+              </Text>
+            ) : null}
+            <Text
+              variant="title"
+              accessibilityRole="header"
+              style={{ color: market.onNavy, fontSize: 26, lineHeight: 32 }}
+            >
+              {title}
+            </Text>
+            <Text style={{ color: market.onNavyMuted }}>{subtitle}</Text>
           </View>
-        ) : null}
+          {showMark ? (
+            <View
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+              testID={`${testID}-mark`}
+              style={{ width: markW, height: Math.round(markW * 0.8), flexShrink: 0 }}
+            >
+              <ChartMark width={markW} height={Math.round(markW * 0.8)} />
+            </View>
+          ) : null}
+        </View>
+        {children}
       </View>
     </View>
   );

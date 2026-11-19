@@ -11,6 +11,7 @@ import { StateView } from "../state/StateView";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { Screen, Text } from "../ui";
 import { AdminDashboard } from "./admin/AdminDashboard";
+import { InstructorDashboard } from "./instructor/InstructorDashboard";
 import { dashboardGroups, type Icon } from "./groups";
 import { useAcademyMetrics, type Metric } from "./metrics";
 
@@ -103,7 +104,9 @@ export function StaffDashboardScreen() {
   }
   // Admins have the redesigned dashboard; the other roles keep theirs until they are redesigned.
   if (a.roles.includes("admin")) return <AdminDashboard access={a} />;
-  const role = a.roles.includes("manager") ? "Manager" : "Instructor";
+  // Instructor and Lecturer share this screen; their own permissions decide what it lists.
+  if (!a.roles.includes("manager")) return <InstructorDashboard access={a} />;
+  const role = "Manager";
   const groups = dashboardGroups(a);
   return (
     <Screen>
