@@ -224,8 +224,10 @@ export class AssignmentsService {
       }
       const changed: string[] = [];
       const data: Prisma.AssignmentUncheckedUpdateInput = {};
-      if (input.title !== undefined && input.title !== cur.title)
-        ((data.title = input.title), changed.push("title"));
+      if (input.title !== undefined && input.title !== cur.title) {
+        data.title = input.title;
+        changed.push("title");
+      }
       if (input.instructions !== undefined && input.instructions !== cur.instructions) {
         data.instructions = input.instructions;
         changed.push("instructions");
