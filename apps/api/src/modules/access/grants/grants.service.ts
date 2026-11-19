@@ -40,6 +40,7 @@ export const OWNER_AUTO_PERMISSIONS: readonly GrantablePermission[] = [
   "course:update",
   "lesson:upload",
   "live:schedule",
+  "assignments:manage",
   "students:read",
   "reports:read",
 ];

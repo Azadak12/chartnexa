@@ -3,6 +3,7 @@ import type { AppConfig } from "./config/config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
+import { AssignmentsModule } from "./modules/assignments/index.js";
 import { AnnouncementsModule } from "./modules/announcements/index.js";
 import { CategoriesModule } from "./modules/categories/index.js";
 import { CoursesModule } from "./modules/courses/index.js";
@@ -44,6 +45,7 @@ export class AppModule {
         LiveModule,
         AnnouncementsModule,
         InvitationsModule,
+        AssignmentsModule,
       ],
       controllers: [HealthController, ...extraControllers],
     };

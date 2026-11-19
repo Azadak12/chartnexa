@@ -73,6 +73,7 @@ const PUBLIC = [
   "POST /auth/mfa/setup/complete",
   // Signed links: the token in the address is the permission (short-lived, HMAC).
   "GET /files/:resourceId",
+  "GET /assignment-files/:id",
   "GET /videos/:videoId/stream",
   // Payment provider callbacks: verified by signature, not by a session.
   "POST /payments/webhooks/:provider",

@@ -47,7 +47,7 @@ const CLEANUP_EVERY_MS = 15 * 60 * 1000;
       inject: [OBJECT_STORAGE],
     },
   ],
-  exports: [ResourcesService, VideoService],
+  exports: [ResourcesService, VideoService, OBJECT_STORAGE],
 })
 export class ResourcesModule implements OnModuleInit, OnModuleDestroy {
   private timer: NodeJS.Timeout | undefined;

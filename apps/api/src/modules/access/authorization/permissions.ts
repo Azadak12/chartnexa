@@ -18,6 +18,7 @@ export const PERMISSION_SCOPES = {
   "course:publish": "course",
   "lesson:upload": "course",
   "live:schedule": "course",
+  "assignments:manage": "course",
   "students:read": "course",
   "enrollments:manage": "global",
   "reports:read": "course",
@@ -47,6 +48,8 @@ export const PERMISSION_HOLDERS: Record<Permission, readonly Role[]> = {
   "course:publish": ["admin", "manager"],
   "lesson:upload": ["admin", "manager"],
   "live:schedule": ["admin", "manager"],
+  // R41 proposal: create, publish and assign coursework, and give feedback on submissions.
+  "assignments:manage": ["admin", "manager"],
   "students:read": ["admin", "manager"],
   "enrollments:manage": ["admin", "manager"],
   "reports:read": ["admin", "manager"],

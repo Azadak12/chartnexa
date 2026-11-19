@@ -65,7 +65,7 @@ describe("grant requests", () => {
     ).toBe(false);
   });
   it("lists exactly the seven grantable permissions", () => {
-    expect(GRANTABLE_LIST).toHaveLength(7);
+    expect(GRANTABLE_LIST).toHaveLength(8);
   });
   it("needs a reason to revoke", () => {
     expect(revokeGrantRequestSchema.safeParse({}).success).toBe(false);
