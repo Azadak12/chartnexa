@@ -101,6 +101,49 @@ beforeEach(async () => {
   lessons.outline.mockResolvedValue({ items: outline });
 });
 
+describe("My Learning summary and filters", () => {
+  beforeEach(() => {
+    mine.list.mockResolvedValue(
+      page([
+        owned(1, { progress: { completed: 2, total: 5 } }),
+        owned(2, { progress: { completed: 4, total: 4 } }),
+        owned(3, { progress: { completed: 0, total: 3 } }),
+      ]),
+    );
+  });
+
+  it("sums real lesson progress and counts completed courses", async () => {
+    await renderRouter(app, { initialUrl: "/courses" });
+    expect(await screen.findByTestId("learning-summary")).toBeTruthy();
+    expect(screen.getByText("6 of 12 lessons done")).toBeTruthy();
+    expect(screen.getByText("1 of 3 courses completed")).toBeTruthy();
+  });
+
+  it("filters to In Progress and Completed, and offers a way back from an empty filter", async () => {
+    await renderRouter(app, { initialUrl: "/courses" });
+    await screen.findByTestId("my-course-c1");
+    await press("Completed");
+    expect(screen.queryByTestId("my-course-c1")).toBeNull();
+    expect(screen.getByTestId("my-course-c2")).toBeTruthy();
+    await press("In Progress");
+    expect(screen.getByTestId("my-course-c1")).toBeTruthy();
+    expect(screen.getByTestId("my-course-c3")).toBeTruthy();
+    expect(screen.queryByTestId("my-course-c2")).toBeNull();
+
+    mine.list.mockResolvedValue(page([owned(1, { progress: { completed: 2, total: 5 } })]));
+  });
+
+  it("says nothing is completed yet when no course is finished", async () => {
+    mine.list.mockResolvedValue(page([owned(1, { progress: { completed: 2, total: 5 } })]));
+    await renderRouter(app, { initialUrl: "/courses" });
+    await screen.findByTestId("my-course-c1");
+    await press("Completed");
+    expect(await screen.findByText("Nothing completed yet")).toBeTruthy();
+    await press("Show all courses");
+    expect(screen.getByTestId("my-course-c1")).toBeTruthy();
+  });
+});
+
 describe("My Courses", () => {
   it("lists owned courses and says in text when one is not on sale", async () => {
     await renderRouter(app, { initialUrl: "/courses" });

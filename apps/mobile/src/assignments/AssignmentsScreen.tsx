@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { isAppError, messageFor } from "../api/errors";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { colors, neutrals, radii, spacing, status as statusColors } from "../theme";
+import { AssignmentCard } from "../kit/AssignmentCard";
+import { spacing } from "../theme";
 import { Screen, Text } from "../ui";
 import { assignmentApi, STATE_TEXT } from "./assignment-api";
 
@@ -12,6 +13,12 @@ const dueText = (iso: string | null) =>
   iso
     ? `Due ${new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
     : "No due date";
+
+const SECTIONS = [
+  { key: "todo", title: "To do", states: ["to_do"] },
+  { key: "submitted", title: "Submitted", states: ["submitted", "late"] },
+  { key: "reviewed", title: "Reviewed", states: ["reviewed"] },
+] as const;
 
 /** The student's coursework: what is still to do first, then what is handed in or reviewed. */
 export function AssignmentsScreen() {
@@ -42,42 +49,32 @@ export function AssignmentsScreen() {
           message="When an instructor gives you coursework, it appears here."
         />
       ) : (
-        q.data.map((a) => (
-          <Pressable
-            key={a.id}
-            accessibilityRole="button"
-            accessibilityLabel={`${a.title}, ${a.courseTitle}, ${STATE_TEXT[a.state]}${a.overdue ? ", overdue" : ""}. ${dueText(a.dueAt)}`}
-            onPress={() => router.push(`/assignment/${a.id}`)}
-            testID={`assignment-${a.id}`}
-            style={{
-              borderWidth: 1,
-              borderColor: a.overdue ? statusColors.error : neutrals.divider,
-              borderRadius: radii.card,
-              padding: spacing.md,
-              gap: spacing.xs,
-              backgroundColor: colors.white,
-            }}
-          >
-            <Text variant="caption" tone="muted">
-              {a.courseTitle}
-            </Text>
-            <Text variant="subheading">{a.title}</Text>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between", gap: spacing.sm }}
-            >
-              <Text variant="caption" tone={a.overdue ? "error" : "muted"}>
-                {a.overdue ? "Overdue · " : ""}
-                {dueText(a.dueAt)}
+        SECTIONS.map((sec) => {
+          const rows = q.data.filter((a) => (sec.states as readonly string[]).includes(a.state));
+          if (rows.length === 0) return null;
+          return (
+            <View key={sec.title} style={{ gap: spacing.sm }} testID={`section-${sec.key}`}>
+              <Text variant="heading" accessibilityRole="header">
+                {sec.title} ({rows.length})
               </Text>
-              <Text
-                variant="caption"
-                tone={a.state === "to_do" ? "link" : a.state === "reviewed" ? "success" : "muted"}
-              >
-                {STATE_TEXT[a.state]}
-              </Text>
+              {rows.map((a) => (
+                <AssignmentCard
+                  key={a.id}
+                  testID={`assignment-${a.id}`}
+                  title={a.title}
+                  courseTitle={a.courseTitle}
+                  stateText={STATE_TEXT[a.state]}
+                  stateTone={
+                    a.state === "to_do" ? "link" : a.state === "reviewed" ? "success" : "muted"
+                  }
+                  dueText={dueText(a.dueAt)}
+                  overdue={a.overdue}
+                  onPress={() => router.push(`/assignment/${a.id}`)}
+                />
+              ))}
             </View>
-          </Pressable>
-        ))
+          );
+        })
       )}
     </Screen>
   );
