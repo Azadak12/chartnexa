@@ -39,19 +39,28 @@ const schema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
   /** The From address for the "resend" driver, for example "ChartNexa <onboarding@resend.dev>". */
   MAIL_FROM: z.string().min(3).max(200).optional(),
-  /** Where uploaded files live. Only the local-disk driver exists; production refuses it. */
-  STORAGE_DRIVER: z.enum(["local"]).default("local"),
+  /** Where uploaded files live. "local" is disk (development, refused in production); "postgres" keeps the bytes in the managed database (hosted pilot). */
+  STORAGE_DRIVER: z.enum(["local", "postgres"]).default("local"),
   STORAGE_DIR: z.string().min(1).default(".dev-storage"),
-  /** Malware scanning. Only "none" exists; files are marked not scanned and production refuses it. */
-  SCANNER: z.enum(["none"]).default("none"),
-  /** Video hosting. Only the "test" adapter exists (no transcoding); production refuses it. */
-  VIDEO_PROVIDER: z.enum(["test"]).default("test"),
+  /** Malware scanning of lesson files. "none" marks files not scanned (development; production refuses it unless FILE_UPLOADS=disabled); "clamav" asks a clamd daemon. */
+  SCANNER: z.enum(["none", "clamav"]).default("none"),
+  /** A ClamAV daemon (clamd), needed when SCANNER is "clamav". */
+  CLAMAV_HOST: z.string().min(1).optional(),
+  CLAMAV_PORT: z.coerce.number().int().min(1).max(65535).default(3310),
+  CLAMAV_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120_000).default(30_000),
+  /**
+   * Turn off the upload of lesson files (PDF and similar) entirely. The only way to run a hosted
+   * server without a malware scanner: nothing is accepted, so nothing goes unscanned.
+   */
+  FILE_UPLOADS: z.enum(["enabled", "disabled"]).default("enabled"),
+  /** Video hosting. "test" is for development (production refuses it); "direct" serves the uploaded MP4 with signed ranges, no transcoding (hosted pilot). */
+  VIDEO_PROVIDER: z.enum(["test", "direct"]).default("test"),
   /** Lifetime of a playback link; long enough for a lesson, since players fetch ranges throughout. */
   VIDEO_LINK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(14_400),
   /** Share of a video to watch for the lesson to count as complete (Q07 proposal: 90). */
   VIDEO_COMPLETION_PERCENT: z.coerce.number().int().min(50).max(100).default(90),
-  /** Payments run in test mode only (owner decision C17); production refuses the test provider. */
-  PAYMENT_PROVIDER: z.enum(["test"]).default("test"),
+  /** Payments run in test mode only (owner decision C17); production refuses the test provider. "disabled" refuses every purchase (hosted pilot: staff give access). */
+  PAYMENT_PROVIDER: z.enum(["test", "disabled"]).default("test"),
   /** Signs test-provider events. Development default only; a real provider has its own secret. */
   PAYMENT_TEST_WEBHOOK_SECRET: z
     .string()
@@ -125,11 +134,31 @@ const checked = schema.superRefine((c, ctx) => {
       message: "the test video adapter is not allowed in production; a video provider is pending",
     });
   }
-  if (c.NODE_ENV === "production" && c.SCANNER === "none") {
+  if (c.SCANNER === "clamav" && !c.CLAMAV_HOST) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["CLAMAV_HOST"],
+      message: "the clamav scanner needs CLAMAV_HOST",
+    });
+  }
+  if (c.NODE_ENV === "production" && c.SCANNER === "none" && c.FILE_UPLOADS !== "disabled") {
     ctx.addIssue({
       code: "custom",
       path: ["SCANNER"],
-      message: "uploads must be scanned in production; a scanning provider is pending",
+      message:
+        "lesson files must be scanned in production: use SCANNER=clamav, or FILE_UPLOADS=disabled",
+    });
+  }
+  if (
+    c.NODE_ENV === "production" &&
+    !isLocalDatabase(c.DATABASE_URL) &&
+    !/[?&]sslmode=(require|verify-full|verify-ca)(&|$)/.test(c.DATABASE_URL)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["DATABASE_URL"],
+      message:
+        "a database that is not on this computer must be reached over TLS (add ?sslmode=require)",
     });
   }
   if (c.MFA_DEV_BYPASS && !isLocalDatabase(c.DATABASE_URL)) {

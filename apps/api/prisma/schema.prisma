@@ -814,3 +814,14 @@ model AssignmentSubmission {
   @@id([assignmentId, userId])
   @@map("assignment_submissions")
 }
+
+/// File bytes for STORAGE_DRIVER=postgres. Written and read only by PostgresStorage with raw SQL
+/// (range reads and server-side joins); the CHECK constraints are in the migration.
+model StorageObject {
+  key        String   @id
+  data       Bytes
+  sizeBytes  BigInt   @map("size_bytes")
+  modifiedAt DateTime @default(now()) @map("modified_at") @db.Timestamptz(6)
+
+  @@map("storage_objects")
+}

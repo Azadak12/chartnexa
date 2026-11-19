@@ -100,6 +100,9 @@ export class ResourcesService {
     lessonId: string,
     input: StartUploadRequest,
   ): Promise<UploadSession> {
+    if (this.config.FILE_UPLOADS === "disabled") {
+      throw new ForbiddenException("File uploads are not turned on for this academy yet.");
+    }
     await this.lessonOf(courseId, lessonId);
     const ext = input.fileName.toLowerCase().split(".").pop() ?? "";
     const allowed = ALLOWED_TYPES[input.mimeType as AllowedType].ext as readonly string[];

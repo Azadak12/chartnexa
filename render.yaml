@@ -1,0 +1,44 @@
+# Render Blueprint for the ChartNexa API (hosted pilot / TestFlight testing).
+# Secrets are never stored here: values marked sync: false are typed into the Render dashboard.
+# Full procedure: docs/operations/render-neon.md
+services:
+  - type: web
+    name: chartnexa-api
+    runtime: node
+    plan: starter # a paid plan: free web services sleep when idle, which breaks sign-in on a phone
+    region: oregon
+    healthCheckPath: /health/ready
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile --prod=false &&
+      pnpm --filter @chartnexa/shared-types --filter @chartnexa/design-tokens --filter @chartnexa/api-contracts build &&
+      pnpm --filter @chartnexa/api build
+    preDeployCommand: pnpm --filter @chartnexa/api migrate:deploy
+    startCommand: pnpm --filter @chartnexa/api start
+    envVars:
+      - { key: NODE_VERSION, value: 26.13.1 }
+      - { key: NODE_ENV, value: production }
+      - { key: LOG_LEVEL, value: info }
+      - { key: TRUST_PROXY, value: "true" }
+      - { key: DATABASE_POOL_MAX, value: "5" }
+      # Neon: the pooled address for the API, the direct address for migrations.
+      - { key: DATABASE_URL, sync: false }
+      - { key: MIGRATION_DATABASE_URL, sync: false }
+      # Generated once by Render and kept; rotating them signs everyone out.
+      - { key: CURSOR_SECRET, generateValue: true }
+      - { key: ACCESS_TOKEN_SECRET, generateValue: true }
+      - { key: METRICS_TOKEN, generateValue: true }
+      # 32 random bytes, base64 (openssl rand -base64 32). Keep a copy: losing it makes every
+      # saved authenticator secret unreadable.
+      - { key: MFA_ENCRYPTION_KEY, sync: false }
+      # Hosted adapters (no development adapters are allowed in production).
+      - { key: STORAGE_DRIVER, value: postgres }
+      - { key: VIDEO_PROVIDER, value: direct }
+      - { key: PAYMENT_PROVIDER, value: disabled }
+      # No scanner yet, so lesson-file uploads are switched off. To allow them, run a ClamAV
+      # daemon, set SCANNER=clamav and CLAMAV_HOST, and remove FILE_UPLOADS.
+      - { key: SCANNER, value: none }
+      - { key: FILE_UPLOADS, value: disabled }
+      - { key: MAILER_DRIVER, value: resend }
+      - { key: RESEND_API_KEY, sync: false }
+      - { key: MAIL_FROM, sync: false }

@@ -76,6 +76,60 @@ describe("loadConfig", () => {
     expect(loadConfig({ ...valid, NODE_ENV: "development" }).PAYMENT_PROVIDER).toBe("test");
   });
 
+  describe("the hosted pilot (Render and Neon)", () => {
+    const hosted = {
+      ...valid,
+      NODE_ENV: "production",
+      DATABASE_URL: "postgresql://u:p@ep-x.neon.tech/db?sslmode=require",
+      MFA_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString("base64"),
+      MAILER_DRIVER: "resend",
+      RESEND_API_KEY: "re_x",
+      MAIL_FROM: "ChartNexa <hello@example.com>",
+      STORAGE_DRIVER: "postgres",
+      VIDEO_PROVIDER: "direct",
+      PAYMENT_PROVIDER: "disabled",
+      SCANNER: "clamav",
+      CLAMAV_HOST: "clamav",
+      TRUST_PROXY: "true",
+    };
+    it("accepts the hosted adapters in production", () => {
+      const c = loadConfig(hosted);
+      expect([c.STORAGE_DRIVER, c.VIDEO_PROVIDER, c.PAYMENT_PROVIDER, c.SCANNER]).toEqual([
+        "postgres",
+        "direct",
+        "disabled",
+        "clamav",
+      ]);
+      expect(c.MFA_DEV_BYPASS).toBe(false);
+    });
+    it("still refuses every development adapter and the shortcut in production", () => {
+      for (const [k, v] of [
+        ["STORAGE_DRIVER", "local"],
+        ["VIDEO_PROVIDER", "test"],
+        ["PAYMENT_PROVIDER", "test"],
+        ["SCANNER", "none"],
+        ["MAILER_DRIVER", "dev"],
+        ["MFA_DEV_BYPASS", "true"],
+      ] as const) {
+        expect(() => loadConfig({ ...hosted, [k]: v }), k).toThrow(new RegExp(k));
+      }
+    });
+    it("allows no scanner only when file uploads are switched off", () => {
+      const noScan = { ...hosted, SCANNER: "none", CLAMAV_HOST: undefined };
+      expect(() => loadConfig(noScan)).toThrow(/SCANNER/);
+      expect(loadConfig({ ...noScan, FILE_UPLOADS: "disabled" }).FILE_UPLOADS).toBe("disabled");
+      expect(() => loadConfig({ ...hosted, CLAMAV_HOST: undefined })).toThrow(/CLAMAV_HOST/);
+    });
+    it("requires TLS to a database that is not on this computer", () => {
+      expect(() =>
+        loadConfig({ ...hosted, DATABASE_URL: "postgresql://u:p@ep-x.neon.tech/db" }),
+      ).toThrow(/sslmode/);
+      expect(
+        loadConfig({ ...hosted, DATABASE_URL: "postgresql://u:p@localhost:5432/db" }).NODE_ENV,
+      ).toBe("production");
+    });
+  });
+
   it("rejects dev and memory mail senders in production, naming the setting", () => {
     for (const driver of ["dev", "memory"]) {
       expect(() => loadConfig({ ...valid, NODE_ENV: "production", MAILER_DRIVER: driver })).toThrow(

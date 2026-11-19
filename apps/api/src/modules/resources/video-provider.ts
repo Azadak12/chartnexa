@@ -26,7 +26,7 @@ export const VIDEO_PROVIDER = Symbol("VIDEO_PROVIDER");
  * configuration refuses it.
  */
 export class TestVideoProvider implements VideoProvider {
-  readonly name = "test";
+  readonly name: string = "test";
   constructor(private readonly storage: ObjectStorage) {}
 
   async ingest(key: string, sizeBytes: number): Promise<IngestResult> {
@@ -43,4 +43,14 @@ export class TestVideoProvider implements VideoProvider {
   async remove(ref: string): Promise<void> {
     await this.storage.delete(ref);
   }
+}
+
+/**
+ * Hosted pilot adapter: the same behaviour as the test adapter (the MP4 as uploaded, served with
+ * HTTP ranges behind short-lived signed links) but named for what it is in production. No
+ * transcoding and no adaptive streaming, so it suits a small pilot, not a large catalogue; a real
+ * video platform (decision Q09) replaces it.
+ */
+export class DirectVideoProvider extends TestVideoProvider {
+  override readonly name: string = "direct";
 }

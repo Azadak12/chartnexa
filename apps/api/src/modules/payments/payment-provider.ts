@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from "@nestjs/common";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 /**
@@ -35,5 +36,25 @@ export class TestPaymentProvider implements PaymentProvider {
   verifySignature(body: string, signature: string | undefined): boolean {
     if (!signature || !/^[0-9a-f]{64}$/.test(signature)) return false;
     return timingSafeEqual(Buffer.from(this.sign(body), "hex"), Buffer.from(signature, "hex"));
+  }
+}
+
+/**
+ * Hosted pilot: no payment provider is connected, so nobody can buy. The academy gives students
+ * access to courses itself (Students and access). Every checkout is refused and no webhook can
+ * be valid.
+ */
+export class DisabledPaymentProvider implements PaymentProvider {
+  readonly name = "disabled";
+  readonly testMode = false;
+
+  async createCheckout(): Promise<{ ref: string }> {
+    throw new ServiceUnavailableException(
+      "Purchases are not available yet. Ask the academy to give you access.",
+    );
+  }
+
+  verifySignature(): boolean {
+    return false;
   }
 }

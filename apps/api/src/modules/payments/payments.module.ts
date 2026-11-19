@@ -7,7 +7,11 @@ import {
   PaymentsController,
   StaffOrdersController,
 } from "./payments.controller.js";
-import { PAYMENT_PROVIDER, TestPaymentProvider } from "./payment-provider.js";
+import {
+  DisabledPaymentProvider,
+  PAYMENT_PROVIDER,
+  TestPaymentProvider,
+} from "./payment-provider.js";
 import { PaymentsService } from "./payments.service.js";
 
 @Module({
@@ -17,7 +21,10 @@ import { PaymentsService } from "./payments.service.js";
     PaymentsService,
     {
       provide: PAYMENT_PROVIDER,
-      useFactory: (c: AppConfig) => new TestPaymentProvider(c.PAYMENT_TEST_WEBHOOK_SECRET),
+      useFactory: (c: AppConfig) =>
+        c.PAYMENT_PROVIDER === "disabled"
+          ? new DisabledPaymentProvider()
+          : new TestPaymentProvider(c.PAYMENT_TEST_WEBHOOK_SECRET),
       inject: [CONFIG],
     },
   ],
