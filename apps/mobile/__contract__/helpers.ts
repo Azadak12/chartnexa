@@ -31,13 +31,16 @@ export function realFetch(
         const chunks: Buffer[] = [];
         res.on("data", (c: Buffer) => chunks.push(c));
         res.on("end", () => {
-          const text = Buffer.concat(chunks).toString("utf8");
+          const raw = Buffer.concat(chunks);
+          const text = raw.toString("utf8");
           if ((res.statusCode ?? 0) >= 400 && process.env.CONTRACT_DEBUG)
             process.stderr.write(`RESP ${init.method} ${u.pathname} ${res.statusCode} ${text}\n`);
           resolve({
             ok: (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300,
             status: res.statusCode ?? 0,
             json: () => Promise.resolve(text ? JSON.parse(text) : null),
+            arrayBuffer: () =>
+              Promise.resolve(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength)),
             headers: {
               get: (k: string) => (res.headers[k.toLowerCase()] as string | undefined) ?? null,
             },

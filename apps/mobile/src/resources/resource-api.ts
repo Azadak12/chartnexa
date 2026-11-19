@@ -52,7 +52,11 @@ export const staffResourceApi = {
       await authedFetch(`${staffPath(courseId)}/lessons/${enc(lessonId)}/resources`),
     ).items;
   },
-  async start(courseId: string, lessonId: string, body: StartUploadRequest): Promise<UploadSession> {
+  async start(
+    courseId: string,
+    lessonId: string,
+    body: StartUploadRequest,
+  ): Promise<UploadSession> {
     return check(
       uploadSessionSchema,
       await authedFetch(`${staffPath(courseId)}/lessons/${enc(lessonId)}/uploads`, {
@@ -68,7 +72,11 @@ export const staffResourceApi = {
       timeoutMs: 120_000,
     });
   },
-  async complete(courseId: string, uploadId: string, body: CompleteUploadRequest): Promise<StaffResource> {
+  async complete(
+    courseId: string,
+    uploadId: string,
+    body: CompleteUploadRequest,
+  ): Promise<StaffResource> {
     return check(
       staffResourceSchema,
       await authedFetch(`${staffPath(courseId)}/uploads/${enc(uploadId)}/complete`, {

@@ -22,9 +22,9 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2 | rbac-core-and-audit | Archived | |
 | 2 | instructor-permission-delegation | Archived | Fresh-clone check recorded 2026-11-18 |
 | 2 | staff-mfa | Archived | |
-| 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` archived; `course-categories` built (awaiting CI and archive); lifecycle validation pending decision |
-| 3 | curriculum-crud | Partly built | `course-lessons-basic` archived; `course-modules` built (awaiting CI and archive); lesson types wait for media |
-| 3 | asset-upload-pipeline | Not started | Storage and scanning providers not chosen |
+| 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` and `course-categories` archived (CI run 77); publication rules pending decision (R14) |
+| 3 | curriculum-crud | Archived | `course-lessons-basic` and `course-modules` archived (CI run 78); lesson types arrive with video |
+| 3 | asset-upload-pipeline | Built, awaiting CI | `lesson-resources`: checked uploads, scanning boundary, signed links, app screens; production storage and scanning blocked on Q32, Q33 |
 | 3 | video-processing-integration | Blocked | Video provider not chosen (Q09) |
 | 3 | entitlements-core | Archived | `admin_grant` source only |
 | 3 | staff-authoring-surface | Partly built | Course, lesson and student screens exist |
@@ -48,6 +48,8 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-18 | Fresh clone of `main` at `ec6e7a0`: install, lint, format, typecheck, tests, builds, secrets, migration round trip | All pass: 416 API, 420 app, 34 contract |
 | 2026-11-18 | CI on `main`, run 75 (`ec6e7a0`) | Success |
 | 2026-11-18 | Local full checks after `course-categories` | All pass: 449 API, 427 app, 35 contract |
+| 2026-11-18 | CI on `main` runs 77, 78, 79 (categories, modules, files server) | Success |
+| 2026-11-19 | Local full checks after `lesson-resources` | All pass: 484 API, 446 app, 37 contract; audit gate passes (2 moderate advisories in Expo tooling) |
 
 ## Never verified
 
@@ -58,7 +60,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 
 ## Outstanding owner decisions
 
-Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider (Q03), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), deployment arrangement for staff (mobile, web or both).
+Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider (Q03), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
 
 ## Current risks
 

@@ -11,6 +11,7 @@ import { colors, MIN_TOUCH_SIZE, neutrals, spacing } from "../../theme";
 import { Banner, Button, Screen, Text, useReducedMotion } from "../../ui";
 import { focusElement } from "../../ui/focus";
 import { courseApi } from "../../courses/course-api";
+import { LessonFilesSection } from "../../resources/LessonFilesSection";
 import { CompletionControl } from "../../progress/CompletionControl";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
@@ -206,6 +207,7 @@ export function LessonReaderScreen() {
           ) : null}
         </>
       )}
+      <LessonFilesSection courseId={String(id)} lessonId={String(lessonId)} />
       {owner && steps.length > 0 ? (
         progress.status === "success" ? (
           <CompletionControl courseId={String(id)} lessonId={String(lessonId)} completed={done} />

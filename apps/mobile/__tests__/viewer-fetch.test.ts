@@ -15,12 +15,12 @@ describe("viewerFetch", () => {
   it("sends the token only when someone is signed in", async () => {
     sessionStore.set("signed-out");
     expect(await viewerFetch("/courses/c1")).toBe("public");
-    expect(apiFetch).toHaveBeenCalledWith("/courses/c1");
+    expect(apiFetch).toHaveBeenCalledWith("/courses/c1", {});
     expect(authedFetch).not.toHaveBeenCalled();
 
     sessionStore.set("signed-in");
     expect(await viewerFetch("/courses/c1")).toBe("signed-in");
-    expect(authedFetch).toHaveBeenCalledWith("/courses/c1");
+    expect(authedFetch).toHaveBeenCalledWith("/courses/c1", {});
   });
 
   it("does not use the token while the session is still being restored", async () => {

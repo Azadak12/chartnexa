@@ -72,7 +72,11 @@ export async function uploadFile(input: UploadInput): Promise<StaffResource> {
     size: input.size,
   });
   const cancelled = async (): Promise<never> => {
-    await staffResourceApi.cancel(input.courseId, session.uploadId).catch(() => undefined);
+    try {
+      await staffResourceApi.cancel(input.courseId, session.uploadId);
+    } catch {
+      // The server also removes abandoned uploads after a day.
+    }
     throw new UploadCancelled();
   };
   input.onProgress?.(0);

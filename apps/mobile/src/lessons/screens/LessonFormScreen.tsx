@@ -17,6 +17,7 @@ import { useZodForm } from "../../forms/use-zod-form";
 import { StateView } from "../../state/StateView";
 import { colors, spacing } from "../../theme";
 import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
+import { StaffLessonFiles } from "../../resources/StaffLessonFiles";
 import { staffLessonApi } from "../lesson-api";
 
 const formSchema = z.object({
@@ -264,6 +265,13 @@ function Form({
         loading={pending}
         onPress={() => void handleSubmit((v) => run(v))()}
       />
+      {current ? (
+        <StaffLessonFiles courseId={courseId} lessonId={current.id} />
+      ) : (
+        <Text variant="caption" tone="muted">
+          Save the lesson first, then add files.
+        </Text>
+      )}
       <Button label="Back" variant="tertiary" onPress={back} />
       <View style={{ height: spacing.xl }} />
     </Screen>
