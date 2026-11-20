@@ -3,7 +3,7 @@ import { Animated, Easing, View } from "react-native";
 import { colors, market, radii } from "../theme";
 import { useReducedMotion } from "../ui";
 
-const SHADES = [colors.blue, market.blueOnNavy, colors.ink, colors.blueTint, colors.gold];
+const SHADES = [colors.blue, market.blueOnNavy, colors.ink, colors.blueTint, colors.champagne];
 const COUNT = 16;
 
 /** A one-shot burst of confetti around its parent's centre. Nothing is drawn with reduced motion. */

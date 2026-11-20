@@ -20,7 +20,7 @@ export function AppHeader({
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <Text variant="subheading" accessibilityRole="header" style={{ color: colors.ink }}>
           ChartNexa{" "}
-          <Text variant="subheading" style={{ color: colors.blue }}>
+          <Text variant="subheading" style={{ color: colors.link }}>
             Academy
           </Text>
         </Text>

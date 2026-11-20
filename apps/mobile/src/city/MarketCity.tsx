@@ -38,7 +38,7 @@ function Windows({
           y={y + j * rh + rh * 0.22}
           width={cw * 0.6}
           height={rh * 0.5}
-          fill={lit(i, j) ? colors.gold : market.grid}
+          fill={lit(i, j) ? colors.champagne : market.grid}
           opacity={lit(i, j) ? 0.55 : 0.5}
         />,
       );
@@ -117,7 +117,7 @@ function ProvisionalScene() {
         );
       })}
       <Rect x="0" y="80" width="100" height="10" fill="url(#ground)" />
-      <Rect x="0" y="80" width="100" height="0.4" fill={colors.gold} opacity={0.6} />
+      <Rect x="0" y="80" width="100" height="0.4" fill={colors.champagne} opacity={0.6} />
     </Svg>
   );
 }
@@ -159,8 +159,8 @@ function Hotspot({
           flex: 1,
           borderRadius: radii.control / 3,
           borderWidth: 1.5,
-          borderColor: colors.gold,
-          backgroundColor: colors.goldTint,
+          borderColor: colors.champagne,
+          backgroundColor: colors.champagneTint,
           justifyContent: "flex-end",
           alignItems: "center",
           paddingBottom: spacing.xs,
@@ -244,7 +244,7 @@ export function MarketCity() {
           }}
         >
           <Svg width="100%" height="100%">
-            <Ellipse cx="50%" cy="60%" rx="50%" ry="40%" fill={colors.gold} />
+            <Ellipse cx="50%" cy="60%" rx="50%" ry="40%" fill={colors.champagne} />
           </Svg>
         </Animated.View>
         <Animated.View
@@ -275,7 +275,7 @@ export function MarketCity() {
           style={{ position: "absolute", top: spacing.md, right: spacing.md }}
         >
           <Svg width={14} height={14}>
-            <Circle cx={7} cy={7} r={4} fill={colors.gold} opacity={0.8} />
+            <Circle cx={7} cy={7} r={4} fill={colors.champagne} opacity={0.8} />
           </Svg>
         </View>
         {DESTINATIONS.map((d) => (

@@ -303,3 +303,7 @@ The owner approved changing the brand kit to follow the client's trading-academy
 ## 2026-11-21 — "Market City" direction and delivery limits
 
 The owner asked for a realistic, cinematic Market City presentation across all roles. Implemented so far: shared responsive and motion foundations and the Student Home entrance with tap areas to existing screens. **Photorealistic artwork is not delivered**: it needs commissioned/licensed imagery (spec in `docs/design/market-city-assets.md`); the scene shows a provisional vector skyline with a visible notice. Staff roles, Lab, Assignments, Live and Profile have the dark theme but not yet a bespoke redesign (see `docs/design/screen-inventory.md`). No simulator/device review has been possible (no Xcode on the build machine).
+
+## 2026-11-21 — Design System V1 palette adopted
+
+Owner approved "ChartNexa Cinematic Interactive Academy — Design System V1" as the permanent design baseline (`docs/design/design-system-v1.md`). Palette moved to Midnight `#07111F` / Deep Navy `#101D32` / Elevated `#192A42` / action blue `#2878FF` / champagne `#D8AD66` / Ice White `#F5F8FC`, with a lighter `link` blue for small text (action blue is 4.2:1 on Deep Navy). `colors.gold` is now `colors.champagne`. Light appearance, editorial display face, haptics, shared-element transitions and photoreal assets remain to do.

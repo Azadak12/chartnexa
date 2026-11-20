@@ -16,21 +16,22 @@ import {
 describe("brand colors", () => {
   it("match the reference-derived dark palette exactly", () => {
     expect(colors).toEqual({
-      page: "#070B14",
-      surface: "#0F1628",
-      ink: "#E8EEFB",
-      blue: "#3D8BFF",
-      blueTint: "#13203D",
-      onBlue: "#0B1020",
-      gold: "#F5C542",
-      goldTint: "#33270B",
+      page: "#07111F",
+      surface: "#101D32",
+      ink: "#F5F8FC",
+      blue: "#2878FF",
+      link: "#6EA8FF",
+      blueTint: "#12284D",
+      onBlue: "#07111F",
+      champagne: "#D8AD66",
+      champagneTint: "#2E2412",
     });
   });
 
   it("keeps every other color a neutral or a functional status color", () => {
     const all = [...Object.values(neutrals), ...Object.values(status)];
     for (const c of all) expect(c).toMatch(/^(#[0-9A-F]{6}|rgba\(3, 6, 12, 0\.7\))$/i);
-    expect(Object.keys(colors)).toHaveLength(8);
+    expect(Object.keys(colors)).toHaveLength(9);
   });
 });
 
@@ -38,7 +39,7 @@ describe("contrast", () => {
   it("computes known ratios", () => {
     expect(contrastRatio("#000000", "#FFFFFF")).toBeCloseTo(21, 1);
     expect(contrastRatio("#FFFFFF", "#FFFFFF")).toBeCloseTo(1, 5);
-    expect(contrastRatio(colors.blue, colors.surface)).toBeGreaterThan(5);
+    expect(contrastRatio(colors.link, colors.surface)).toBeGreaterThan(4.5);
   });
 
   it("holds for every approved pairing at its required ratio", () => {
@@ -55,13 +56,13 @@ describe("contrast", () => {
 
   it("detects a pairing that is too faint", () => {
     const bad = [
-      { name: "faint", foreground: "#2B3A5E", background: colors.surface, kind: "text" as const },
+      { name: "faint", foreground: "#243750", background: colors.surface, kind: "text" as const },
     ];
     expect(failingPairings(bad)).toHaveLength(1);
     const faintBorder = [
       {
         name: "faint border",
-        foreground: "#1F2B47",
+        foreground: "#243750",
         background: colors.surface,
         kind: "control" as const,
       },

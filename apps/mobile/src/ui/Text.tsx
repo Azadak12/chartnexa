@@ -16,7 +16,7 @@ export type TextTone =
 const toneColor: Record<TextTone, string> = {
   body: colors.ink,
   muted: neutrals.muted,
-  link: colors.blue,
+  link: colors.link,
   error: status.error,
   success: status.success,
   warning: status.warning,

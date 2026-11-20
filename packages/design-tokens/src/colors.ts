@@ -1,68 +1,70 @@
 /**
- * Dark-first fintech palette adopted from the client's trading-academy reference (owner decision,
- * 2026-11-21; supersedes the white/black/blue kit in docs/04): deep navy surfaces, electric blue
- * primary, gold for rewards. `surface` is the card colour, `page` the screen behind it, `ink` the
- * primary text, `onBlue` the dark text and icons placed on a blue or gold fill.
+ * ChartNexa Cinematic Interactive Academy, Design System V1 (owner brief, 2026-11-21; supersedes
+ * the first trading-academy-derived palette). `page` is Primary Midnight, `surface` Deep Navy,
+ * `blue` the primary action colour (fills, selected states), `link` its lighter text form (the
+ * action blue is 4.2:1 on the surface, so it is not used for small text), `champagne` a premium
+ * editorial highlight (never a profit signal), `ink` Ice White. `onBlue` is the dark text and
+ * icon colour placed on blue or champagne fills.
  */
 export const colors = {
-  page: "#070B14",
-  surface: "#0F1628",
-  ink: "#E8EEFB",
-  blue: "#3D8BFF",
-  blueTint: "#13203D",
-  onBlue: "#0B1020",
-  gold: "#F5C542",
-  goldTint: "#33270B",
+  page: "#07111F",
+  surface: "#101D32",
+  ink: "#F5F8FC",
+  blue: "#2878FF",
+  link: "#6EA8FF",
+  blueTint: "#12284D",
+  onBlue: "#07111F",
+  champagne: "#D8AD66",
+  champagneTint: "#2E2412",
 } as const;
 
-/** Neutrals derived for borders, raised surfaces and muted text. */
+/** Neutrals derived for borders, elevated surfaces and muted text. */
 export const neutrals = {
-  /** A raised surface: inputs, secondary panels. */
-  surface: "#141D33",
+  /** Elevated surface: inputs, secondary panels. */
+  surface: "#192A42",
   /** Decorative dividers and card edges; not used as the only boundary of a control. */
-  divider: "#1F2B47",
+  divider: "#243750",
   /** Control borders: at least 3:1 on the surface. */
-  border: "#6B7BA3",
-  /** Secondary text: at least 4.5:1 on the page, the surface and the tint. */
-  muted: "#9AA8C7",
+  border: "#7388A8",
+  /** Secondary text: at least 4.5:1 on the page, the surface and the elevated surface. */
+  muted: "#9DAFC5",
   /** Disabled controls are exempt from contrast rules but must still be legible. */
-  disabledText: "#6B7A9E",
-  disabledFill: "#141D33",
+  disabledText: "#6B7E99",
+  disabledFill: "#192A42",
   /** Dimmed backdrop behind sheets and dialogs. */
   scrim: "rgba(3, 6, 12, 0.7)",
 } as const;
 
 /** Functional status colors. Always shown with an icon or text label, never alone. */
 export const status = {
-  error: "#F87171",
-  errorTint: "#3A1620",
-  success: "#4ADE80",
-  successTint: "#10301E",
-  warning: "#F5C542",
-  warningTint: "#33270B",
+  error: "#F16B72",
+  errorTint: "#3A1A24",
+  success: "#16B89A",
+  successTint: "#0D2F2B",
+  warning: "#D8AD66",
+  warningTint: "#2E2412",
   /** Pressed state of the primary blue (lighter: the screen is dark). */
-  bluePressed: "#6FB0FF",
+  bluePressed: "#5B9BFF",
   /** The darker lower edge of raised blue buttons and path nodes. */
-  blueLip: "#2563EB",
+  blueLip: "#1B5BD1",
 } as const;
 
 /**
- * Chart and "market learning" surfaces (Phase 2 design). The navy surface is reserved for charts
- * and hero panels. Up and down colours are for meaningful price direction only and are always
- * paired with a symbol or word. `upText` and `downText` are the lighter text versions that meet
- * 4.5:1 on the navy surface; `up` and `down` are for filled shapes (3:1).
+ * Chart and "market learning" surfaces. The navy surface is reserved for charts and hero panels.
+ * Bullish green and bearish coral are for meaningful price direction only and are always paired
+ * with a symbol or word. `upText` and `downText` are the text versions on navy.
  */
 export const market = {
-  navy: "#0F172A",
-  navyRaised: "#1E293B",
-  grid: "#334155",
-  onNavy: "#F8FAFC",
-  onNavyMuted: "#94A3B8",
-  blueOnNavy: "#60A5FA",
-  up: "#10B981",
-  down: "#EF4444",
-  upText: "#34D399",
-  downText: "#F87171",
+  navy: "#0B1829",
+  navyRaised: "#192A42",
+  grid: "#2A3D5C",
+  onNavy: "#F5F8FC",
+  onNavyMuted: "#9DAFC5",
+  blueOnNavy: "#6EA8FF",
+  up: "#16B89A",
+  down: "#F16B72",
+  upText: "#16B89A",
+  downText: "#F16B72",
 } as const;
 
 /**

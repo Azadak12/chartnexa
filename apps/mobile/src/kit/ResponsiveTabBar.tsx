@@ -89,7 +89,7 @@ export function ResponsiveTabBar({
         const focused = state.index === index;
         const options = descriptors[route.key]?.options;
         const name = options?.tabBarAccessibilityLabel ?? m.label;
-        const color = focused ? colors.blue : neutrals.muted;
+        const color = focused ? colors.link : neutrals.muted;
         return (
           <Pressable
             key={route.key}

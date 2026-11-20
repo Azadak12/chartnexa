@@ -150,7 +150,7 @@ describe.each(ROLES)("the %s tab bar", (role) => {
       .filter((b) => b.props.accessibilityState?.selected === true);
     expect(selected).toHaveLength(1);
     const label = screen.getByText(tabsFor(role)[0]!.label, { hidden: true });
-    expect(StyleSheet.flatten(label.props.style).color).toBe(colors.blue);
+    expect(StyleSheet.flatten(label.props.style).color).toBe(colors.link);
   });
 
   it("shows no button for tabs the role does not use", async () => {

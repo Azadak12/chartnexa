@@ -60,7 +60,7 @@ export function LessonCompletionPanel({
           width: 48,
           height: 48,
           borderRadius: radii.pill,
-          backgroundColor: complete ? colors.gold : colors.blue,
+          backgroundColor: complete ? colors.champagne : colors.blue,
           alignItems: "center",
           justifyContent: "center",
           transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) }],

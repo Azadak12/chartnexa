@@ -6,8 +6,12 @@ import { useReducedMotion } from "../ui";
 export const motion = {
   /** Taps and small state changes. */
   fast: 120,
-  /** Screen content, sheets, expanding sections. */
+  /** Screen content, sheets, expanding sections (local transitions 180-300 ms). */
   base: 240,
+  /** Moving between destinations (250-450 ms). */
+  navigation: 350,
+  /** Major cinematic reveals, only where context permits (450-900 ms). */
+  cinematic: 600,
   /** Progress and celebrations. */
   slow: 500,
   /** Ambient scenery: clouds, light. Always slow enough to be ignorable. */
