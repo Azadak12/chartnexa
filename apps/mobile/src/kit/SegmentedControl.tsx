@@ -64,7 +64,7 @@ export function SegmentedControl<T extends string>({
             left: TRACK_PAD,
             width: cell,
             borderRadius: radii.control,
-            backgroundColor: colors.white,
+            backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: neutrals.divider,
             transform: [{ translateX: x }],

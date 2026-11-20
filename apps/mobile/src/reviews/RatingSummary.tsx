@@ -34,7 +34,7 @@ export function RatingSummary({
             key={n}
             name="star"
             size={14}
-            color={n <= filled ? colors.blue : colors.black}
+            color={n <= filled ? colors.blue : colors.ink}
             style={{ opacity: n <= filled ? 1 : 0.25 }}
             accessible={false}
           />

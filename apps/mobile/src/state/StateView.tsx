@@ -83,7 +83,7 @@ export function StateView({
       <Feather
         name={d.icon}
         size={32}
-        color={state === "error" ? colors.black : colors.blue}
+        color={state === "error" ? colors.ink : colors.blue}
         accessible={false}
       />
       <Text variant="heading" accessibilityRole="header" style={styles.centerText}>

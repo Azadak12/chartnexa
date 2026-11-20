@@ -99,7 +99,7 @@ describe("catalog topic filter", () => {
     );
   });
 
-  it("keeps the list first: no filter buttons on the page, and the sheet holds radio groups with real categories", async () => {
+  it("offers quick filters on the page and draft radio groups in the sheet", async () => {
     courses.list.mockResolvedValue({
       items: [
         {
@@ -119,7 +119,7 @@ describe("catalog topic filter", () => {
     expect(screen.getByRole("header", { name: "Explore Courses" })).toBeTruthy();
     expect(screen.getByTestId("result-count").props.children.join("")).toBe("1 course");
     for (const n of ["Beginner", "Intermediate", "Advanced", "Forex"]) {
-      expect(screen.queryByRole("button", { name: n })).toBeNull();
+      expect(screen.getByRole("button", { name: n })).toBeTruthy();
       expect(screen.queryByRole("radio", { name: n })).toBeNull();
     }
     await fireEvent.press(screen.getByTestId("filters-button"));
@@ -245,4 +245,19 @@ describe("staff categories screen", () => {
     await waitFor(() => expect(staffCat.remove).toHaveBeenLastCalledWith("k2"));
     await waitFor(() => expect(announce).toHaveBeenCalledWith("Category deleted"));
   });
+});
+
+it("selects and clears a topic directly from discovery", async () => {
+  await renderRouter(app, { initialUrl: "/explore" });
+  await fireEvent.press(await screen.findByRole("button", { name: "Forex" }));
+  await waitFor(() => expect(courses.list).toHaveBeenLastCalledWith({ category: "k1" }));
+  expect(screen.getByRole("button", { name: "Forex" }).props.accessibilityState.selected).toBe(
+    true,
+  );
+  await fireEvent.press(screen.getByRole("button", { name: "All topics" }));
+  // Returning to a fresh cached query does not need another request.
+  expect(screen.getByRole("button", { name: "All topics" }).props.accessibilityState.selected).toBe(
+    true,
+  );
+  expect(screen.queryByRole("button", { name: "Remove filter Forex" })).toBeNull();
 });

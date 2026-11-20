@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   primary: { backgroundColor: colors.blue },
   primaryPressed: { backgroundColor: status.bluePressed },
-  secondary: { backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.blue },
+  secondary: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.blue },
   tertiary: { backgroundColor: "transparent" },
   softPressed: { backgroundColor: colors.blueTint },
   inactive: { backgroundColor: neutrals.disabledFill, borderColor: neutrals.disabledFill },

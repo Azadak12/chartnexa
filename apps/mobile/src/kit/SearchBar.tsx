@@ -40,7 +40,7 @@ export function SearchBar({
         autoCapitalize="none"
         autoCorrect={false}
         maxFontSizeMultiplier={MAX_FONT_SCALE}
-        style={{ flex: 1, color: colors.black, fontSize: 16, paddingVertical: 10 }}
+        style={{ flex: 1, color: colors.ink, fontSize: 16, paddingVertical: 10 }}
       />
       {value.length > 0 ? (
         <Pressable

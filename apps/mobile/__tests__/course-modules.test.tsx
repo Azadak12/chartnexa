@@ -149,7 +149,7 @@ describe("students see modules on the course page", () => {
     expect(
       screen.getByRole("button", { name: /^Module 1: Basics/ }).props.accessibilityState.expanded,
     ).toBe(true);
-    expect(screen.getByText(/Welcome/)).toBeTruthy();
+    expect(screen.getByLabelText("Lesson 1: Welcome, free preview")).toBeTruthy();
   });
 });
 

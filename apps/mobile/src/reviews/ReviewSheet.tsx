@@ -113,7 +113,7 @@ export function ReviewSheet({
               <Feather
                 name="star"
                 size={28}
-                color={n <= rating ? colors.blue : colors.black}
+                color={n <= rating ? colors.blue : colors.ink}
                 style={{ opacity: n <= rating ? 1 : 0.3 }}
                 accessible={false}
               />

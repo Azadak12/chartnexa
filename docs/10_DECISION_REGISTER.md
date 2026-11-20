@@ -287,3 +287,15 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 ## Owner decision — 2026-11-20: hosted staff password-only sign-in
 
 The owner explicitly approved email/password-only sign-in for Admin and Manager on the live app. This supersedes the mandatory staff MFA policy for this deployment. `STAFF_MFA_REQUIRED=false` selects this policy in production; omission defaults to MFA. Password verification, rate limits, roles and permissions remain enforced. Existing authenticator records are retained so the policy can be reversed. The local-only `MFA_DEV_BYPASS` restrictions remain unchanged.
+
+## 2026-11-20 — Guided student learning UI
+
+Owner approved implementation after reviewing the trading-academy reference and the proposed first scope: Home → My Learning → lesson completion. Adapt the interaction ideas to the existing native app and white/black/blue identity, using real resume, module and progress data. This authorizes the UI changes tracked in `engaging-learning-journey`; XP, streaks, mastery assessments, leaderboards and backend changes are outside this scope. Device visual/accessibility review remains unverified in this session.
+
+## 2026-11-20 — Course discovery UI follow-up
+
+The owner requested the next upgrade after the guided learning implementation. Continue the previously discussed sequence with Explore Courses and course details: visible topic/level selection, fuller cards, actual course facts and clearer preview/continue presentation. Preserve existing backend, checkout and enrollment rules. Tracked in `course-discovery-experience`; device visual validation remains outstanding.
+
+## 2026-11-21 — Visual identity follows the trading-academy reference
+
+The owner approved changing the brand kit to follow the client's trading-academy design: a dark-first fintech palette (deep navy surfaces, electric blue primary `#3D8BFF`, gold `#F5C542` for rewards) and game-like interaction (winding lesson path, bite-sized lessons, celebrations, raised 3D controls). This supersedes the white/black/blue rules in `docs/04_BRAND_AND_UX.md` and the "do not turn the entire application dark" rule. Backend, API and features are unchanged; XP, streaks, leagues and quests remain out of scope because no backend data exists for them. Tokens live in `packages/design-tokens` (`white`/`black` were renamed `surface`/`ink`; `page`, `onBlue`, `gold` were added) and contrast pairings were re-verified (AA). Not yet validated on a device or simulator; the production logo and splash are still the old light-background placeholders.

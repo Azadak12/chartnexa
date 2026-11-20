@@ -1,9 +1,10 @@
 import { Feather } from "@expo/vector-icons";
 import type { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { Pressable, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Pressable, View } from "react-native";
 import { colors, MIN_TOUCH_SIZE, neutrals } from "../theme";
-import { Text } from "../ui";
+import { Text, useReducedMotion } from "../ui";
 
 type BarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 type Icon = ComponentProps<typeof Feather>["name"];
@@ -19,6 +20,37 @@ export interface TabMeta {
   label: string;
   icon: Icon;
   hidden: boolean;
+}
+
+/** The icon hops up and settles when its tab becomes selected (static with reduced motion). */
+function TabIcon({ name, focused, color }: { name: Icon; focused: boolean; color: string }) {
+  const reduced = useReducedMotion();
+  const t = useRef(new Animated.Value(focused ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced !== false) {
+      t.setValue(focused ? 1 : 0);
+      return;
+    }
+    Animated.spring(t, {
+      toValue: focused ? 1 : 0,
+      friction: 5,
+      tension: 160,
+      useNativeDriver: true,
+    }).start();
+  }, [focused, reduced, t]);
+  return (
+    <Animated.View
+      accessible={false}
+      style={{
+        transform: [
+          { scale: t.interpolate({ inputRange: [0, 1], outputRange: [1, 1.18] }) },
+          { translateY: t.interpolate({ inputRange: [0, 1], outputRange: [0, -2] }) },
+        ],
+      }}
+    >
+      <Feather name={name} size={TAB_ICON_SIZE} color={color} accessible={false} />
+    </Animated.View>
+  );
 }
 
 /**
@@ -41,7 +73,7 @@ export function ResponsiveTabBar({
       accessibilityRole="tablist"
       style={{
         flexDirection: "row",
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         borderTopWidth: 1,
         borderTopColor: neutrals.divider,
         paddingBottom: insets.bottom,
@@ -96,7 +128,7 @@ export function ResponsiveTabBar({
                 backgroundColor: focused ? colors.blue : "transparent",
               }}
             />
-            <Feather name={m.icon} size={TAB_ICON_SIZE} color={color} accessible={false} />
+            <TabIcon name={m.icon} focused={focused} color={color} />
             <Text
               accessible={false}
               numberOfLines={1}

@@ -26,7 +26,7 @@ export function ModuleAccordion({
         borderWidth: 1,
         borderColor: neutrals.divider,
         overflow: "hidden",
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
       }}
       testID={testID}
     >
@@ -41,7 +41,7 @@ export function ModuleAccordion({
           gap: spacing.md,
           padding: spacing.md,
           minHeight: 56,
-          backgroundColor: pressed ? neutrals.surface : colors.white,
+          backgroundColor: pressed ? neutrals.surface : colors.surface,
         })}
       >
         <View style={{ flex: 1 }}>
@@ -115,7 +115,7 @@ export function LessonCard({
         gap: spacing.md,
         paddingHorizontal: spacing.md,
         minHeight: 52,
-        backgroundColor: pressed ? neutrals.surface : colors.white,
+        backgroundColor: pressed ? neutrals.surface : colors.surface,
       })}
     >
       <Feather
@@ -133,7 +133,7 @@ export function LessonCard({
       <View style={{ flex: 1 }}>
         <Text
           variant="bodyStrong"
-          style={{ color: state === "locked" ? neutrals.muted : colors.black }}
+          style={{ color: state === "locked" ? neutrals.muted : colors.ink }}
         >
           {position}. {title}
         </Text>

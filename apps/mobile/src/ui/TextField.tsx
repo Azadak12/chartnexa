@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     borderColor: neutrals.border,
     borderRadius: radii.control,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     fontFamily: fontFamilies.regular,
     fontSize: 16,
-    color: colors.black,
+    color: colors.ink,
   },
   fieldInline: {
     gap: spacing.sm,

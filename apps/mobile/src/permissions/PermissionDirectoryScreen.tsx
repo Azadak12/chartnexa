@@ -149,7 +149,7 @@ function PersonList({ role, term }: { role: ManagedRole; term: string }) {
             borderRadius: radii.control,
             borderWidth: 1,
             borderColor: neutrals.divider,
-            backgroundColor: pressed ? neutrals.surface : colors.white,
+            backgroundColor: pressed ? neutrals.surface : colors.surface,
             gap: 2,
           })}
         >

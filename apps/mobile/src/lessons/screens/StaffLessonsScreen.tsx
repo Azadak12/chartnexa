@@ -433,7 +433,7 @@ export function StaffLessonsScreen() {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: neutrals.divider,

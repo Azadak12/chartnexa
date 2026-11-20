@@ -202,3 +202,38 @@ describe("lesson player context", () => {
     ).toBeNull();
   });
 });
+
+describe("course decision panels", () => {
+  it("shows course facts and the actual preview title", async () => {
+    await renderRouter(app, { initialUrl: "/course/c1" });
+    expect(await screen.findByTestId("course-at-a-glance")).toBeTruthy();
+    expect(await screen.findByText(/Try “What is a candle/)).toBeTruthy();
+  });
+  it("distinguishes a failed outline from an empty course and retries", async () => {
+    lessons.outline.mockRejectedValueOnce(new Error("unavailable"));
+    await renderRouter(app, { initialUrl: "/course/c1?tab=learn" });
+    expect(await screen.findByTestId("course-outline-error")).toBeTruthy();
+    expect(screen.queryByTestId("learn-empty")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Retry course content" }));
+    expect(await screen.findByTestId("panel-learn")).toBeTruthy();
+    expect(screen.queryByTestId("course-outline-error")).toBeNull();
+  });
+  it("shows retryable feedback when review cannot resolve a lesson", async () => {
+    courses.get.mockResolvedValue(
+      detail({
+        enrolled: true,
+        onSale: true,
+        nextLessonId: null,
+        progress: { completed: 3, total: 3 },
+      }),
+    );
+    await renderRouter(app, { initialUrl: "/course/c1" });
+    await screen.findByRole("button", { name: "Review course" });
+    await waitFor(() => expect(lessons.outline).toHaveBeenCalled());
+    lessons.outline.mockRejectedValueOnce(new Error("failed"));
+    await fireEvent.press(screen.getByRole("button", { name: "Review course" }));
+    expect(await screen.findByText(/The lesson could not be opened/)).toBeTruthy();
+    await fireEvent.press(screen.getByRole("button", { name: "Review course" }));
+    await waitFor(() => expect(screen).toHavePathname("/course/c1/lesson/l1"));
+  });
+});

@@ -14,6 +14,7 @@ import {
   type TabMeta,
 } from "../src/kit/ResponsiveTabBar";
 import { ALL_TAB_NAMES, tabsFor, type RoleKind } from "../src/staff/role-tabs";
+import { colors } from "../src/theme";
 import { sessionManager } from "../src/auth/session-manager";
 import { sessionStore } from "../src/session/session-store";
 import { clearScreenMemory } from "../src/navigation/screen-memory";
@@ -149,7 +150,7 @@ describe.each(ROLES)("the %s tab bar", (role) => {
       .filter((b) => b.props.accessibilityState?.selected === true);
     expect(selected).toHaveLength(1);
     const label = screen.getByText(tabsFor(role)[0]!.label, { hidden: true });
-    expect(StyleSheet.flatten(label.props.style).color).toBe("#2563EB");
+    expect(StyleSheet.flatten(label.props.style).color).toBe(colors.blue);
   });
 
   it("shows no button for tabs the role does not use", async () => {

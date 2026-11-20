@@ -64,7 +64,7 @@ export function StaffAssignmentsHub() {
               borderRadius: radii.card,
               borderWidth: 1,
               borderColor: neutrals.divider,
-              backgroundColor: pressed ? neutrals.surface : colors.white,
+              backgroundColor: pressed ? neutrals.surface : colors.surface,
             })}
           >
             <CourseThumbnail tone={c.coverTone} thumbnailUrl={c.thumbnailUrl ?? null} width={88} />

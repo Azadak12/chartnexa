@@ -10,12 +10,13 @@ import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
 import { colors, neutrals, radii, spacing } from "../../theme";
-import { Button, Screen, Skeleton, Text } from "../../ui";
+import { Banner, Button, Screen, Skeleton, Text, useSubmitOnce } from "../../ui";
 import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { CoverBlock } from "../CoverBlock";
 import { LessonOutlineSection } from "../../lessons/screens/LessonOutlineSection";
 import { lessonApi } from "../../lessons/lesson-api";
+import { ProgressRing } from "../../kit/ProgressRing";
 import { ProgressBar } from "../../progress/ProgressBar";
 import { RatingSummary } from "../../reviews/RatingSummary";
 import { ReviewsSection } from "../../reviews/ReviewsSection";
@@ -72,13 +73,8 @@ export function CoursePageScreen() {
   /** Opens the next lesson, or the first one when everything is complete. */
   const goToLesson = async (courseId: string, lessonId: string | null) => {
     let target = lessonId;
-    if (!target) {
-      try {
-        target = (await lessonApi.outline(courseId)).items[0]?.id ?? null;
-      } catch {
-        target = null;
-      }
-    }
+    if (!target) target = (await lessonApi.outline(courseId)).items[0]?.id ?? null;
+    if (!target) throw new Error("No lesson available");
     if (target) router.push(`/course/${courseId}/lesson/${target}`);
   };
   return <CourseDetails c={c} goHome={goHome} goToLesson={goToLesson} initialTab={tab} />;
@@ -112,11 +108,37 @@ function CourseDetails({
     retry: shouldRetry,
   });
   const preview = outline.data?.items.find((l) => l.isPreview) ?? null;
+  const next = outline.data?.items.find((l) => l.id === c.nextLessonId);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const { run: continueLesson, pending: openingLesson } = useSubmitOnce(async () => {
+    setActionError(null);
+    try {
+      await goToLesson(c.id, c.nextLessonId);
+    } catch (e) {
+      setActionError(
+        isAppError(e) ? e.message : "The lesson could not be opened. Please try again.",
+      );
+    }
+  });
 
   return (
     <Screen>
       <BackButton onPress={goHome} />
       <CoverBlock tone={c.coverTone} height={200} thumbnailUrl={c.thumbnailUrl} />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+        <View
+          style={{
+            backgroundColor: colors.blueTint,
+            borderRadius: radii.pill,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+          }}
+        >
+          <Text variant="caption" tone="link">
+            {c.categoryName ?? "CHARTNEXA ACADEMY"}
+          </Text>
+        </View>
+      </View>
       <Text variant="title" accessibilityRole="header">
         {c.title}
       </Text>
@@ -131,6 +153,7 @@ function CourseDetails({
           justifyContent: "space-between",
           alignItems: "center",
           gap: spacing.sm,
+          flexWrap: "wrap",
         }}
       >
         <Text tone="muted">
@@ -142,9 +165,62 @@ function CourseDetails({
         </Text>
       </View>
       <RatingSummary rating={c.rating} testID="course-rating" />
+      <View
+        testID="course-at-a-glance"
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: spacing.md,
+          padding: spacing.md,
+          borderRadius: radii.card,
+          backgroundColor: colors.surface,
+          borderWidth: 2,
+          borderBottomWidth: 5,
+          borderColor: neutrals.divider,
+        }}
+      >
+        <View style={{ flex: 1, minWidth: 100, gap: spacing.xs }}>
+          <Feather name="book-open" size={20} color={colors.blue} accessible={false} />
+          <Text variant="heading">{c.lessonCount}</Text>
+          <Text variant="caption" tone="muted">
+            {c.lessonCount === 1 ? "Lesson" : "Lessons"}
+          </Text>
+        </View>
+        <View style={{ flex: 1, minWidth: 100, gap: spacing.xs }}>
+          <Feather name="play-circle" size={20} color={colors.blue} accessible={false} />
+          <Text variant="heading">{c.previewCount}</Text>
+          <Text variant="caption" tone="muted">
+            {c.previewCount === 1 ? "Free preview" : "Free previews"}
+          </Text>
+        </View>
+      </View>
 
       {c.enrolled ? (
-        <View style={{ gap: spacing.md }}>
+        <View
+          style={{
+            gap: spacing.md,
+            padding: spacing.lg,
+            borderRadius: radii.card,
+            backgroundColor: colors.blueTint,
+            borderWidth: 2,
+            borderBottomWidth: 5,
+            borderColor: colors.blue,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+            {c.progress && c.progress.total > 0 ? (
+              <ProgressRing
+                completed={c.progress.completed}
+                total={c.progress.total}
+                size={64}
+                stroke={7}
+                testID="course-progress-ring"
+              />
+            ) : null}
+            <Text variant="heading" style={{ flex: 1 }}>
+              Your next chapter
+            </Text>
+          </View>
           <View
             accessible
             accessibilityLabel="You are enrolled in this course"
@@ -179,15 +255,27 @@ function CourseDetails({
               testID="course-progress"
             />
           ) : null}
+          {next ? <Text tone="muted">Up next: {next.title}</Text> : null}
+          {actionError ? <Banner kind="error" message={actionError} /> : null}
           {c.progress && c.progress.total > 0 ? (
             <Button
               label={c.nextLessonId ? "Continue" : "Review course"}
-              onPress={() => void goToLesson(c.id, c.nextLessonId)}
+              loading={openingLesson}
+              onPress={() => void continueLesson()}
             />
           ) : null}
         </View>
       ) : (
-        <View style={{ gap: spacing.sm }}>
+        <View
+          style={{
+            gap: spacing.md,
+            padding: spacing.lg,
+            borderRadius: radii.card,
+            backgroundColor: colors.blueTint,
+          }}
+        >
+          <Text variant="heading">Start exploring this course</Text>
+          {preview ? <Text tone="muted">Try “{preview.title}” before you decide.</Text> : null}
           <BuySection courseId={c.id} priceCents={c.priceCents} />
           {preview ? (
             <Button
@@ -199,10 +287,23 @@ function CourseDetails({
         </View>
       )}
 
+      {outline.isError ? (
+        <View style={{ gap: spacing.sm }} testID="course-outline-error">
+          <Text tone="muted">Course topics and previews could not be loaded.</Text>
+          <Button
+            label="Retry course content"
+            variant="secondary"
+            onPress={() => void outline.refetch()}
+          />
+        </View>
+      ) : null}
       <TabBar tabs={TABS} value={tab} onChange={setTab} />
 
       {tab === "overview" ? (
         <View style={{ gap: spacing.lg }} testID="panel-overview">
+          <Text variant="heading" accessibilityRole="header">
+            About this course
+          </Text>
           {c.description ? (
             <Text>{c.description}</Text>
           ) : (
@@ -211,7 +312,9 @@ function CourseDetails({
           {c.enrolled ? <LiveClassesSection courseId={c.id} /> : null}
         </View>
       ) : null}
-      {tab === "learn" ? <LearnPanel outline={outline.data} loading={outline.isPending} /> : null}
+      {tab === "learn" && !outline.isError ? (
+        <LearnPanel outline={outline.data} loading={outline.isPending} />
+      ) : null}
       {tab === "curriculum" ? <LessonOutlineSection courseId={c.id} enrolled={c.enrolled} /> : null}
       {tab === "reviews" ? (
         <ReviewsSection courseId={c.id} enrolled={c.enrolled} rating={c.rating} />

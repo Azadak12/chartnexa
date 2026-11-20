@@ -35,7 +35,7 @@ export function ProfileMenuRow({
         gap: spacing.md,
         minHeight: 52,
         paddingHorizontal: spacing.md,
-        backgroundColor: pressed ? neutrals.surface : colors.white,
+        backgroundColor: pressed ? neutrals.surface : colors.surface,
         borderBottomWidth: last ? 0 : 1,
         borderBottomColor: neutrals.divider,
       })}
@@ -47,7 +47,7 @@ export function ProfileMenuRow({
         accessible={false}
       />
       <Text
-        style={{ flex: 1, color: destructive ? status.error : colors.black }}
+        style={{ flex: 1, color: destructive ? status.error : colors.ink }}
         variant="bodyStrong"
       >
         {label}
@@ -82,7 +82,7 @@ export function MenuGroup({ title, children }: { title: string; children: React.
           borderWidth: 1,
           borderColor: neutrals.divider,
           overflow: "hidden",
-          backgroundColor: colors.white,
+          backgroundColor: colors.surface,
         }}
       >
         {children}

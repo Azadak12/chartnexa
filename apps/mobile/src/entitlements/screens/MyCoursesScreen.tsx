@@ -1,16 +1,18 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import type { MyCourse } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { ProgressBar, progressLabel } from "../../progress/ProgressBar";
 import { LEVEL_LABEL } from "../../courses/CourseCard";
 import { CourseThumbnail } from "../../kit/CourseThumbnail";
-import { useRestorableScroll } from "../../navigation/screen-memory";
+import { useScreenMemoryState, useRestorableScroll } from "../../navigation/screen-memory";
 import { StateView } from "../../state/StateView";
 import { colors, neutrals, radii, spacing } from "../../theme";
-import { Chip, Screen, Skeleton, Text } from "../../ui";
+import { Button, Chip, Screen, Skeleton, Text } from "../../ui";
+import { ResumeLearning } from "../../progress/ResumeLearning";
+import { CourseLearningAction } from "../../progress/CourseLearningAction";
+import { ProgressRing } from "../../kit/ProgressRing";
 import { myCoursesApi } from "../entitlement-api";
 
 type Filter = "all" | "in_progress" | "completed";
@@ -33,7 +35,7 @@ export function MyCoursesScreen() {
     queryFn: ({ pageParam }) => myCoursesApi.list(pageParam),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useScreenMemoryState<Filter>("my-courses:filter", "all");
   const all = query.data?.pages.flatMap((p) => p.items) ?? [];
   const items = all.filter((c) =>
     filter === "all" ? true : filter === "completed" ? isDone(c) : !isDone(c),
@@ -47,6 +49,8 @@ export function MyCoursesScreen() {
       <Text variant="title" accessibilityRole="header">
         My Learning
       </Text>
+      <Text tone="muted">Small steps. Lasting knowledge.</Text>
+      <ResumeLearning journey />
       {all.length > 0 ? (
         <>
           <View
@@ -55,17 +59,24 @@ export function MyCoursesScreen() {
             accessibilityLabel={`${all.length} ${all.length === 1 ? "course" : "courses"}, ${completedCourses} completed, ${lessonsDone} of ${lessonsTotal} lessons done${query.hasNextPage ? " so far" : ""}`}
             style={styles.summary}
           >
-            <Text variant="caption" tone="muted">
-              Your progress
-            </Text>
-            <Text variant="heading">
-              {lessonsDone} of {lessonsTotal} lessons done
-            </Text>
-            <Text variant="caption" tone="muted">
-              {completedCourses} of {all.length} {all.length === 1 ? "course" : "courses"} completed
-              {query.hasNextPage ? " (loaded so far)" : ""}
-            </Text>
+            <ProgressRing completed={lessonsDone} total={lessonsTotal} size={64} stroke={6} />
+            <View style={{ flex: 1, gap: spacing.xs }}>
+              <Text variant="caption" tone="muted">
+                Your progress
+              </Text>
+              <Text variant="heading">
+                {lessonsDone} of {lessonsTotal} lessons done
+              </Text>
+              <Text variant="caption" tone="muted">
+                {completedCourses} of {all.length} {all.length === 1 ? "course" : "courses"}{" "}
+                completed
+                {query.hasNextPage ? " (loaded so far)" : ""}
+              </Text>
+            </View>
           </View>
+          <Text variant="heading" accessibilityRole="header">
+            Your courses
+          </Text>
           <View style={{ flexDirection: "row", gap: spacing.sm, flexWrap: "wrap" }}>
             {FILTERS.map((f) => (
               <Chip
@@ -128,45 +139,63 @@ export function MyCoursesScreen() {
         keyExtractor={(c) => c.id}
         ListHeaderComponent={header}
         ListEmptyComponent={empty}
-        ListFooterComponent={query.isFetchingNextPage ? <Skeleton height={80} /> : undefined}
+        ListFooterComponent={
+          query.isFetchingNextPage ? (
+            <Skeleton height={80} />
+          ) : query.isFetchNextPageError ? (
+            <Button
+              label="Retry more courses"
+              variant="secondary"
+              onPress={() => void query.fetchNextPage()}
+            />
+          ) : undefined
+        }
         contentContainerStyle={{ padding: spacing.lg }}
         {...scroll.props}
         onEndReached={() => {
-          if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+          if (query.hasNextPage && !query.isFetchingNextPage && !query.isFetchNextPageError)
+            void query.fetchNextPage();
         }}
         renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${item.title}, ${LEVEL_LABEL[item.level]}${item.onSale ? "" : ", not currently on sale"}, ${progressLabel(item.progress.completed, item.progress.total)}`}
-            onPress={() => router.push(`/course/${item.id}`)}
-            style={styles.card}
-            testID={`my-course-${item.id}`}
-          >
-            <View style={{ flexDirection: "row", gap: spacing.md }}>
-              <CourseThumbnail tone={item.coverTone} thumbnailUrl={item.thumbnailUrl} width={104} />
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="bodyStrong" numberOfLines={2}>
-                  {item.title}
-                </Text>
-                <Text variant="caption" tone="muted">
-                  {LEVEL_LABEL[item.level]} · {stateOf(item)}
-                </Text>
-                {item.onSale ? null : (
-                  <Text variant="caption" tone="warning" testID={`not-on-sale-${item.id}`}>
-                    Not currently on sale
+          <View style={styles.card}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${item.title}, ${LEVEL_LABEL[item.level]}${item.onSale ? "" : ", not currently on sale"}, ${progressLabel(item.progress.completed, item.progress.total)}`}
+              onPress={() => router.push(`/course/${item.id}`)}
+              testID={`my-course-${item.id}`}
+            >
+              <View style={{ flexDirection: "row", gap: spacing.md }}>
+                <CourseThumbnail
+                  tone={item.coverTone}
+                  thumbnailUrl={item.thumbnailUrl}
+                  width={104}
+                />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong" numberOfLines={2}>
+                    {item.title}
                   </Text>
-                )}
+                  <Text variant="caption" tone="muted">
+                    {LEVEL_LABEL[item.level]} · {stateOf(item)}
+                  </Text>
+                  {item.onSale ? null : (
+                    <Text variant="caption" tone="warning" testID={`not-on-sale-${item.id}`}>
+                      Not currently on sale
+                    </Text>
+                  )}
+                </View>
               </View>
-            </View>
+            </Pressable>
             <ProgressBar
               completed={item.progress.completed}
               total={item.progress.total}
               testID={`progress-${item.id}`}
             />
-            <Text variant="caption" tone="link">
-              {isDone(item) ? "Review course" : item.progress.completed > 0 ? "Continue" : "Start"}
-            </Text>
-          </Pressable>
+            <CourseLearningAction
+              courseId={item.id}
+              completed={item.progress.completed}
+              total={item.progress.total}
+            />
+          </View>
         )}
       />
     </Screen>
@@ -176,6 +205,8 @@ export function MyCoursesScreen() {
 const styles = StyleSheet.create({
   summary: {
     padding: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: radii.card,
     backgroundColor: neutrals.surface,
     borderWidth: 1,
@@ -183,7 +214,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: neutrals.divider,

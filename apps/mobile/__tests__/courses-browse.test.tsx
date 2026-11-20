@@ -217,3 +217,28 @@ describe("course page", () => {
     expect(await screen.findByRole("header", { name: "Price Action Basics" })).toBeTruthy();
   });
 });
+
+describe("discovery quick filters", () => {
+  it("keeps a level selected while a pending search debounce completes", async () => {
+    await renderRouter(app, { initialUrl: "/explore" });
+    await screen.findByTestId("course-c1");
+    await type("Search courses", "candles");
+    await fireEvent.press(screen.getByRole("button", { name: "Advanced" }));
+    await wait(350);
+    await waitFor(() => expect(api.list).toHaveBeenCalledWith({ q: "candles", level: "advanced" }));
+    expect(screen.getByRole("button", { name: "Advanced" }).props.accessibilityState.selected).toBe(
+      true,
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Clear all" }));
+    expect(screen.getByLabelText("Search courses").props.value).toBe("");
+    expect(
+      screen.getByRole("button", { name: "All levels" }).props.accessibilityState.selected,
+    ).toBe(true);
+  });
+  it("shows course summaries on discovery cards", async () => {
+    await renderRouter(app, { initialUrl: "/explore" });
+    expect(await screen.findByText("Summary of course 1")).toBeTruthy();
+    await fireEvent.press(screen.getByTestId("course-c1"));
+    expect(screen).toHavePathname("/course/c1");
+  });
+});

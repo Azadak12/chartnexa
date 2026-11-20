@@ -9,12 +9,14 @@ import { categoryApi } from "../categories/category-api";
 import { courseApi } from "../courses/course-api";
 import { FeaturedCourseCard } from "../kit/CourseCards";
 import { AppHeader } from "../kit/AppHeader";
-import { CourseThumbnail } from "../kit/CourseThumbnail";
 import { LoadingSkeleton } from "../kit/Feedback";
-import { ProgressRing } from "../kit/ProgressRing";
 import { MarketPreviewCard } from "../lab/MarketPreviewCard";
 import { NextLiveCard } from "../live/NextLiveCard";
-import { continueApi } from "../progress/continue-api";
+import { ResumeLearning } from "../progress/ResumeLearning";
+import { myCoursesApi } from "../entitlements/entitlement-api";
+import { ProgressRing } from "../kit/ProgressRing";
+import { Reveal } from "../kit/Reveal";
+import { PressableCard } from "../kit/PressableCard";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { Screen, Text } from "../ui";
 
@@ -44,17 +46,19 @@ export function HomeScreen() {
     queryFn: announcementApi.unread,
     staleTime: 0,
   });
-  const resume = useQuery({
-    queryKey: ["continue-learning"],
-    queryFn: continueApi.get,
-    staleTime: 0,
-  });
   const featured = useQuery({
     queryKey: ["featured"],
     queryFn: () => courseApi.list({ limit: 8 }),
   });
   const categories = useQuery({ queryKey: ["categories"], queryFn: categoryApi.list });
-  const r = resume.data;
+  // Real totals from the student's own courses; hidden when none exist or the call fails.
+  const mine = useQuery({ queryKey: ["my-courses", "home"], queryFn: () => myCoursesApi.list() });
+  const owned = mine.data?.items ?? [];
+  const lessonsDone = owned.reduce((n, c) => n + c.progress.completed, 0);
+  const lessonsTotal = owned.reduce((n, c) => n + c.progress.total, 0);
+  const coursesDone = owned.filter(
+    (c) => c.progress.total > 0 && c.progress.completed >= c.progress.total,
+  ).length;
   const cats = (categories.data ?? []).filter((c) => c.courseCount > 0);
 
   return (
@@ -67,56 +71,50 @@ export function HomeScreen() {
       />
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
-      <MarketPreviewCard />
-
-      {r ? (
-        <View style={{ gap: spacing.sm }} testID="continue-learning">
-          <Text variant="heading" accessibilityRole="header">
-            Continue learning
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Continue ${r.courseTitle}: ${r.nextLessonTitle}. ${Math.round((r.completed / Math.max(1, r.total)) * 100)} percent complete`}
-            onPress={() => router.push(`/course/${r.courseId}/lesson/${r.nextLessonId}`)}
-            style={({ pressed }) => ({
+      <Reveal index={0}>
+        <ResumeLearning />
+      </Reveal>
+      {lessonsTotal > 0 ? (
+        <Reveal index={1}>
+          <PressableCard
+            testID="home-progress"
+            accessibilityLabel={`Your progress: ${lessonsDone} of ${lessonsTotal} lessons done, ${coursesDone} of ${owned.length} courses completed. Opens My Learning`}
+            onPress={() => router.push("/courses")}
+            style={{
               flexDirection: "row",
-              gap: spacing.md,
               alignItems: "center",
+              gap: spacing.md,
               padding: spacing.md,
               borderRadius: radii.card,
-              borderWidth: 1,
+              backgroundColor: colors.surface,
+              borderWidth: 2,
               borderColor: neutrals.divider,
-              backgroundColor: pressed ? neutrals.surface : colors.white,
-            })}
+              borderBottomWidth: 5,
+            }}
           >
-            <CourseThumbnail
-              tone={
-                (["blue", "black", "tint"].includes(r.coverTone) ? r.coverTone : "blue") as "blue"
-              }
-              thumbnailUrl={r.thumbnailUrl}
-              width={96}
+            <ProgressRing
+              completed={lessonsDone}
+              total={lessonsTotal}
+              size={68}
+              stroke={7}
+              testID="home-progress-ring"
             />
             <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong" numberOfLines={2}>
-                {r.courseTitle}
+              <Text variant="caption" tone="muted">
+                YOUR PROGRESS
               </Text>
-              <Text variant="caption" tone="muted" numberOfLines={2}>
-                Next: {r.nextLessonTitle}
-              </Text>
-              <Text variant="caption" tone="link">
-                Continue
+              <Text variant="heading">{lessonsDone} lessons done</Text>
+              <Text variant="caption" tone="muted">
+                {coursesDone} of {owned.length} {owned.length === 1 ? "course" : "courses"}{" "}
+                completed
               </Text>
             </View>
-            <ProgressRing
-              completed={r.completed}
-              total={r.total}
-              size={52}
-              stroke={6}
-              testID="continue-ring"
-            />
-          </Pressable>
-        </View>
+            <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
+          </PressableCard>
+        </Reveal>
       ) : null}
+      <NextLiveCard />
+      <MarketPreviewCard />
 
       <View style={{ gap: spacing.sm }}>
         <View
@@ -162,33 +160,53 @@ export function HomeScreen() {
           <Text variant="heading" accessibilityRole="header">
             Trading Categories
           </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
             {cats.map((c) => (
-              <Pressable
-                key={c.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${c.name}, ${c.courseCount} ${c.courseCount === 1 ? "course" : "courses"}`}
-                onPress={() => router.push({ pathname: "/explore", params: { category: c.id } })}
-                testID={`category-${c.id}`}
-                style={({ pressed }) => ({
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: spacing.sm,
-                  minHeight: 48,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: radii.control,
-                  backgroundColor: pressed ? neutrals.divider : colors.blueTint,
-                })}
-              >
-                <Feather name={iconFor(c.name)} size={18} color={colors.blue} accessible={false} />
-                <Text variant="bodyStrong">{c.name}</Text>
-              </Pressable>
+              <View key={c.id} style={{ width: "47.5%", flexGrow: 1 }}>
+                <PressableCard
+                  accessibilityLabel={`${c.name}, ${c.courseCount} ${c.courseCount === 1 ? "course" : "courses"}`}
+                  onPress={() => router.push({ pathname: "/explore", params: { category: c.id } })}
+                  testID={`category-${c.id}`}
+                  style={{
+                    gap: spacing.sm,
+                    minHeight: 112,
+                    padding: spacing.md,
+                    borderRadius: radii.card,
+                    backgroundColor: colors.blueTint,
+                    borderWidth: 2,
+                    borderColor: colors.blue,
+                    borderBottomWidth: 5,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: radii.pill,
+                      backgroundColor: colors.blue,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Feather
+                      name={iconFor(c.name)}
+                      size={22}
+                      color={colors.onBlue}
+                      accessible={false}
+                    />
+                  </View>
+                  <Text variant="bodyStrong" numberOfLines={2}>
+                    {c.name}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {c.courseCount} {c.courseCount === 1 ? "course" : "courses"}
+                  </Text>
+                </PressableCard>
+              </View>
             ))}
           </View>
         </View>
       ) : null}
-
-      <NextLiveCard />
     </Screen>
   );
 }

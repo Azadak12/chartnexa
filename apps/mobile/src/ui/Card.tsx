@@ -12,7 +12,7 @@ export function Card({ children, style, ...rest }: ViewProps & { children: React
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: neutrals.divider,

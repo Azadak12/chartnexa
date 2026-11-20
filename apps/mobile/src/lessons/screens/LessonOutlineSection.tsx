@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: neutrals.divider,
     overflow: "hidden",
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
 });
 

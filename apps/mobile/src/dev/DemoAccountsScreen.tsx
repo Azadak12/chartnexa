@@ -64,7 +64,7 @@ export function DemoAccountsScreen() {
               borderRadius: radii.card,
               borderWidth: 1,
               borderColor: current ? colors.blue : neutrals.divider,
-              backgroundColor: colors.white,
+              backgroundColor: colors.surface,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>

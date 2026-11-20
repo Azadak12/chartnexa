@@ -1,37 +1,49 @@
-/** The three brand hues plus the blue tint (docs/04_BRAND_AND_UX.md). */
+/**
+ * Dark-first fintech palette adopted from the client's trading-academy reference (owner decision,
+ * 2026-11-21; supersedes the white/black/blue kit in docs/04): deep navy surfaces, electric blue
+ * primary, gold for rewards. `surface` is the card colour, `page` the screen behind it, `ink` the
+ * primary text, `onBlue` the dark text and icons placed on a blue or gold fill.
+ */
 export const colors = {
-  white: "#FFFFFF",
-  black: "#111111",
-  blue: "#2563EB",
-  blueTint: "#EFF6FF",
+  page: "#070B14",
+  surface: "#0F1628",
+  ink: "#E8EEFB",
+  blue: "#3D8BFF",
+  blueTint: "#13203D",
+  onBlue: "#0B1020",
+  gold: "#F5C542",
+  goldTint: "#33270B",
 } as const;
 
-/** Neutrals derived for borders, surfaces and muted text. */
+/** Neutrals derived for borders, raised surfaces and muted text. */
 export const neutrals = {
-  surface: "#F8FAFC",
-  /** Decorative dividers; not used as the only boundary of a control. */
-  divider: "#E2E8F0",
-  /** Control borders: at least 3:1 on white. */
-  border: "#7A8394",
-  /** Secondary text: at least 4.5:1 on white and on the tint. */
-  muted: "#475467",
+  /** A raised surface: inputs, secondary panels. */
+  surface: "#141D33",
+  /** Decorative dividers and card edges; not used as the only boundary of a control. */
+  divider: "#1F2B47",
+  /** Control borders: at least 3:1 on the surface. */
+  border: "#6B7BA3",
+  /** Secondary text: at least 4.5:1 on the page, the surface and the tint. */
+  muted: "#9AA8C7",
   /** Disabled controls are exempt from contrast rules but must still be legible. */
-  disabledText: "#98A2B3",
-  disabledFill: "#F2F4F7",
-  /** Dimmed backdrop behind sheets and dialogs (the brand black at 45 percent). */
-  scrim: "rgba(17, 17, 17, 0.45)",
+  disabledText: "#6B7A9E",
+  disabledFill: "#141D33",
+  /** Dimmed backdrop behind sheets and dialogs. */
+  scrim: "rgba(3, 6, 12, 0.7)",
 } as const;
 
 /** Functional status colors. Always shown with an icon or text label, never alone. */
 export const status = {
-  error: "#B42318",
-  errorTint: "#FEF3F2",
-  success: "#067647",
-  successTint: "#ECFDF3",
-  warning: "#B54708",
-  warningTint: "#FFFAEB",
-  /** Pressed state of the primary blue. */
-  bluePressed: "#1D4ED8",
+  error: "#F87171",
+  errorTint: "#3A1620",
+  success: "#4ADE80",
+  successTint: "#10301E",
+  warning: "#F5C542",
+  warningTint: "#33270B",
+  /** Pressed state of the primary blue (lighter: the screen is dark). */
+  bluePressed: "#6FB0FF",
+  /** The darker lower edge of raised blue buttons and path nodes. */
+  blueLip: "#2563EB",
 } as const;
 
 /**
@@ -59,10 +71,10 @@ export const market = {
  * always shown with an icon and words, never alone. Sky is the secondary accent next to brand blue.
  */
 export const accents = {
-  blue: { ink: "#2563EB", tint: "#EFF6FF" },
-  sky: { ink: "#0369A1", tint: "#E0F2FE" },
-  emerald: { ink: "#047857", tint: "#D1FAE5" },
-  amber: { ink: "#B45309", tint: "#FEF3C7" },
-  purple: { ink: "#6D28D9", tint: "#EDE9FE" },
+  blue: { ink: "#8AB8FF", tint: "#13203D" },
+  sky: { ink: "#7DD3FC", tint: "#0C2A3D" },
+  emerald: { ink: "#6EE7B7", tint: "#0F2F25" },
+  amber: { ink: "#FCD34D", tint: "#33270B" },
+  purple: { ink: "#C4B5FD", tint: "#271B4D" },
 } as const;
 export type AccentName = keyof typeof accents;

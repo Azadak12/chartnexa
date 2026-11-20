@@ -47,7 +47,7 @@ export function NativePlayer({
       fullscreenOptions={{ enable: true }}
       contentFit="contain"
       accessibilityLabel={label}
-      style={{ width: "100%", aspectRatio: 16 / 9, backgroundColor: colors.black }}
+      style={{ width: "100%", aspectRatio: 16 / 9, backgroundColor: colors.ink }}
     />
   );
 }

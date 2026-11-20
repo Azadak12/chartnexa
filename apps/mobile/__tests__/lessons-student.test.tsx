@@ -1,3 +1,4 @@
+import { within } from "@testing-library/react-native";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 import * as SecureStore from "expo-secure-store";
 import { courseApi } from "../src/courses/course-api";
@@ -82,7 +83,9 @@ describe("curriculum on the course page", () => {
     expect(lessons.outline).toHaveBeenCalledWith("c1");
     expect(screen.getByLabelText("Lesson 1: What is a candle?, free preview")).toBeTruthy();
     expect(screen.getByLabelText("Lesson 2: Support and resistance, locked")).toBeTruthy();
-    expect(screen.getAllByText("Free preview")).toHaveLength(1);
+    expect(within(screen.getByTestId("lesson-outline")).getAllByText("Free preview")).toHaveLength(
+      1,
+    );
     expect(screen.getAllByText("Locked")).toHaveLength(2);
   });
 

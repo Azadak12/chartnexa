@@ -40,5 +40,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   on: { backgroundColor: colors.blue, borderColor: colors.blue },
-  off: { backgroundColor: colors.white, borderColor: neutrals.border },
+  off: { backgroundColor: colors.surface, borderColor: neutrals.border },
 });

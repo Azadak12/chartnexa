@@ -78,7 +78,7 @@ export function buildConfig(env: Record<string, string | undefined>): ExpoConfig
     scheme: v.scheme,
     version: "0.1.0",
     orientation: "default",
-    userInterfaceStyle: "light",
+    userInterfaceStyle: "dark",
     // 1024x1024, no transparency (App Store requirement). Made by scripts/make-icons.py.
     icon: "./assets/icon.png",
     platforms: ["ios", "android"],
@@ -115,7 +115,7 @@ export function buildConfig(env: Record<string, string | undefined>): ExpoConfig
       "expo-status-bar",
       [
         "expo-splash-screen",
-        { image: "./assets/splash-icon.png", imageWidth: 160, backgroundColor: "#FFFFFF" },
+        { image: "./assets/splash-icon.png", imageWidth: 160, backgroundColor: "#070B14" },
       ],
       "expo-secure-store",
       "expo-video",

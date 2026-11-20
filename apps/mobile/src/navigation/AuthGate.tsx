@@ -19,7 +19,7 @@ export function GateLoading() {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
       }}
     >
       <ActivityIndicator color={colors.blue} />
@@ -38,7 +38,7 @@ function GateOverlay() {
         right: 0,
         bottom: 0,
         left: 0,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
       }}
     >
       <GateLoading />

@@ -76,9 +76,9 @@ export const CourseManageCard = memo(function CourseManageCard({
         borderRadius: radii.card,
         borderWidth: 1,
         borderColor: neutrals.divider,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
         overflow: "hidden",
-        shadowColor: colors.black,
+        shadowColor: colors.ink,
         shadowOpacity: 0.06,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
@@ -95,7 +95,7 @@ export const CourseManageCard = memo(function CourseManageCard({
           alignItems: "flex-start",
           gap: spacing.md,
           padding: spacing.sm,
-          backgroundColor: colors.white,
+          backgroundColor: colors.surface,
         }}
         pressedStyle={{ backgroundColor: neutrals.surface }}
       >
@@ -150,7 +150,7 @@ export const CourseManageCard = memo(function CourseManageCard({
                   minHeight: 44,
                   paddingHorizontal: spacing.sm,
                   borderRadius: radii.control,
-                  backgroundColor: colors.white,
+                  backgroundColor: colors.surface,
                 }}
               >
                 <Feather name={a.icon} size={16} color={accents.blue.ink} accessible={false} />

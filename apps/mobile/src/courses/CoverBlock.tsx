@@ -6,8 +6,8 @@ import { apiBaseUrl } from "../api/client";
 import { colors, neutrals, radii } from "../theme";
 
 const tones: Record<CourseTone, { bg: string; fg: string }> = {
-  blue: { bg: colors.blue, fg: colors.white },
-  black: { bg: colors.black, fg: colors.white },
+  blue: { bg: colors.blue, fg: colors.onBlue },
+  black: { bg: colors.ink, fg: colors.onBlue },
   tint: { bg: colors.blueTint, fg: colors.blue },
 };
 

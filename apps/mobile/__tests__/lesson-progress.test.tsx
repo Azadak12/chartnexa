@@ -137,6 +137,7 @@ describe("marking a lesson in the reader", () => {
     await renderRouter(app, { initialUrl: "/course/c1/lesson/l1" });
     await screen.findByText("Paragraph one.");
     expect(screen.queryByTestId("completion-control")).toBeNull();
+    expect(screen.queryByTestId("lesson-completion-panel")).toBeNull();
     expect(api.read).not.toHaveBeenCalled();
   });
 
@@ -150,6 +151,7 @@ describe("marking a lesson in the reader", () => {
     await press("Mark as complete");
     expect(await screen.findByTestId("lesson-completed")).toBeTruthy();
     expect(screen.getByText("✓ Completed")).toBeTruthy();
+    expect(screen.getByTestId("lesson-completion-panel")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Mark as not complete" })).toBeTruthy();
     expect(api.mark).toHaveBeenCalledWith("c1", "l2");
     expect(announce).toHaveBeenCalledWith("Lesson marked complete");
@@ -164,6 +166,7 @@ describe("marking a lesson in the reader", () => {
     expect(await screen.findByRole("button", { name: "Mark as complete" })).toBeTruthy();
     expect(screen.queryByTestId("lesson-completed")).toBeNull();
     expect(api.unmark).toHaveBeenCalledWith("c1", "l2");
+    expect(screen.queryByTestId("lesson-completion-panel")).toBeNull();
   });
 
   it("sends one request when the button is pressed twice quickly", async () => {

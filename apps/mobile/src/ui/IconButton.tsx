@@ -41,7 +41,7 @@ export function IconButton({
       <Feather
         name={icon}
         size={size}
-        color={disabled ? colors.black : colors.blue}
+        color={disabled ? colors.ink : colors.blue}
         accessible={false}
       />
     </Pressable>

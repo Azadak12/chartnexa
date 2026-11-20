@@ -37,13 +37,13 @@ describe("Text", () => {
 });
 
 describe("Screen", () => {
-  it("has a white background", async () => {
+  it("has the dark page background", async () => {
     await render(
       <Screen>
         <Text>x</Text>
       </Screen>,
     );
-    expect(flat(screen.getByTestId("screen")).backgroundColor).toBe(colors.white);
+    expect(flat(screen.getByTestId("screen")).backgroundColor).toBe(colors.page);
   });
 });
 

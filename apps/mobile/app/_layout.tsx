@@ -46,7 +46,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={client}>
         <OverlayProvider>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           <AuthGate>
             <Stack screenOptions={{ headerShown: false }} />
           </AuthGate>

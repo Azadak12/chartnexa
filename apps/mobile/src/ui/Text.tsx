@@ -1,17 +1,27 @@
 import { Text as RNText, type TextProps as RNTextProps } from "react-native";
-import { colors, fontFamilies, MAX_FONT_SCALE, neutrals, status, typeScale } from "../theme";
+import {
+  colors,
+  fontFamilies,
+  market,
+  MAX_FONT_SCALE,
+  neutrals,
+  status,
+  typeScale,
+} from "../theme";
 import type { TextVariant } from "@chartnexa/design-tokens";
 
-export type TextTone = "body" | "muted" | "link" | "error" | "success" | "warning" | "onBlue";
+export type TextTone =
+  "body" | "muted" | "link" | "error" | "success" | "warning" | "onBlue" | "onNavy";
 
 const toneColor: Record<TextTone, string> = {
-  body: colors.black,
+  body: colors.ink,
   muted: neutrals.muted,
   link: colors.blue,
   error: status.error,
   success: status.success,
   warning: status.warning,
-  onBlue: colors.white,
+  onBlue: colors.onBlue,
+  onNavy: market.onNavy,
 };
 
 export interface TextProps extends RNTextProps {

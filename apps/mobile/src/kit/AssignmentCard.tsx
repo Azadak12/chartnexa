@@ -35,7 +35,7 @@ export function AssignmentCard({
         borderRadius: radii.card,
         padding: spacing.md,
         gap: spacing.xs,
-        backgroundColor: pressed ? neutrals.surface : colors.white,
+        backgroundColor: pressed ? neutrals.surface : colors.surface,
       })}
     >
       <Text variant="caption" tone="muted">

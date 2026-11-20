@@ -43,7 +43,7 @@ export function ReasonPicker({
                 height: 20,
                 borderRadius: 10,
                 borderWidth: 2,
-                borderColor: on ? colors.blue : colors.black,
+                borderColor: on ? colors.blue : colors.ink,
                 alignItems: "center",
                 justifyContent: "center",
               }}

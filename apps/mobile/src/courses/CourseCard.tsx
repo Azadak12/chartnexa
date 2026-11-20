@@ -60,7 +60,7 @@ export function CourseCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.card,
     borderWidth: 1,
     borderColor: neutrals.divider,

@@ -7,13 +7,14 @@ import { isAppError, messageFor } from "../../api/errors";
 import { shouldRetry } from "../../state/query-client";
 import { useScreenMemoryState } from "../../navigation/screen-memory";
 import { StateView } from "../../state/StateView";
-import { colors, MIN_TOUCH_SIZE, neutrals, spacing } from "../../theme";
+import { colors, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
 import { Banner, Button, Screen, Text, useReducedMotion } from "../../ui";
 import { focusElement } from "../../ui/focus";
 import { courseApi } from "../../courses/course-api";
 import { LessonFilesSection } from "../../resources/LessonFilesSection";
 import { VideoLesson } from "../../video/VideoLesson";
 import { videoApi } from "../../video/video-api";
+import { LessonCompletionPanel } from "../../progress/LessonCompletionPanel";
 import { CompletionControl } from "../../progress/CompletionControl";
 import { progressApi } from "../../progress/progress-api";
 import { lessonApi } from "../lesson-api";
@@ -178,18 +179,38 @@ export function LessonReaderScreen() {
             accessibilityRole="progressbar"
             accessibilityLabel={`Step ${step + 1} of ${steps.length}`}
             accessibilityValue={{ min: 1, max: steps.length, now: step + 1 }}
-            style={{ height: 4, borderRadius: 2, backgroundColor: neutrals.divider }}
+            style={{ flexDirection: "row", gap: 4 }}
           >
-            <View
-              style={{
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: colors.blue,
-                width: `${((step + 1) / steps.length) * 100}%`,
-              }}
-            />
+            {steps.map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: i <= step ? colors.blue : neutrals.divider,
+                }}
+              />
+            ))}
           </View>
-          <Animated.View style={{ opacity: fade, minHeight: MIN_TOUCH_SIZE }}>
+          <Animated.View
+            style={{
+              opacity: fade,
+              transform: [
+                { translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
+              ],
+              minHeight: MIN_TOUCH_SIZE * 3,
+              padding: spacing.lg,
+              borderRadius: radii.card,
+              backgroundColor: colors.blueTint,
+              borderWidth: 2,
+              borderColor: colors.blue,
+              borderBottomWidth: 5,
+            }}
+          >
+            <Text variant="caption" tone="link" style={{ marginBottom: spacing.md }}>
+              {last ? "LAST BITE · YOU MADE IT" : `BITE ${step + 1} OF ${steps.length}`}
+            </Text>
             <View ref={stepRef} accessible testID="lesson-step" collapsable={false}>
               <Text selectable>{steps[step]}</Text>
             </View>
@@ -243,6 +264,13 @@ export function LessonReaderScreen() {
         ) : progress.status === "error" ? (
           <Banner kind="error" message="Progress could not be loaded." testID="progress-error" />
         ) : null
+      ) : null}
+      {owner && done && progress.data ? (
+        <LessonCompletionPanel
+          courseId={String(id)}
+          lessonId={String(lessonId)}
+          progress={progress.data}
+        />
       ) : null}
       <LessonNeighbours
         courseId={String(id)}

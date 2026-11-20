@@ -3,6 +3,8 @@
 ## Brand
 Temporary name **ChartNexa Academy**, short **ChartNexa**. Proposed tagline: *Learn the Market. Master the Skills.* Logo direction: open book + stylized candlestick chart; working asset `assets/ChartNexa_Working_Logo.png` is **placeholder** only, not production-validated.
 
+> **Superseded 2026-11-21** (see `docs/10_DECISION_REGISTER.md`): the owner adopted the trading-academy reference design. The app is now dark-first: page `#070B14`, surface `#0F1628`, ink `#E8EEFB`, primary blue `#3D8BFF` with dark `#0B1020` text on it, gold `#F5C542` for rewards. Source of truth for values: `packages/design-tokens/src/colors.ts`. The white/black/blue rules below are historical.
+
 ## Exactly three brand hues
 - **White `#FFFFFF`** — dominant page background and cards.
 - **Black `#111111`** — heading, text, core icons.

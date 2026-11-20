@@ -1,18 +1,19 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Feather } from "@expo/vector-icons";
-import { FlatList, Pressable, View } from "react-native";
+import { FlatList, Pressable, ScrollView, View } from "react-native";
 import type { CourseLevel } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { categoryApi } from "../../categories/category-api";
 import { EmptyState, ErrorState, LoadingSkeleton } from "../../kit/Feedback";
-import { CourseCard } from "../../kit/CourseCards";
+import { DiscoveryCourseCard } from "../../kit/CourseCards";
 import { FilterSheet } from "../../kit/FilterSheet";
+import { Reveal } from "../../kit/Reveal";
 import { SearchBar } from "../../kit/SearchBar";
 import { useRestorableScroll, useScreenMemoryState } from "../../navigation/screen-memory";
-import { colors, neutrals, radii, spacing } from "../../theme";
-import { Screen, Skeleton, Text } from "../../ui";
+import { colors, neutrals, radii, spacing, status } from "../../theme";
+import { Button, Chip, Screen, Skeleton, Text } from "../../ui";
 import { courseApi } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 
@@ -31,7 +32,7 @@ function RemovableChip({ label, onRemove }: { label: string; onRemove: () => voi
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        minHeight: 32,
+        minHeight: 44,
         paddingLeft: spacing.md,
         paddingRight: spacing.sm,
         borderRadius: radii.pill,
@@ -72,11 +73,13 @@ export function ExploreScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.category]);
+  const currentFilters = useRef(filters);
+  currentFilters.current = filters;
   // Search runs shortly after typing stops, not on every key.
   useEffect(() => {
     const t = setTimeout(() => {
       const q = text.trim();
-      if (q !== filters.q) setFilters({ ...filters, q });
+      if (q !== currentFilters.current.q) setFilters({ ...currentFilters.current, q });
     }, SEARCH_DELAY_MS);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,6 +118,35 @@ export function ExploreScreen() {
       <Text variant="title" accessibilityRole="header">
         Explore Courses
       </Text>
+      <View
+        style={{
+          padding: spacing.lg,
+          borderRadius: radii.card,
+          backgroundColor: colors.blue,
+          borderBottomWidth: 5,
+          borderBottomColor: status.bluePressed,
+          gap: spacing.sm,
+        }}
+      >
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: radii.pill,
+            backgroundColor: colors.surface,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Feather name="compass" size={26} color={colors.blue} accessible={false} />
+        </View>
+        <Text variant="heading" tone="onBlue">
+          Find your next skill.
+        </Text>
+        <Text tone="onBlue">
+          Choose a topic. Find your level. Take the next step in your learning.
+        </Text>
+      </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <SearchBar value={text} onChangeText={setText} />
@@ -135,7 +167,7 @@ export function ExploreScreen() {
             borderRadius: radii.control,
             borderWidth: 1,
             borderColor: activeCount > 0 ? colors.blue : neutrals.divider,
-            backgroundColor: activeCount > 0 ? colors.blueTint : colors.white,
+            backgroundColor: activeCount > 0 ? colors.blueTint : colors.surface,
           }}
         >
           <Feather name="sliders" size={18} color={colors.blue} accessible={false} />
@@ -143,6 +175,67 @@ export function ExploreScreen() {
             Filters{activeCount > 0 ? ` · ${activeCount}` : ""}
           </Text>
         </Pressable>
+      </View>
+      <Text variant="bodyStrong">Choose your level</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: spacing.sm, paddingVertical: spacing.xs }}
+      >
+        <Chip
+          label="All levels"
+          selected={level === null}
+          onPress={() => setFilters({ ...filters, level: null })}
+        />
+        {(["beginner", "intermediate", "advanced"] as const).map((value) => (
+          <Chip
+            key={value}
+            label={LEVEL_LABEL[value]}
+            selected={level === value}
+            onPress={() => setFilters({ ...filters, level: value })}
+          />
+        ))}
+      </ScrollView>
+      {withCourses.length > 0 ? (
+        <>
+          <Text variant="bodyStrong">Explore by topic</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: spacing.sm, paddingVertical: spacing.xs }}
+          >
+            <Chip
+              label="All topics"
+              selected={category === null}
+              onPress={() => setFilters({ ...filters, category: null })}
+            />
+            {withCourses.map((topic) => (
+              <Chip
+                key={topic.id}
+                label={topic.name}
+                selected={category === topic.id}
+                onPress={() => setFilters({ ...filters, category: topic.id })}
+              />
+            ))}
+          </ScrollView>
+        </>
+      ) : categories.isError ? (
+        <Button label="Retry topics" variant="tertiary" onPress={() => void categories.refetch()} />
+      ) : null}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: spacing.sm,
+          marginTop: spacing.md,
+        }}
+      >
+        <Text variant="heading" accessibilityRole="header">
+          {filtered ? "Your matches" : "Discover courses"}
+        </Text>
+        {filtered ? <Button label="Clear all" variant="tertiary" onPress={clear} /> : null}
       </View>
       <View
         style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing.sm }}
@@ -210,15 +303,28 @@ export function ExploreScreen() {
         testID="catalog-list"
         data={items}
         keyExtractor={(c) => c.id}
-        renderItem={({ item }) => (
-          <CourseCard course={item} onPress={() => router.push(`/course/${item.id}`)} />
+        renderItem={({ item, index }) => (
+          <Reveal index={Math.min(index, 4)}>
+            <DiscoveryCourseCard course={item} onPress={() => router.push(`/course/${item.id}`)} />
+          </Reveal>
         )}
         ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
         ListHeaderComponent={header}
         ListEmptyComponent={empty ?? undefined}
-        ListFooterComponent={query.isFetchingNextPage ? <Skeleton height={80} /> : undefined}
+        ListFooterComponent={
+          query.isFetchingNextPage ? (
+            <Skeleton height={80} />
+          ) : query.isFetchNextPageError ? (
+            <Button
+              label="Retry more courses"
+              variant="secondary"
+              onPress={() => void query.fetchNextPage()}
+            />
+          ) : undefined
+        }
         onEndReached={() => {
-          if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+          if (query.hasNextPage && !query.isFetchingNextPage && !query.isFetchNextPageError)
+            void query.fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
         {...scroll.props}

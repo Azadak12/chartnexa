@@ -101,7 +101,7 @@ export function RegisterScreen() {
                 width: 48,
                 height: 48,
                 borderRadius: radii.control,
-                backgroundColor: colors.white,
+                backgroundColor: colors.surface,
                 alignItems: "center",
                 justifyContent: "center",
               }}

@@ -18,7 +18,7 @@ export function AppHeader({
   return (
     <View style={{ gap: spacing.xs }} testID="app-header">
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Text variant="subheading" accessibilityRole="header" style={{ color: colors.black }}>
+        <Text variant="subheading" accessibilityRole="header" style={{ color: colors.ink }}>
           ChartNexa{" "}
           <Text variant="subheading" style={{ color: colors.blue }}>
             Academy
@@ -40,7 +40,7 @@ export function AppHeader({
               backgroundColor: neutrals.surface,
             }}
           >
-            <Feather name="bell" size={20} color={colors.black} />
+            <Feather name="bell" size={20} color={colors.ink} />
             {unread > 0 ? (
               <View
                 accessible={false}
@@ -53,7 +53,7 @@ export function AppHeader({
                   borderRadius: 5,
                   backgroundColor: status.error,
                   borderWidth: 2,
-                  borderColor: colors.white,
+                  borderColor: colors.surface,
                 }}
               />
             ) : null}

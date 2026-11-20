@@ -36,7 +36,7 @@ function IconBadge({ icon, accent, size = 40 }: { icon: Icon; accent: AccentName
 
 const VALUE_STYLE = { fontSize: 28, lineHeight: 34 } as const;
 function ValueText({ value, animate, muted }: { value: string; animate: boolean; muted: boolean }) {
-  const style = { ...VALUE_STYLE, color: muted ? neutrals.muted : colors.black };
+  const style = { ...VALUE_STYLE, color: muted ? neutrals.muted : colors.ink };
   return animate ? (
     <CountUp value={value} variant="title" style={style} />
   ) : (
@@ -99,7 +99,7 @@ export function StatTile({
         borderRadius: radii.card,
         borderWidth: 1,
         borderColor: neutrals.divider,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
       }}
       pressedStyle={{ backgroundColor: accents[accent].tint }}
     >
@@ -152,7 +152,7 @@ export function QuickAction({
       }}
     >
       <Feather name={icon} size={22} color={accents[accent].ink} accessible={false} />
-      <Text variant="caption" style={{ textAlign: "center", color: colors.black }}>
+      <Text variant="caption" style={{ textAlign: "center", color: colors.ink }}>
         {label}
       </Text>
     </PressableCard>
@@ -183,7 +183,7 @@ export function NavCard({
         borderRadius: radii.card,
         borderWidth: 1,
         borderColor: neutrals.divider,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surface,
       }}
       pressedStyle={{ backgroundColor: neutrals.surface }}
     >

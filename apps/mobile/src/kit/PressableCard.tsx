@@ -14,6 +14,7 @@ export function PressableCard({
   accessibilityLabel,
   accessibilityHint,
   testID,
+  minHeight,
   accessibilityRole = "button",
 }: {
   children: ReactNode;
@@ -23,6 +24,8 @@ export function PressableCard({
   accessibilityLabel: string;
   accessibilityHint?: string;
   testID?: string;
+  /** Guaranteed tap-target height on the pressable itself. */
+  minHeight?: number;
   accessibilityRole?: "button" | "link";
 }) {
   const reduced = useReducedMotion();
@@ -40,6 +43,7 @@ export function PressableCard({
       onPressIn={() => to(0.98)}
       onPressOut={() => to(1)}
       testID={testID}
+      style={minHeight ? { minHeight } : undefined}
     >
       {({ pressed }) => (
         <Animated.View style={[style, pressed ? pressedStyle : null, { transform: [{ scale }] }]}>
