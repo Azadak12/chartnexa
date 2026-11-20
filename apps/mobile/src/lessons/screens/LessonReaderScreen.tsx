@@ -12,6 +12,7 @@ import { Banner, Button, Screen, Text, useReducedMotion } from "../../ui";
 import { focusElement } from "../../ui/focus";
 import { courseApi } from "../../courses/course-api";
 import { LessonFilesSection } from "../../resources/LessonFilesSection";
+import { ClassroomStage } from "../../classroom/ClassroomStage";
 import { VideoLesson } from "../../video/VideoLesson";
 import { videoApi } from "../../video/video-api";
 import { LessonCompletionPanel } from "../../progress/LessonCompletionPanel";
@@ -166,7 +167,13 @@ export function LessonReaderScreen() {
       <Text variant="title" accessibilityRole="header">
         {l.title}
       </Text>
-      <VideoLesson courseId={String(id)} lessonId={String(lessonId)} />
+      {hasVideo ? (
+        <ClassroomStage courseId={String(id)}>
+          <VideoLesson courseId={String(id)} lessonId={String(lessonId)} />
+        </ClassroomStage>
+      ) : (
+        <VideoLesson courseId={String(id)} lessonId={String(lessonId)} />
+      )}
       {steps.length === 0 ? (
         hasVideo ? null : (
           <Text tone="muted">This lesson has no text yet.</Text>

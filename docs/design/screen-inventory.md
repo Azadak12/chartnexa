@@ -6,7 +6,7 @@ Legend: **Dark theme** = new palette via shared tokens (all screens). **Redesign
 |---|---|---|
 | Student Home | `home` | Redesigned: Market City entrance (provisional art), progress card, categories |
 | Student discovery | `explore`, `course/[id]` | Redesigned: cards, hero, ring (no photoreal covers yet) |
-| Student learning | `courses`, lesson reader, completion | Redesigned: winding path, bite steps, celebration |
+| Student learning | `courses`, lesson reader, completion | Redesigned: winding path, bite steps, celebration; video lessons sit in a classroom stage (placeholder room, 3 camera views, desk buttons) |
 | Lab | `lab` | Redesigned header ("Market Observatory", simulated-data pill); chart and quiz internals unchanged. Interior artwork pending |
 | Assignments | `assignments`, `assignment/[id]` | List redesigned: mission cards (status rail, labelled pill). Detail and submit screens: dark theme only |
 | Live classes | section in course page, `NextLiveCard` | Redesigned row: date block, live pulse (Reduced-Motion safe). Auditorium artwork pending |
