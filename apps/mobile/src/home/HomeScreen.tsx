@@ -12,6 +12,7 @@ import { AppHeader } from "../kit/AppHeader";
 import { LoadingSkeleton } from "../kit/Feedback";
 import { MarketPreviewCard } from "../lab/MarketPreviewCard";
 import { NextLiveCard } from "../live/NextLiveCard";
+import { MarketCity } from "../city/MarketCity";
 import { ResumeLearning } from "../progress/ResumeLearning";
 import { myCoursesApi } from "../entitlements/entitlement-api";
 import { ProgressRing } from "../kit/ProgressRing";
@@ -71,6 +72,7 @@ export function HomeScreen() {
       />
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
+      <MarketCity />
       <Reveal index={0}>
         <ResumeLearning />
       </Reveal>

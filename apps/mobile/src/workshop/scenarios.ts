@@ -114,7 +114,7 @@ export function drillReducer(state: DrillState, action: DrillAction): DrillState
   if (action.type === "select")
     return state.revealed ||
       action.option < 0 ||
-      action.option >= SCENARIOS[state.index].options.length
+      action.option >= (SCENARIOS[state.index]?.options.length ?? 0)
       ? state
       : { ...state, selected: action.option };
   if (action.type === "confirm")

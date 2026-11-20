@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OfflineBanner } from "../state/OfflineBanner";
+import { useLayout } from "../layout/responsive";
 import { colors, spacing } from "../theme";
 
 export interface ScreenProps {
@@ -31,13 +32,31 @@ export function Screen({
   onRefresh,
 }: ScreenProps) {
   const [refreshing, setRefreshing] = useState(false);
+  const layout = useLayout();
   const content = (
     <>
       <OfflineBanner />
       {children}
     </>
   );
-  const body = padded ? <View style={styles.padded}>{content}</View> : content;
+  // Content is centred and capped on tablets instead of stretching a phone layout across them.
+  const body = padded ? (
+    <View
+      style={[
+        styles.padded,
+        {
+          paddingHorizontal: layout.gutter,
+          maxWidth: layout.contentMaxWidth,
+          width: "100%",
+          alignSelf: "center",
+        },
+      ]}
+    >
+      {content}
+    </View>
+  ) : (
+    content
+  );
   const inner = scroll ? (
     <ScrollView
       contentContainerStyle={styles.grow}
