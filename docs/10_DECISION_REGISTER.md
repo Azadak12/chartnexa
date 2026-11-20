@@ -283,3 +283,7 @@ Q23 to Q29 were approved in chat with the proposed answers ("yes, build it with 
 | Q39 | Should lesson videos, PDFs and lesson text, and assignments versus reviewing submissions, become separate permissions? Today `lesson:upload` covers lessons, videos and PDFs, and `assignments:manage` covers creating assignments and reviewing submissions. | Pending; split only if you need a person with one half. |
 | Q40 | Should a person be able to gain a permission individually that their whole role has switched off (Managers, Students)? Today only Instructor grants add permissions; for Managers and Students an individual switch can only turn a role permission off or back on. | Pending. |
 
+
+## Owner decision — 2026-11-20: hosted staff password-only sign-in
+
+The owner explicitly approved email/password-only sign-in for Admin and Manager on the live app. This supersedes the mandatory staff MFA policy for this deployment. `STAFF_MFA_REQUIRED=false` selects this policy in production; omission defaults to MFA. Password verification, rate limits, roles and permissions remain enforced. Existing authenticator records are retained so the policy can be reversed. The local-only `MFA_DEV_BYPASS` restrictions remain unchanged.

@@ -1,6 +1,18 @@
 # Deploying the API on Render with Neon PostgreSQL
 
-Status (2026-11-20): the code and `render.yaml` are ready and the production start-up was checked locally (production mode, hosted adapters, migrations applied, `/health/ready` ok, `/docs` off, `/metrics` protected). **Nothing is deployed**: it needs your Render, Neon and Resend accounts. No account was created and no secret exists in the repository.
+Status (2026-11-20): **Deployed on Render** at `https://chartnexa-1.onrender.com`, with Render PostgreSQL 16 (`chartnexa-db`), rather than Neon. All 23 migrations applied. Readiness and courses return 200, `/docs` returns 404, and unauthenticated `/metrics` returns 401. The service runs in production mode.
+
+### Current pilot deployment
+- Web service: `srv-dc03996i0phs73bi9n30`, Oregon, free instance, root directory `apps/api/`.
+- Database: `dpg-dc03fd3rjlhs7386gk3g-a`, Oregon, free 1 GB instance. **Expires December 20, 2026 unless upgraded.** Free web instances sleep with inactivity.
+- Runtime `DATABASE_URL` uses the external Render database hostname with `sslmode=verify-full`; the short internal hostname failed runtime readiness. No certificate verification was disabled.
+- Free instances do not support pre-deploy commands, so the current start command is `pnpm --filter @chartnexa/api migrate:deploy && pnpm --filter @chartnexa/api start`.
+- Health check: `/health/ready`. Build command is shown below; do not run `corepack enable` on Render's read-only system directory.
+- Resend is connected using `ChartNexa <onboarding@resend.dev>`. **No domain is verified in this Resend account: email is limited to the account owner's address.** Verify a sending domain and change `MAIL_FROM` before enabling general sign-up/password recovery.
+- The hosted database is new and empty. Local development/demo data was not uploaded.
+- Production EAS environment variable `EXPO_PUBLIC_API_BASE_URL` points to this Render service.
+
+The remainder describes the original Neon/paid-Render deployment recipe. It is a reference configuration, not the exact current free pilot setup.
 
 ## What is hosted, and what is not
 | Area | Hosted pilot setting | Notes |
@@ -29,7 +41,7 @@ Use the blueprint (New → Blueprint → this repository, file `render.yaml`) or
 - **Runtime:** Node, repository root, branch `main`, a paid instance (free ones sleep).
 - **Build command:**
 ```bash
-corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @chartnexa/shared-types --filter @chartnexa/design-tokens --filter @chartnexa/api-contracts build && pnpm --filter @chartnexa/api build
+pnpm install --frozen-lockfile --prod=false && pnpm --filter @chartnexa/shared-types --filter @chartnexa/design-tokens --filter @chartnexa/api-contracts build && pnpm --filter @chartnexa/api build
 ```
 - **Pre-deploy command (runs the migrations):** `pnpm --filter @chartnexa/api migrate:deploy`
 - **Start command:** `pnpm --filter @chartnexa/api start`
@@ -48,6 +60,7 @@ corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter 
 | `DATABASE_URL` | Neon **pooled** URL (`...-pooler...?sslmode=require`), secret |
 | `MIGRATION_DATABASE_URL` | Neon **direct** URL (`?sslmode=require`), secret. Used only by `migrate:deploy` |
 | `CURSOR_SECRET`, `ACCESS_TOKEN_SECRET`, `METRICS_TOKEN` | generated (32+ characters) |
+| `STAFF_MFA_REQUIRED` | `false` — owner-approved email/password-only staff sign-in |
 | `MFA_ENCRYPTION_KEY` | the base64 value above, secret |
 | `STORAGE_DRIVER` / `VIDEO_PROVIDER` / `PAYMENT_PROVIDER` | `postgres` / `direct` / `disabled` |
 | `SCANNER` / `FILE_UPLOADS` | `none` / `disabled` (or `clamav` + `CLAMAV_HOST` later) |
@@ -65,7 +78,7 @@ Never set `MFA_DEV_BYPASS` (the server refuses it in production and on any non-l
 A fresh database has no accounts and no demo data. The demo seed refuses to run in production. In the Render **Shell** for the service (or locally with the production variables set):
 1. Create the account in the app (Sign Up) and verify the email.
 2. Run `pnpm --filter @chartnexa/api admin:bootstrap -- --email you@example.com` to make it the first Admin.
-3. The Admin signs in (two-step sign-in is required for staff; set it up in Profile) and invites Instructors and appoints Managers.
+3. The Admin signs in (email/password only when `STAFF_MFA_REQUIRED=false`) and invites Instructors and appoints Managers.
 
 ## Verify the deployment
 Replace `$API` with the Render URL (for example `https://chartnexa-api.onrender.com`):

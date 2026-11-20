@@ -102,6 +102,13 @@ describe("loadConfig", () => {
       ]);
       expect(c.MFA_DEV_BYPASS).toBe(false);
     });
+    it("allows the explicit password-only staff policy in production, defaulting to MFA", () => {
+      expect(loadConfig(hosted).STAFF_MFA_REQUIRED).toBe(true);
+      expect(loadConfig({ ...hosted, STAFF_MFA_REQUIRED: "false" }).STAFF_MFA_REQUIRED).toBe(false);
+      expect(() => loadConfig({ ...hosted, STAFF_MFA_REQUIRED: "no" })).toThrow(
+        /STAFF_MFA_REQUIRED/,
+      );
+    });
     it("still refuses every development adapter and the shortcut in production", () => {
       for (const [k, v] of [
         ["STORAGE_DRIVER", "local"],

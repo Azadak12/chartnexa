@@ -30,6 +30,11 @@ const schema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  /** Owner-controlled staff sign-in policy; false permits email/password sign-in in production. */
+  STAFF_MFA_REQUIRED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
   MFA_CHALLENGE_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(300),
   MFA_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
   RL_MFA_USER_MAX: z.coerce.number().int().min(1).default(10),
