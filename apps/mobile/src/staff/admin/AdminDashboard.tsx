@@ -6,7 +6,7 @@ import { canCreateCourses, canInviteInstructors, canManageCourses } from "../../
 import { CountUp } from "../../kit/CountUp";
 import { Grid } from "../../kit/Grid";
 import { PressableCard } from "../../kit/PressableCard";
-import { accents, colors, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
+import { accents, colors, raised, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
 import type { AccentName } from "@chartnexa/design-tokens";
 import { Screen, Skeleton, Text } from "../../ui";
 import { dashboardGroups, type DashboardTile, type Icon } from "../groups";
@@ -96,10 +96,7 @@ export function StatTile({
       style={{
         gap: spacing.sm,
         padding: spacing.md,
-        borderRadius: radii.card,
-        borderWidth: 1,
-        borderColor: neutrals.divider,
-        backgroundColor: colors.surface,
+        ...raised,
       }}
       pressedStyle={{ backgroundColor: accents[accent].tint }}
     >
@@ -180,10 +177,7 @@ export function NavCard({
         gap: spacing.md,
         minHeight: Math.max(64, MIN_TOUCH_SIZE),
         padding: spacing.md,
-        borderRadius: radii.card,
-        borderWidth: 1,
-        borderColor: neutrals.divider,
-        backgroundColor: colors.surface,
+        ...raised,
       }}
       pressedStyle={{ backgroundColor: neutrals.surface }}
     >

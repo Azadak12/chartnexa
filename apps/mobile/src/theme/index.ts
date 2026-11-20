@@ -11,3 +11,4 @@ export {
   MAX_FONT_SCALE,
   MIN_TOUCH_SIZE,
 } from "@chartnexa/design-tokens";
+export { raised } from "./surfaces";

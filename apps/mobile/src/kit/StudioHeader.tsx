@@ -104,7 +104,7 @@ export function StudioHeader({
             <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
               <Stop offset="0" stopColor={market.navy} />
               <Stop offset="0.55" stopColor={market.navy} />
-              <Stop offset="1" stopColor={status.bluePressed} stopOpacity={0.9} />
+              <Stop offset="1" stopColor={status.blueLip} stopOpacity={0.9} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradientId})`} />

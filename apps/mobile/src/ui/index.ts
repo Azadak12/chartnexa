@@ -13,3 +13,4 @@ export { Text, type TextTone } from "./Text";
 export { TextField } from "./TextField";
 export { useReducedMotion } from "./use-reduced-motion";
 export { useSubmitOnce } from "./use-submit-once";
+export { StatusPill, type PillTone } from "./StatusPill";

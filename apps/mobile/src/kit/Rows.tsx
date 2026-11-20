@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
-import { colors, neutrals, radii, spacing, status } from "../theme";
+import { colors, neutrals, radii, raised, spacing, status } from "../theme";
 import { Text } from "../ui";
 
 type Icon = React.ComponentProps<typeof Feather>["name"];
@@ -112,10 +112,7 @@ export function DashboardMetricCard({
       style={{
         flex: 1,
         minWidth: 140,
-        borderRadius: radii.card,
-        borderWidth: 1,
-        borderColor: neutrals.divider,
-        backgroundColor: neutrals.surface,
+        ...raised,
         padding: spacing.md,
         gap: 2,
       }}
