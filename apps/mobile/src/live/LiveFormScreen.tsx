@@ -19,6 +19,7 @@ import { useZodForm } from "../forms/use-zod-form";
 import { StateView } from "../state/StateView";
 import { Banner, Button, Screen, Text, useSubmitOnce } from "../ui";
 import { fromLocalParts, localParts, staffLiveApi } from "./live-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const formSchema = z.object({
   title: z
@@ -239,9 +240,11 @@ function Form({
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        {existing ? "Edit live class" : "Schedule a live class"}
-      </Text>
+      <StaffPageHeader
+        title={existing ? "Edit live class" : "Schedule a live class"}
+        eyebrow="COURSE STUDIO"
+        icon="edit-3"
+      />
       {message ? <Banner kind="error" message={message} testID="live-form-error" /> : null}
       <FormField control={control} name="title" label="Title" maxLength={LIVE_TITLE_MAX + 10} />
       <FormField

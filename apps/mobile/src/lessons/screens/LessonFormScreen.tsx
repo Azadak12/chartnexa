@@ -20,6 +20,7 @@ import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
 import { StaffLessonFiles } from "../../resources/StaffLessonFiles";
 import { StaffLessonVideo } from "../../video/StaffLessonVideo";
 import { staffLessonApi } from "../lesson-api";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 const formSchema = z.object({
   title: z
@@ -214,9 +215,11 @@ function Form({
 
   return (
     <Screen keyboard>
-      <Text variant="title" accessibilityRole="header">
-        {current ? "Edit lesson" : "New lesson"}
-      </Text>
+      <StaffPageHeader
+        title={current ? "Edit lesson" : "New lesson"}
+        eyebrow="COURSE STUDIO"
+        icon="edit-3"
+      />
       {message ? <Banner kind="error" message={message} testID="form-error" /> : null}
       {info ? <Banner kind="success" message={info} testID="form-info" /> : null}
       {stale ? (

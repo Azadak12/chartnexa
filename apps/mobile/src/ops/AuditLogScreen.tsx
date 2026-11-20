@@ -7,9 +7,10 @@ import { isAppError, messageFor } from "../api/errors";
 import { canReadAudit, fetchAccess } from "../courses/course-api";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Button, Chip, Screen, Text, TextField } from "../ui";
 import { actionText, opsApi, shortId } from "./ops-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 type Outcome = "success" | "denied" | undefined;
 const when = (iso: string) =>
@@ -74,9 +75,7 @@ export function AuditLogScreen() {
         key={e.id}
         testID={`audit-${e.id}`}
         style={{
-          borderWidth: 1,
-          borderColor: neutrals.divider,
-          borderRadius: radii.card,
+          ...raised,
           padding: spacing.md,
           gap: spacing.xs,
         }}
@@ -118,9 +117,7 @@ export function AuditLogScreen() {
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Audit log
-      </Text>
+      <StaffPageHeader title="Audit log" eyebrow="COMMAND CENTER" icon="shield" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
         {(
           [

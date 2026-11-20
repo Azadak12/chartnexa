@@ -11,9 +11,10 @@ import { isAppError, messageFor } from "../api/errors";
 import { canPublishAnnouncements, fetchAccess } from "../courses/course-api";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Banner, BottomSheet, Button, Screen, Text, TextField, useSubmitOnce } from "../ui";
 import { staffAnnouncementApi } from "./announcement-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const when = (iso: string) =>
   new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -68,9 +69,7 @@ export function StaffAnnouncementsScreen() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Post announcements
-      </Text>
+      <StaffPageHeader title="Post announcements" eyebrow="OPERATIONS" icon="inbox" />
       {info ? <Banner kind="success" message={info} testID="staff-ann-info" /> : null}
       <Button
         label="New announcement"
@@ -93,9 +92,7 @@ export function StaffAnnouncementsScreen() {
               key={a.id}
               testID={`staff-ann-${a.id}`}
               style={{
-                borderWidth: 1,
-                borderColor: neutrals.divider,
-                borderRadius: radii.card,
+                ...raised,
                 padding: spacing.md,
                 gap: spacing.xs,
               }}

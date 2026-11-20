@@ -24,6 +24,7 @@ import { StateView } from "../state/StateView";
 import { spacing } from "../theme";
 import { Banner, Button, Chip, Screen, Text, useSubmitOnce } from "../ui";
 import { staffAssignmentApi } from "./assignment-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 export const attachmentPicker = {
   async pick(): Promise<{ uri: string; name: string; size?: number; mimeType?: string } | null> {
@@ -270,9 +271,11 @@ function Form({
   const items = lessons.data?.items ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        {existing ? "Edit assignment" : "New assignment"}
-      </Text>
+      <StaffPageHeader
+        title={existing ? "Edit assignment" : "New assignment"}
+        eyebrow="COURSE STUDIO"
+        icon="edit-3"
+      />
       {message ? (
         <Banner
           kind={message.ok ? "success" : "error"}

@@ -10,10 +10,11 @@ import {
 import { isAppError, messageFor } from "../api/errors";
 import { canScheduleLive, fetchAccess } from "../courses/course-api";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Banner, BottomSheet, Button, Screen, Text, TextField, useSubmitOnce } from "../ui";
 import { durationText, STATE_TEXT, staffLiveApi, whenText } from "./live-api";
 import { liveOpener } from "./use-join";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const joinedText = (n: number) =>
   n === 0 ? "No one has joined yet" : `${n} ${n === 1 ? "person" : "people"} joined`;
@@ -103,9 +104,7 @@ export function StaffLiveScreen() {
       key={s.id}
       testID={`staff-live-${s.id}`}
       style={{
-        borderWidth: 1,
-        borderColor: neutrals.divider,
-        borderRadius: radii.card,
+        ...raised,
         padding: spacing.md,
         gap: spacing.xs,
       }}
@@ -149,9 +148,7 @@ export function StaffLiveScreen() {
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Live classes
-      </Text>
+      <StaffPageHeader title="Live classes" eyebrow="COURSE STUDIO" icon="book-open" />
       <Text tone="muted">
         Times are in your time zone. Start a class to open your meeting room; students who own the
         course can join from 15 minutes before the start.

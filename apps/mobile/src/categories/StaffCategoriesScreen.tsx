@@ -8,9 +8,10 @@ import { ConfirmDialog } from "../auth/ConfirmDialog";
 import { canManageCategories, fetchAccess } from "../courses/course-api";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Banner, Button, NameSheet, Screen, Text } from "../ui";
 import { staffCategoryApi } from "./category-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const courses = (n: number) => `${n} ${n === 1 ? "course" : "courses"}`;
 
@@ -65,9 +66,7 @@ export function StaffCategoriesScreen() {
   const items = list.data ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Categories
-      </Text>
+      <StaffPageHeader title="Categories" eyebrow="COURSE STUDIO" icon="book-open" />
       {message ? <Banner kind="error" message={message} testID="categories-error" /> : null}
       <View ref={addRef} collapsable={false}>
         <Button label="Add category" onPress={() => setAdding(true)} />
@@ -95,9 +94,7 @@ export function StaffCategoriesScreen() {
               style={{
                 gap: spacing.xs,
                 padding: spacing.md,
-                borderRadius: radii.card,
-                borderWidth: 1,
-                borderColor: neutrals.divider,
+                ...raised,
               }}
             >
               <Text variant="subheading">{c.name}</Text>

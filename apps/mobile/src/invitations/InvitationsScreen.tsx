@@ -13,15 +13,14 @@ import { canInviteInstructors, canManageRoles, fetchAccess } from "../courses/co
 import { ReasonSheet } from "../instructors/ReasonSheet";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Banner, BottomSheet, Button, Chip, Screen, Text, TextField, useSubmitOnce } from "../ui";
 import { invitationApi, STATUS_TEXT } from "./invitation-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const when = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
 const card = {
-  borderWidth: 1,
-  borderColor: neutrals.divider,
-  borderRadius: radii.card,
+  ...raised,
   padding: spacing.md,
   gap: spacing.xs,
 } as const;
@@ -108,9 +107,7 @@ export function InvitationsScreen() {
   const items = list.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Instructors
-      </Text>
+      <StaffPageHeader title="Instructors" eyebrow="OPERATIONS" icon="inbox" />
       {info ? <Banner kind="success" message={info} testID="inv-info" /> : null}
       {error ? <Banner kind="error" message={error} testID="inv-error" /> : null}
       <Button label="Invite an instructor" onPress={() => setInviting(true)} />

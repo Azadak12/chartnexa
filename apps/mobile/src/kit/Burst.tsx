@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, View } from "react-native";
-import { colors, market, radii, status } from "../theme";
+import { colors, market, radii } from "../theme";
 import { useReducedMotion } from "../ui";
 
 const SHADES = [colors.blue, market.blueOnNavy, colors.ink, colors.blueTint, colors.gold];

@@ -12,10 +12,11 @@ import { isAppError, messageFor } from "../../api/errors";
 import { ConfirmDialog } from "../../auth/ConfirmDialog";
 import { canAuthorLessons, fetchAccess } from "../../courses/course-api";
 import { StateView } from "../../state/StateView";
-import { colors, neutrals, radii, spacing } from "../../theme";
+import { raised, spacing } from "../../theme";
 import { Banner, Button, IconButton, NameSheet, Screen, Text } from "../../ui";
 import { staffLessonApi } from "../lesson-api";
 import { ModulePickerSheet } from "./ModulePickerSheet";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 /** Staff lesson list for one course: order, edit, delete. The server checks every request. */
 export function StaffLessonsScreen() {
@@ -176,9 +177,7 @@ export function StaffLessonsScreen() {
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Lessons
-      </Text>
+      <StaffPageHeader title="Lessons" eyebrow="COURSE STUDIO" icon="book-open" />
       <Button label="Add lesson" onPress={() => router.push(`/manage/${courseId}/lessons/new`)} />
       {message ? <Banner kind="error" message={message} testID="lessons-error" /> : null}
       {query.status === "success" ? (
@@ -433,10 +432,7 @@ export function StaffLessonsScreen() {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: neutrals.divider,
+    ...raised,
     padding: spacing.lg,
     gap: spacing.sm,
   },

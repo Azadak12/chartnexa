@@ -8,9 +8,10 @@ import { canReadPayments, fetchAccess } from "../courses/course-api";
 import { formatPrice } from "../courses/money";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Button, Chip, Screen, Text } from "../ui";
 import { opsApi, shortId } from "./ops-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 /** Staff wording: what happened and, where it matters, what still needs doing. */
 export const STAFF_ORDER_TEXT: Record<OrderStatus, string> = {
@@ -73,9 +74,7 @@ export function StaffOrdersScreen() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Orders
-      </Text>
+      <StaffPageHeader title="Orders" eyebrow="COMMAND CENTER" icon="shield" />
       <Text variant="caption" tone="muted">
         Test mode: no real payments have been made. Card details are never stored here.
       </Text>
@@ -111,9 +110,7 @@ export function StaffOrdersScreen() {
               key={o.id}
               testID={`order-${o.id}`}
               style={{
-                borderWidth: 1,
-                borderColor: neutrals.divider,
-                borderRadius: radii.card,
+                ...raised,
                 padding: spacing.md,
                 gap: spacing.xs,
               }}

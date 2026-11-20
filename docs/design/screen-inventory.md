@@ -21,4 +21,6 @@ Legend: **Dark theme** = new palette via shared tokens (all screens). **Redesign
 
 Shared across roles: `raised` card surface (`theme/surfaces.ts`) now used by `Card`, admin `StatTile`, `DashboardMetricCard`, mission and live cards; `StatusPill` is the single status shape; `StudioHeader` gradient fixed for the dark palette. Staff dashboards already used `StudioHeader`/`StatTile`, so they inherit this; their list/form screens (manage/*, staff assignments, reviews, users) were not individually reworked.
 
+Staff pass (2026-11-21): every staff screen with a fixed title now opens with `StaffPageHeader` (area label, icon, header title): course/lesson/assignment/live forms and lists, students, grant access, categories, reviews, announcements, invitations, permissions directory, instructor search, orders, audit log. Staff list cards use the shared `raised` surface. Not changed: screens whose title is the record name (instructor/permission person, assignment manage), and the form field layouts themselves.
+
 Behaviour, API calls, roles and routes were not changed.

@@ -6,8 +6,9 @@ import { canManageAssignments, fetchAccess, staffCourseApi } from "../courses/co
 import { CourseThumbnail } from "../kit/CourseThumbnail";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { colors, neutrals, radii, spacing } from "../theme";
+import { colors, neutrals, raised, spacing } from "../theme";
 import { Screen, Text } from "../ui";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 /**
  * The Instructor's Assignments tab: the courses whose coursework they can manage. Assignments
@@ -27,9 +28,7 @@ export function StaffAssignmentsHub() {
   const rows = (courses.data?.items ?? []).filter((c) => canManageAssignments(access.data, c.id));
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Assignments
-      </Text>
+      <StaffPageHeader title="Assignments" eyebrow="COURSE STUDIO" icon="book-open" />
       <Text tone="muted">Choose a course to create, review and grade its assignments.</Text>
       {access.status === "pending" || (access.status === "success" && courses.isPending) ? (
         <StateView state="loading" />
@@ -61,9 +60,7 @@ export function StaffAssignmentsHub() {
               gap: spacing.md,
               alignItems: "center",
               padding: spacing.md,
-              borderRadius: radii.card,
-              borderWidth: 1,
-              borderColor: neutrals.divider,
+              ...raised,
               backgroundColor: pressed ? neutrals.surface : colors.surface,
             })}
           >

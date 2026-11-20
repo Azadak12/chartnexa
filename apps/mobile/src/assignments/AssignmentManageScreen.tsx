@@ -9,7 +9,7 @@ import { canManageAssignments, fetchAccess } from "../courses/course-api";
 import { fileOpener } from "../resources/LessonFilesSection";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Banner, BottomSheet, Button, Chip, Screen, Text, TextField, useSubmitOnce } from "../ui";
 import { RECIPIENT_TEXT, staffAssignmentApi } from "./assignment-api";
 
@@ -183,9 +183,7 @@ export function AssignmentManageScreen() {
             key={r.userId}
             testID={`recipient-${r.userId}`}
             style={{
-              borderWidth: 1,
-              borderColor: neutrals.divider,
-              borderRadius: radii.card,
+              ...raised,
               padding: spacing.md,
               gap: spacing.xs,
             }}

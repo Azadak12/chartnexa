@@ -4,7 +4,7 @@ import { View, useWindowDimensions } from "react-native";
 import type { StaffCourse } from "@chartnexa/api-contracts";
 import { LEVEL_LABEL } from "../courses/CourseCard";
 import { formatPrice } from "../courses/money";
-import { accents, colors, neutrals, radii, spacing } from "../theme";
+import { accents, colors, neutrals, radii, raised, spacing } from "../theme";
 import { Text } from "../ui";
 import { CourseThumbnail } from "./CourseThumbnail";
 import { thumbWidth } from "./CourseCards";
@@ -73,16 +73,8 @@ export const CourseManageCard = memo(function CourseManageCard({
   return (
     <View
       style={{
-        borderRadius: radii.card,
-        borderWidth: 1,
-        borderColor: neutrals.divider,
-        backgroundColor: colors.surface,
+        ...raised,
         overflow: "hidden",
-        shadowColor: colors.ink,
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 1,
       }}
     >
       <PressableCard

@@ -17,6 +17,7 @@ import { StateView } from "../state/StateView";
 import { spacing } from "../theme";
 import { Banner, Button, Chip, Screen, Text, useSubmitOnce } from "../ui";
 import { newAnnouncementKey, staffAnnouncementApi } from "./announcement-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const formSchema = z.object({
   title: z
@@ -107,9 +108,7 @@ export function AnnouncementFormScreen() {
   const list = courses.data?.items ?? [];
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        New announcement
-      </Text>
+      <StaffPageHeader title="New announcement" eyebrow="OPERATIONS" icon="inbox" />
       {message ? <Banner kind="error" message={message} testID="ann-form-error" /> : null}
       <FormField
         control={control}

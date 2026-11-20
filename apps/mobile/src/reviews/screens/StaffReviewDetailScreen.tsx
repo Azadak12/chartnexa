@@ -19,6 +19,7 @@ import { BottomSheet, Banner, Button, Screen, Text, TextField, useSubmitOnce } f
 import { OTHER_NOTE_HINT, REASON_LABEL } from "../moderation-labels";
 import { moderationApi } from "../moderation-api";
 import { ReasonPicker } from "../ReasonPicker";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 const date = (iso: string): string =>
   new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
@@ -268,9 +269,7 @@ export function StaffReviewDetailScreen() {
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Review
-      </Text>
+      <StaffPageHeader title="Review" eyebrow="OPERATIONS" icon="inbox" />
       {message ? <Banner kind="error" message={message} testID="staff-review-error" /> : null}
       <View style={{ gap: spacing.xs }} testID="staff-review-body">
         <Text variant="bodyStrong">{d.courseTitle}</Text>

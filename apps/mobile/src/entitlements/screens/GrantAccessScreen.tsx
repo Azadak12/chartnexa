@@ -12,6 +12,7 @@ import { instructorApi } from "../../instructors/instructor-api";
 import { StateView } from "../../state/StateView";
 import { Banner, Button, Screen, Text, useSubmitOnce } from "../../ui";
 import { staffEntitlementApi } from "../entitlement-api";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 const formSchema = z.object({
   email: z.string().trim().min(3, "Enter the person's email").max(254, "That email is too long"),
@@ -128,9 +129,7 @@ export function GrantAccessScreen() {
 
   return (
     <Screen keyboard>
-      <Text variant="title" accessibilityRole="header">
-        Grant access
-      </Text>
+      <StaffPageHeader title="Grant access" eyebrow="COURSE STUDIO" icon="book-open" />
       <Text tone="muted">
         The person gets lifetime access to every lesson of this course. Their email must belong to
         an active, verified account.

@@ -5,9 +5,10 @@ import { isAppError, messageFor } from "../api/errors";
 import { canManageAssignments, fetchAccess } from "../courses/course-api";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { neutrals, radii, spacing } from "../theme";
+import { raised, spacing } from "../theme";
 import { Button, Screen, Text } from "../ui";
 import { staffAssignmentApi } from "./assignment-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const due = (iso: string | null) =>
   iso
@@ -60,9 +61,7 @@ export function StaffAssignmentsScreen() {
   }
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Assignments
-      </Text>
+      <StaffPageHeader title="Assignments" eyebrow="COURSE STUDIO" icon="book-open" />
       <Button
         label="New assignment"
         onPress={() => router.push(`/manage/${courseId}/assignments/new`)}
@@ -87,9 +86,7 @@ export function StaffAssignmentsScreen() {
             key={a.id}
             testID={`staff-assignment-${a.id}`}
             style={{
-              borderWidth: 1,
-              borderColor: neutrals.divider,
-              borderRadius: radii.card,
+              ...raised,
               padding: spacing.md,
               gap: spacing.xs,
             }}

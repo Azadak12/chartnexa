@@ -6,10 +6,11 @@ import type { CourseStudent } from "@chartnexa/api-contracts";
 import { isAppError, messageFor } from "../../api/errors";
 import { canManageEnrollments, fetchAccess } from "../../courses/course-api";
 import { StateView } from "../../state/StateView";
-import { colors, neutrals, radii, spacing } from "../../theme";
+import { raised, spacing } from "../../theme";
 import { Banner, Button, Screen, Text } from "../../ui";
 import { ReasonSheet } from "../../instructors/ReasonSheet";
 import { staffEntitlementApi } from "../entitlement-api";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 /** People with access to one course. Granting and ending access are explicit, audited actions. */
 export function StaffStudentsScreen() {
@@ -86,9 +87,7 @@ export function StaffStudentsScreen() {
 
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Students
-      </Text>
+      <StaffPageHeader title="Students" eyebrow="COURSE STUDIO" icon="book-open" />
       <Button
         label="Grant access"
         onPress={() => router.push(`/manage/${courseId}/students/grant`)}
@@ -160,10 +159,7 @@ export function StaffStudentsScreen() {
 
 const styles = StyleSheet.create({
   row: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: neutrals.divider,
+    ...raised,
     padding: spacing.lg,
     gap: spacing.sm,
   },

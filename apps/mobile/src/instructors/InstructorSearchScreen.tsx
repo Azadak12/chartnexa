@@ -10,6 +10,7 @@ import { Banner, Button, Card, Screen, Text, TextField, useSubmitOnce } from "..
 import { canManageInstructors, fetchAccess, isAdmin } from "../courses/course-api";
 import { instructorApi } from "./instructor-api";
 import { ReasonSheet } from "./ReasonSheet";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 const ROLE_LABEL = { instructor: "Instructor", manager: "Manager", admin: "Admin" } as const;
 const STATUS_LABEL = { active: "Active", disabled: "Disabled", deleted: "Deleted" } as const;
@@ -85,9 +86,7 @@ export function InstructorSearchScreen() {
   const name = person?.displayName ?? "This person";
   return (
     <Screen keyboard>
-      <Text variant="title" accessibilityRole="header">
-        Instructor permissions
-      </Text>
+      <StaffPageHeader title="Instructor permissions" eyebrow="COMMAND CENTER" icon="shield" />
       <Text tone="muted">Find a person by their exact email address.</Text>
       <TextField
         label="Email"

@@ -6,10 +6,11 @@ import { isAppError, messageFor } from "../../api/errors";
 import { canModerateReviews, fetchAccess } from "../../courses/course-api";
 import { shouldRetry } from "../../state/query-client";
 import { StateView } from "../../state/StateView";
-import { neutrals, radii, spacing } from "../../theme";
+import { raised, spacing } from "../../theme";
 import { Chip, Screen, Text } from "../../ui";
 import { REASON_LABEL } from "../moderation-labels";
 import { moderationApi, type QueueTab } from "../moderation-api";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 const TABS: { id: QueueTab; label: string; empty: string }[] = [
   { id: "reported", label: "Reported", empty: "No reported reviews waiting." },
@@ -67,9 +68,7 @@ export function StaffReviewsScreen() {
 
   const header = (
     <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
-      <Text variant="title" accessibilityRole="header">
-        Review moderation
-      </Text>
+      <StaffPageHeader title="Review moderation" eyebrow="OPERATIONS" icon="inbox" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
         {TABS.map((t) => (
           <Chip key={t.id} label={t.label} selected={tab === t.id} onPress={() => setTab(t.id)} />
@@ -125,9 +124,7 @@ export function StaffReviewsScreen() {
                 gap: spacing.xs,
                 padding: spacing.md,
                 minHeight: 44,
-                borderRadius: radii.card,
-                borderWidth: 1,
-                borderColor: neutrals.divider,
+                ...raised,
               }}
             >
               <Text variant="bodyStrong">{item.courseTitle}</Text>

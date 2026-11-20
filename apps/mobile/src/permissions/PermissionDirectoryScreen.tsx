@@ -18,6 +18,7 @@ import { Banner, Button, Card, Screen, Text } from "../ui";
 import { ROLE_LABEL } from "./labels";
 import { PermissionSwitchRow } from "./PermissionSwitchRow";
 import { permissionApi } from "./permission-api";
+import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 type Tab = ManagedRole | "roles";
 const TABS: readonly { key: Tab; label: string }[] = [
@@ -73,9 +74,7 @@ export function PermissionDirectoryScreen() {
   }
   return (
     <Screen>
-      <Text variant="title" accessibilityRole="header">
-        Permission management
-      </Text>
+      <StaffPageHeader title="Permission management" eyebrow="COMMAND CENTER" icon="shield" />
       <Text tone="muted">
         Choose a person to see what they can do, or open Roles to change what a whole role gets.
         Only Admins can do this, and every change is recorded with a reason.

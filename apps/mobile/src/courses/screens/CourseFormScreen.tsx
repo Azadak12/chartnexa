@@ -36,6 +36,7 @@ import {
 } from "../course-api";
 import { LEVEL_LABEL } from "../CourseCard";
 import { centsToDollarText, parseDollars } from "../money";
+import { StaffPageHeader } from "../../kit/StaffPageHeader";
 
 export const TONE_LABEL: Record<CourseTone, string> = {
   blue: "Blue",
@@ -318,9 +319,11 @@ function Form({
 
   return (
     <Screen keyboard>
-      <Text variant="title" accessibilityRole="header">
-        {course ? "Edit course" : "New course"}
-      </Text>
+      <StaffPageHeader
+        title={course ? "Edit course" : "New course"}
+        eyebrow="COURSE STUDIO"
+        icon="edit-3"
+      />
       {course && status ? (
         <Text
           variant="bodyStrong"
