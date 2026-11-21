@@ -11,7 +11,7 @@ type BarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0
 type Icon = ComponentProps<typeof Feather>["name"];
 
 export const TAB_ICON_SIZE = 22;
-export const TAB_LABEL_SIZE = 11;
+export const TAB_LABEL_SIZE = 12;
 /** Large system fonts grow the label at most this much, so it never outgrows its column. */
 export const TAB_LABEL_MAX_SCALE = 1.2;
 export const TAB_BAR_MIN_HEIGHT = 56;

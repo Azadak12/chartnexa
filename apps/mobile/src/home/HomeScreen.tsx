@@ -69,47 +69,132 @@ export function HomeScreen() {
         subtitle="Learn how markets work, one lesson at a time."
         unread={unread.data ?? 0}
         onBell={() => router.push("/profile/announcements")}
+        name={me.data?.displayName}
+        onProfile={() => router.push("/profile")}
       />
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
       <MarketCity />
       {lessonsTotal > 0 ? (
         <Reveal index={0}>
-          <PressableCard
-            testID="home-progress"
-            accessibilityLabel={`Your progress: ${lessonsDone} of ${lessonsTotal} lessons done, ${coursesDone} of ${owned.length} courses completed. Opens My Learning`}
-            onPress={() => router.push("/courses")}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: spacing.md,
-              padding: spacing.md,
-              borderRadius: radii.card,
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: neutrals.divider,
-              borderBottomWidth: 1,
-            }}
-          >
-            <ProgressRing
-              completed={lessonsDone}
-              total={lessonsTotal}
-              size={68}
-              stroke={7}
-              testID="home-progress-ring"
+          <View style={{ gap: spacing.sm }}>
+            <PressableCard
+              testID="home-progress"
+              accessibilityLabel={`Your progress: ${lessonsDone} of ${lessonsTotal} lessons done, ${coursesDone} of ${owned.length} courses completed. Opens My Learning`}
+              onPress={() => router.push("/courses")}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: spacing.md,
+                padding: spacing.md,
+                borderRadius: radii.card,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: neutrals.divider,
+                borderBottomWidth: 1,
+              }}
+            >
+              <ProgressRing
+                completed={lessonsDone}
+                total={lessonsTotal}
+                size={68}
+                stroke={7}
+                testID="home-progress-ring"
+              />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="caption" tone="muted">
+                  YOUR PROGRESS
+                </Text>
+                <Text variant="heading">{lessonsDone} lessons done</Text>
+                <Text variant="caption" tone="muted">
+                  {coursesDone} of {owned.length} {owned.length === 1 ? "course" : "courses"}{" "}
+                  completed
+                </Text>
+              </View>
+              <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
+            </PressableCard>
+            <FlatList
+              horizontal
+              testID="course-strip"
+              data={owned}
+              keyExtractor={(c) => c.id}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: spacing.sm }}
+              renderItem={({ item, index }) => {
+                const done =
+                  item.progress.total > 0 && item.progress.completed >= item.progress.total;
+                const pct = item.progress.total
+                  ? Math.round((item.progress.completed / item.progress.total) * 100)
+                  : 0;
+                return (
+                  <PressableCard
+                    testID={`strip-${item.id}`}
+                    accessibilityLabel={`${item.title}, ${item.progress.completed} of ${item.progress.total} lessons done`}
+                    onPress={() => router.push(`/course/${item.id}`)}
+                    style={{
+                      width: 240,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: spacing.sm,
+                      padding: spacing.md,
+                      borderRadius: radii.card,
+                      backgroundColor: colors.blueTint,
+                      borderWidth: 1,
+                      borderColor: index === 0 ? colors.blue : neutrals.divider,
+                      borderBottomWidth: 1,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        backgroundColor: colors.blue,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Feather
+                        name={done ? "check" : "book-open"}
+                        size={22}
+                        color={colors.onBlue}
+                        accessible={false}
+                      />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+                      <Text
+                        variant="caption"
+                        tone="link"
+                        style={{ fontWeight: "700", letterSpacing: 1 }}
+                      >
+                        COURSE {index + 1}
+                      </Text>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <View
+                        accessible={false}
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: neutrals.divider,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: `${pct}%`,
+                            height: 6,
+                            backgroundColor: colors.blue,
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </PressableCard>
+                );
+              }}
             />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="caption" tone="muted">
-                YOUR PROGRESS
-              </Text>
-              <Text variant="heading">{lessonsDone} lessons done</Text>
-              <Text variant="caption" tone="muted">
-                {coursesDone} of {owned.length} {owned.length === 1 ? "course" : "courses"}{" "}
-                completed
-              </Text>
-            </View>
-            <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
-          </PressableCard>
+          </View>
         </Reveal>
       ) : null}
       <Reveal index={1}>

@@ -22,9 +22,9 @@ export const typeScale: Record<
   title: { size: 28, lineHeight: 1.25, weight: "displayHeavy" },
   heading: { size: 22, lineHeight: 1.3, weight: "display" },
   subheading: { size: 18, lineHeight: 1.35, weight: "display" },
-  body: { size: 16, lineHeight: 1.5, weight: "regular" },
-  bodyStrong: { size: 16, lineHeight: 1.5, weight: "medium" },
-  caption: { size: 13, lineHeight: 1.45, weight: "regular" },
+  body: { size: 17, lineHeight: 1.5, weight: "regular" },
+  bodyStrong: { size: 17, lineHeight: 1.5, weight: "medium" },
+  caption: { size: 14, lineHeight: 1.45, weight: "regular" },
   button: { size: 16, lineHeight: 1.25, weight: "semibold" },
 };
 

@@ -27,7 +27,7 @@ export const neutrals = {
   /** Control borders: at least 3:1 on the surface. */
   border: "#5E6F96",
   /** Secondary text: at least 4.5:1 on the page, the surface and the elevated surface. */
-  muted: "#8696B8",
+  muted: "#A9B7D4",
   /** Disabled controls are exempt from contrast rules but must still be legible. */
   disabledText: "#56658A",
   disabledFill: "#141D33",
