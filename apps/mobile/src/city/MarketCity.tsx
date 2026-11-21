@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Animated, Image, Pressable, View, useWindowDimensions } from "react-native";
+import { Animated, Image, Pressable, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useLayout } from "../layout/responsive";
 import { motion, useAmbientLoop } from "../motion/motion";
@@ -11,7 +11,6 @@ import {
   CITY_ART_COMPLETE,
   DESTINATIONS,
   HERO_ART,
-  HERO_ASPECT,
   SCENE_ASPECT,
   type Destination,
 } from "./city-assets";
@@ -243,7 +242,7 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
         source={d.art}
         accessible={false}
         resizeMode="cover"
-        style={{ width: "100%", aspectRatio: 1.45 }}
+        style={{ width: "100%", aspectRatio: 1.6 }}
       />
       <View
         style={{
@@ -251,16 +250,16 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
           alignItems: "center",
           justifyContent: "center",
           gap: 2,
-          minHeight: 32,
-          paddingHorizontal: 4,
-          paddingVertical: 4,
+          minHeight: 44,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.sm,
           backgroundColor: a.tint,
         }}
       >
-        <Text variant="caption" accessible={false} style={{ fontWeight: "700", flexShrink: 1 }}>
+        <Text variant="bodyStrong" accessible={false} style={{ flexShrink: 1 }}>
           {d.label}
         </Text>
-        <Feather name="chevron-right" size={12} color={a.ink} accessible={false} />
+        <Feather name="chevron-right" size={16} color={a.ink} accessible={false} />
       </View>
     </Pressable>
   );
@@ -268,13 +267,16 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
 
 /** The photographic entrance: the academy lounge, then the four places to go. */
 function HeroEntrance({ onOpen }: { onOpen: (d: Destination) => void }) {
-  const { fontScale } = useWindowDimensions();
+  const layout = useLayout();
   const [w, setW] = useState(320);
   // Slow camera drift and a warm light that breathes; both rest with Reduced Motion.
   const drift = useAmbientLoop();
   const glow = useAmbientLoop(motion.ambient / 2, 0.5);
-  // Large system text: two rows of two, so names never break mid-word.
-  const perRow = fontScale >= 1.3 ? 2 : 4;
+  // Phones: two columns, so names have room at any text size. Tablets and wide screens: four.
+  const perRow = layout.isTablet ? 4 : 2;
+  // The picture is cropped to this shape, never stretched: a taller frame on phones keeps the
+  // architecture prominent, a wider one on tablets.
+  const heroAspect = layout.isTablet ? 2.5 : 1.9;
   const rows: Destination[][] = [];
   for (let i = 0; i < DESTINATIONS.length; i += perRow)
     rows.push(DESTINATIONS.slice(i, i + perRow));
@@ -288,7 +290,7 @@ function HeroEntrance({ onOpen }: { onOpen: (d: Destination) => void }) {
           overflow: "hidden",
           borderWidth: 1,
           borderColor: market.grid,
-          aspectRatio: HERO_ASPECT,
+          aspectRatio: heroAspect,
         }}
       >
         <Animated.Image

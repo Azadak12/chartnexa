@@ -73,11 +73,8 @@ export function HomeScreen() {
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
       <MarketCity />
-      <Reveal index={0}>
-        <ResumeLearning />
-      </Reveal>
       {lessonsTotal > 0 ? (
-        <Reveal index={1}>
+        <Reveal index={0}>
           <PressableCard
             testID="home-progress"
             accessibilityLabel={`Your progress: ${lessonsDone} of ${lessonsTotal} lessons done, ${coursesDone} of ${owned.length} courses completed. Opens My Learning`}
@@ -115,6 +112,9 @@ export function HomeScreen() {
           </PressableCard>
         </Reveal>
       ) : null}
+      <Reveal index={1}>
+        <ResumeLearning />
+      </Reveal>
       <NextLiveCard />
       <MarketPreviewCard />
 
