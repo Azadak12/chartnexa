@@ -24,3 +24,5 @@ Shared across roles: `raised` card surface (`theme/surfaces.ts`) now used by `Ca
 Staff pass (2026-11-21): every staff screen with a fixed title now opens with `StaffPageHeader` (area label, icon, header title): course/lesson/assignment/live forms and lists, students, grant access, categories, reviews, announcements, invitations, permissions directory, instructor search, orders, audit log. Staff list cards use the shared `raised` surface. Not changed: screens whose title is the record name (instructor/permission person, assignment manage), and the form field layouts themselves.
 
 Behaviour, API calls, roles and routes were not changed.
+
+Audit note (2026-11-22): the "Dark theme only" and "Pending" staff rows above are stale for headers: every staff screen already opens with a shared header (`StaffPageHeader` or `StudioHeader`), checked by search. Added since: a real-data "Courses by status" split on the Manager and Admin dashboards, and an Orders redesign (status rail, "Action needed" flag, status split). Splits draw only when the whole list is loaded. Still plain list layouts: audit log, students, permissions, reviews.

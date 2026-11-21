@@ -213,6 +213,27 @@ describe("staff orders", () => {
     expect(screen.getAllByText(/Buyer dddddddd · Order/).length).toBe(2);
   });
 
+  it("flags orders that need a decision and charts the complete list by status", async () => {
+    access.mockResolvedValue(MANAGER);
+    orders.mockResolvedValue({
+      items: [order(), order({ id: "o2", status: "duplicate_needs_refund" })],
+      nextCursor: null,
+    });
+    await renderRouter(app, { initialUrl: "/profile/orders" });
+    expect(await screen.findAllByText("Action needed")).toHaveLength(1);
+    expect(
+      screen.getByLabelText("Orders by status: 1 Paid, 1 Paid twice, needs a refund decision"),
+    ).toBeTruthy();
+  });
+
+  it("does not chart a partial list", async () => {
+    access.mockResolvedValue(MANAGER);
+    orders.mockResolvedValue({ items: [order()], nextCursor: "more" });
+    await renderRouter(app, { initialUrl: "/profile/orders" });
+    expect(await screen.findByText("$49.00 · Paid")).toBeTruthy();
+    expect(screen.queryByTestId("order-status-split")).toBeNull();
+  });
+
   it("filters by status and has an empty state", async () => {
     await renderRouter(app, { initialUrl: "/profile/orders" });
     expect(await screen.findByText("No orders yet")).toBeTruthy();

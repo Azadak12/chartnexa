@@ -11,6 +11,8 @@ export interface Metric {
   /** "pending", "error" or "success", straight from the request. */
   status: "pending" | "error" | "success";
   value: string;
+  /** The number, only when the list was fully loaded (no further pages); otherwise undefined. */
+  exact?: number;
   retry: () => void;
 }
 
@@ -48,9 +50,11 @@ export function useAcademyMetrics(a: AccessResponse) {
   const metric = (
     q: { status: Metric["status"]; refetch: () => unknown },
     value: string,
+    exact?: number,
   ): Metric => ({
     status: q.status,
     value,
+    exact,
     retry: () => void q.refetch(),
   });
   // The same two lists also give the instructor's own courses, so showing them costs no request.
@@ -69,10 +73,12 @@ export function useAcademyMetrics(a: AccessResponse) {
     published: metric(
       published,
       published.data ? countText(published.data.items.length, !!published.data.nextCursor) : "",
+      published.data && !published.data.nextCursor ? published.data.items.length : undefined,
     ),
     drafts: metric(
       drafts,
       drafts.data ? countText(drafts.data.items.length, !!drafts.data.nextCursor) : "",
+      drafts.data && !drafts.data.nextCursor ? drafts.data.items.length : undefined,
     ),
     async refetchAll(): Promise<void> {
       await Promise.all(

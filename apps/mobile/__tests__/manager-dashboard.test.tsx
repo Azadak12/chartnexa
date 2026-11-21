@@ -131,6 +131,29 @@ describe("the four statistics", () => {
   );
 });
 
+describe("the course status split", () => {
+  it("draws real published and draft counts when both lists are complete", async () => {
+    (staffCourseApi.list as jest.Mock).mockImplementation(async (q: { status?: string }) => ({
+      items: q?.status === "draft" ? [{ id: "d1" }] : [{ id: "c1" }, { id: "c2" }, { id: "c3" }],
+      nextCursor: null,
+    }));
+    at(393);
+    await mount();
+    expect(await screen.findByLabelText("Courses by status: 3 Published, 1 Draft")).toBeTruthy();
+  });
+
+  it("is not drawn when a list has more pages, so a partial count is never charted", async () => {
+    (staffCourseApi.list as jest.Mock).mockImplementation(async (q: { status?: string }) => ({
+      items: q?.status === "draft" ? [{ id: "d1" }] : [{ id: "c1" }],
+      nextCursor: q?.status === "draft" ? null : "next",
+    }));
+    at(393);
+    await mount();
+    expect(await screen.findByText("1+")).toBeTruthy();
+    expect(screen.queryByTestId("course-status-split")).toBeNull();
+  });
+});
+
 describe("quick actions and management sections", () => {
   it("offers only actions a Manager may use, each opening a real screen", async () => {
     at(393);

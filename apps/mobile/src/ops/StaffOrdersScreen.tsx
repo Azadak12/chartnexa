@@ -8,9 +8,10 @@ import { canReadPayments, fetchAccess } from "../courses/course-api";
 import { formatPrice } from "../courses/money";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { raised, spacing } from "../theme";
-import { Button, Chip, Screen, Text } from "../ui";
+import { colors, market, neutrals, raised, spacing, status as statusColor } from "../theme";
+import { Button, Chip, Screen, StatusPill, Text } from "../ui";
 import { opsApi, shortId } from "./ops-api";
+import { SplitBar } from "../kit/SplitBar";
 import { StaffPageHeader } from "../kit/StaffPageHeader";
 
 /** Staff wording: what happened and, where it matters, what still needs doing. */
@@ -21,6 +22,15 @@ export const STAFF_ORDER_TEXT: Record<OrderStatus, string> = {
   cancelled: "Cancelled",
   reversed: "Reversed, access removed",
   duplicate_needs_refund: "Paid twice, needs a refund decision",
+};
+/** The rail colour for each status. Words carry the meaning; colour only supports them. */
+export const ORDER_RAIL: Record<OrderStatus, string> = {
+  pending: neutrals.muted,
+  paid: market.up,
+  failed: statusColor.error,
+  cancelled: neutrals.muted,
+  reversed: colors.champagne,
+  duplicate_needs_refund: statusColor.error,
 };
 const when = (iso: string) =>
   new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -72,6 +82,13 @@ export function StaffOrdersScreen() {
     );
   }
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
+  // A split is only honest when every order was loaded, so it needs the unfiltered, complete list.
+  const complete = status === undefined && q.status === "success" && !q.hasNextPage;
+  const split = ORDER_STATUSES.map((s) => ({
+    label: STAFF_ORDER_TEXT[s],
+    value: items.filter((o) => o.status === s).length,
+    color: ORDER_RAIL[s],
+  })).filter((p) => p.value > 0);
   return (
     <Screen>
       <StaffPageHeader title="Orders" eyebrow="COMMAND CENTER" icon="shield" />
@@ -105,6 +122,9 @@ export function StaffOrdersScreen() {
         />
       ) : (
         <>
+          {complete && split.length > 0 ? (
+            <SplitBar testID="order-status-split" title="Orders by status" parts={split} />
+          ) : null}
           {items.map((o) => (
             <View
               key={o.id}
@@ -112,9 +132,26 @@ export function StaffOrdersScreen() {
               style={{
                 ...raised,
                 padding: spacing.md,
+                paddingLeft: spacing.lg,
                 gap: spacing.xs,
+                overflow: "hidden",
               }}
             >
+              <View
+                testID={`order-rail-${o.id}`}
+                accessible={false}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 5,
+                  backgroundColor: ORDER_RAIL[o.status],
+                }}
+              />
+              {o.status === "duplicate_needs_refund" ? (
+                <StatusPill label="Action needed" tone="error" icon="alert-circle" />
+              ) : null}
               <Text variant="subheading">{o.courseTitle}</Text>
               <Text>
                 {formatPrice(o.amountCents)} · {STAFF_ORDER_TEXT[o.status]}

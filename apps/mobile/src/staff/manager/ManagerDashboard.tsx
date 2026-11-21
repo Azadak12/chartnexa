@@ -5,11 +5,12 @@ import type { AccessResponse } from "@chartnexa/api-contracts";
 import type { AccentName } from "@chartnexa/design-tokens";
 import { accountApi } from "../../auth/account-api";
 import { canCreateCourses, canInviteInstructors, canManageCourses } from "../../courses/course-api";
+import { SplitBar } from "../../kit/SplitBar";
 import { Grid } from "../../kit/Grid";
 import { Reveal } from "../../kit/Reveal";
 import { HEADER_ART } from "../../kit/header-art";
 import { StudioHeader } from "../../kit/StudioHeader";
-import { spacing } from "../../theme";
+import { colors, market, spacing } from "../../theme";
 import { Screen } from "../../ui";
 import {
   ACCENT_FOR,
@@ -131,6 +132,16 @@ export function ManagerDashboard({ access }: { access: AccessResponse }) {
                 />
               ) : null}
             </Grid>
+            {m.courses && m.published.exact !== undefined && m.drafts.exact !== undefined ? (
+              <SplitBar
+                testID="course-status-split"
+                title="Courses by status"
+                parts={[
+                  { label: "Published", value: m.published.exact, color: market.up },
+                  { label: "Draft", value: m.drafts.exact, color: colors.champagne },
+                ]}
+              />
+            ) : null}
           </View>
         </Reveal>
       ) : null}

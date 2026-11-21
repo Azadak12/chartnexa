@@ -4,9 +4,19 @@ import { View } from "react-native";
 import type { AccessResponse } from "@chartnexa/api-contracts";
 import { canCreateCourses, canInviteInstructors, canManageCourses } from "../../courses/course-api";
 import { CountUp } from "../../kit/CountUp";
+import { SplitBar } from "../../kit/SplitBar";
 import { Grid } from "../../kit/Grid";
 import { PressableCard } from "../../kit/PressableCard";
-import { accents, colors, raised, MIN_TOUCH_SIZE, neutrals, radii, spacing } from "../../theme";
+import {
+  accents,
+  colors,
+  raised,
+  MIN_TOUCH_SIZE,
+  market,
+  neutrals,
+  radii,
+  spacing,
+} from "../../theme";
 import type { AccentName } from "@chartnexa/design-tokens";
 import { Screen, Skeleton, Text } from "../../ui";
 import { dashboardGroups, type DashboardTile, type Icon } from "../groups";
@@ -307,6 +317,16 @@ export function AdminDashboard({ access }: { access: AccessResponse }) {
               />
             ) : null}
           </Grid>
+          {m.courses && m.published.exact !== undefined && m.drafts.exact !== undefined ? (
+            <SplitBar
+              testID="course-status-split"
+              title="Courses by status"
+              parts={[
+                { label: "Published", value: m.published.exact, color: market.up },
+                { label: "Draft", value: m.drafts.exact, color: colors.champagne },
+              ]}
+            />
+          ) : null}
         </View>
       ) : null}
 
