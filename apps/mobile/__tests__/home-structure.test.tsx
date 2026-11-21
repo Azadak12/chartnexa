@@ -17,10 +17,9 @@ describe("Home structure", () => {
 
 describe("the top bar", () => {
   it("shows the logo, the bell and a profile circle with the person's initials", async () => {
-    const { AppHeader: Header } = await import("../src/kit/AppHeader");
     const onProfile = jest.fn();
     await render(
-      <Header greeting="Hi" onBell={() => {}} name="Sam Rivera" onProfile={onProfile} />,
+      <AppHeader greeting="Hi" onBell={() => {}} name="Sam Rivera" onProfile={onProfile} />,
     );
     expect(screen.getByTestId("header-logo", { hidden: true })).toBeTruthy();
     expect(screen.getByText("SR", { hidden: true })).toBeTruthy();
