@@ -10,8 +10,18 @@ import { LearningJourney } from "./LearningJourney";
  * The selected course as a large card: title, summary and "n/m lessons". No mastery score or rank
  * is shown, because the backend stores none. The lesson path (unit cards and lessons) opens below.
  */
-export function CourseHero({ course, onOpen }: { course: MyCourse; onOpen: () => void }) {
-  const [showPath, setShowPath] = useState(false);
+export function CourseHero({
+  course,
+  onOpen,
+  alwaysPath = false,
+}: {
+  course: MyCourse;
+  onOpen: () => void;
+  /** Show the lesson path straight away, with no Show/Hide button (the Home layout). */
+  alwaysPath?: boolean;
+}) {
+  const [toggled, setShowPath] = useState(false);
+  const showPath = alwaysPath || toggled;
   const { completed, total } = course.progress;
   return (
     <View style={{ gap: spacing.md }} testID="course-hero">
@@ -28,7 +38,7 @@ export function CourseHero({ course, onOpen }: { course: MyCourse; onOpen: () =>
         <Text variant="caption" tone="link" style={{ fontWeight: "700", letterSpacing: 1.5 }}>
           YOUR COURSE
         </Text>
-        <Text variant="title" accessibilityRole="header">
+        <Text variant="title" accessibilityRole="header" style={{ fontSize: 34, lineHeight: 40 }}>
           {course.title}
         </Text>
         <Text tone="muted">{course.summary}</Text>
@@ -55,13 +65,15 @@ export function CourseHero({ course, onOpen }: { course: MyCourse; onOpen: () =>
           <View style={{ flex: 1 }}>
             <Button label="Open course" onPress={onOpen} />
           </View>
-          <View style={{ flex: 1 }}>
-            <Button
-              label={showPath ? "Hide lessons" : "Show lessons"}
-              variant="secondary"
-              onPress={() => setShowPath(!showPath)}
-            />
-          </View>
+          {alwaysPath ? null : (
+            <View style={{ flex: 1 }}>
+              <Button
+                label={showPath ? "Hide lessons" : "Show lessons"}
+                variant="secondary"
+                onPress={() => setShowPath(!showPath)}
+              />
+            </View>
+          )}
         </View>
       </View>
       {showPath ? <LearningJourney key={course.id} courseId={course.id} /> : null}

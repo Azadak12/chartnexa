@@ -17,6 +17,8 @@ import { ResumeLearning } from "../progress/ResumeLearning";
 import { myCoursesApi } from "../entitlements/entitlement-api";
 import { ProgressRing } from "../kit/ProgressRing";
 import { CourseStrip } from "../progress/CourseStrip";
+import { CourseHero } from "../progress/CourseHero";
+import { useScreenMemoryState } from "../navigation/screen-memory";
 import { Reveal } from "../kit/Reveal";
 import { PressableCard } from "../kit/PressableCard";
 import { colors, neutrals, radii, spacing } from "../theme";
@@ -61,6 +63,8 @@ export function HomeScreen() {
   const coursesDone = owned.filter(
     (c) => c.progress.total > 0 && c.progress.completed >= c.progress.total,
   ).length;
+  const [selectedId, setSelectedId] = useScreenMemoryState<string>("my-courses:selected", "");
+  const selectedCourse = owned.find((c) => c.id === selectedId) ?? owned[0];
   const cats = (categories.data ?? []).filter((c) => c.courseCount > 0);
 
   return (
@@ -75,10 +79,19 @@ export function HomeScreen() {
       />
       {me.data && !me.data.emailVerified ? <VerificationBanner /> : null}
 
-      <MarketCity />
       {lessonsTotal > 0 ? (
         <Reveal index={0}>
-          <View style={{ gap: spacing.sm }}>
+          <View
+            testID="home-progress-card"
+            style={{
+              gap: spacing.md,
+              padding: spacing.md,
+              borderRadius: radii.card,
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: neutrals.divider,
+            }}
+          >
             <PressableCard
               testID="home-progress"
               accessibilityLabel={`Your progress: ${lessonsDone} of ${lessonsTotal} lessons done, ${coursesDone} of ${owned.length} courses completed. Opens My Learning`}
@@ -87,14 +100,25 @@ export function HomeScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: spacing.md,
-                padding: spacing.md,
-                borderRadius: radii.card,
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: neutrals.divider,
-                borderBottomWidth: 1,
+                borderWidth: 0,
+                borderBottomWidth: 0,
+                backgroundColor: "transparent",
+                shadowOpacity: 0,
+                elevation: 0,
               }}
             >
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="caption" tone="muted" style={{ letterSpacing: 1.5 }}>
+                  YOUR PROGRESS
+                </Text>
+                <Text variant="heading">
+                  {lessonsDone}/{lessonsTotal} lessons
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {coursesDone} of {owned.length} {owned.length === 1 ? "course" : "courses"}{" "}
+                  completed
+                </Text>
+              </View>
               <ProgressRing
                 completed={lessonsDone}
                 total={lessonsTotal}
@@ -102,25 +126,26 @@ export function HomeScreen() {
                 stroke={7}
                 testID="home-progress-ring"
               />
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="caption" tone="muted">
-                  YOUR PROGRESS
-                </Text>
-                <Text variant="heading">{lessonsDone} lessons done</Text>
-                <Text variant="caption" tone="muted">
-                  {coursesDone} of {owned.length} {owned.length === 1 ? "course" : "courses"}{" "}
-                  completed
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
             </PressableCard>
-            <CourseStrip courses={owned} onSelect={(c) => router.push(`/course/${c.id}`)} />
+            <CourseStrip
+              courses={owned}
+              selectedId={selectedCourse?.id}
+              onSelect={(c) => setSelectedId(c.id)}
+            />
           </View>
         </Reveal>
       ) : null}
       <Reveal index={1}>
         <ResumeLearning />
       </Reveal>
+      {selectedCourse ? (
+        <CourseHero
+          course={selectedCourse}
+          alwaysPath
+          onOpen={() => router.push(`/course/${selectedCourse.id}`)}
+        />
+      ) : null}
+      <MarketCity />
       <NextLiveCard />
       <MarketPreviewCard />
 
