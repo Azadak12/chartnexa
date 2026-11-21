@@ -1,52 +1,52 @@
 /**
- * ChartNexa Cinematic Interactive Academy, Design System V1 (owner brief, 2026-11-21; supersedes
- * the first trading-academy-derived palette). `page` is Primary Midnight, `surface` Deep Navy,
- * `blue` the primary action colour (fills, selected states), `link` its lighter text form (the
- * action blue is 4.2:1 on the surface, so it is not used for small text), `champagne` a premium
- * editorial highlight (never a profit signal), `ink` Ice White. `onBlue` is the dark text and
- * icon colour placed on blue or champagne fills.
+ * ChartNexa colours, aligned to the owner's trading-academy reference app (2026-11-21): deep navy
+ * and charcoal surfaces, electric-blue primary, gold highlight, green for gains and red for
+ * losses. `page` is the app background, `surface` the card colour, `blue` the primary action
+ * colour (fills, selected states), `link` its lighter text form, `champagne` the gold highlight
+ * (the key keeps its earlier name; it is never a profit signal), `ink` the main text colour.
+ * `onBlue` is the dark text and icon colour placed on blue or gold fills.
  */
 export const colors = {
-  page: "#07111F",
-  surface: "#101D32",
-  ink: "#F5F8FC",
-  blue: "#2878FF",
-  link: "#6EA8FF",
-  blueTint: "#12284D",
-  onBlue: "#07111F",
-  champagne: "#D8AD66",
-  champagneTint: "#2E2412",
+  page: "#070B14",
+  surface: "#0F1628",
+  ink: "#E8EEFB",
+  blue: "#3D8BFF",
+  link: "#6FA8FF",
+  blueTint: "#16284A",
+  onBlue: "#070B14",
+  champagne: "#F5C542",
+  champagneTint: "#33270B",
 } as const;
 
 /** Neutrals derived for borders, elevated surfaces and muted text. */
 export const neutrals = {
   /** Elevated surface: inputs, secondary panels. */
-  surface: "#192A42",
+  surface: "#141D33",
   /** Decorative dividers and card edges; not used as the only boundary of a control. */
-  divider: "#243750",
+  divider: "#1F2B47",
   /** Control borders: at least 3:1 on the surface. */
-  border: "#7388A8",
+  border: "#5E6F96",
   /** Secondary text: at least 4.5:1 on the page, the surface and the elevated surface. */
-  muted: "#9DAFC5",
+  muted: "#8696B8",
   /** Disabled controls are exempt from contrast rules but must still be legible. */
-  disabledText: "#6B7E99",
-  disabledFill: "#192A42",
+  disabledText: "#56658A",
+  disabledFill: "#141D33",
   /** Dimmed backdrop behind sheets and dialogs. */
   scrim: "rgba(3, 6, 12, 0.7)",
 } as const;
 
 /** Functional status colors. Always shown with an icon or text label, never alone. */
 export const status = {
-  error: "#F16B72",
+  error: "#F87171",
   errorTint: "#3A1A24",
-  success: "#16B89A",
-  successTint: "#0D2F2B",
-  warning: "#D8AD66",
-  warningTint: "#2E2412",
+  success: "#22C55E",
+  successTint: "#0D2F23",
+  warning: "#F5C542",
+  warningTint: "#33270B",
   /** Pressed state of the primary blue (lighter: the screen is dark). */
-  bluePressed: "#5B9BFF",
+  bluePressed: "#5C9DFF",
   /** The darker lower edge of raised blue buttons and path nodes. */
-  blueLip: "#1B5BD1",
+  blueLip: "#2563EB",
 } as const;
 
 /**
@@ -55,16 +55,16 @@ export const status = {
  * with a symbol or word. `upText` and `downText` are the text versions on navy.
  */
 export const market = {
-  navy: "#0B1829",
-  navyRaised: "#192A42",
-  grid: "#2A3D5C",
-  onNavy: "#F5F8FC",
-  onNavyMuted: "#9DAFC5",
-  blueOnNavy: "#6EA8FF",
-  up: "#16B89A",
-  down: "#F16B72",
-  upText: "#16B89A",
-  downText: "#F16B72",
+  navy: "#0A1020",
+  navyRaised: "#141D33",
+  grid: "#1F2B47",
+  onNavy: "#E8EEFB",
+  onNavyMuted: "#B7C3DC",
+  blueOnNavy: "#8AB8FF",
+  up: "#22C55E",
+  down: "#F87171",
+  upText: "#22C55E",
+  downText: "#F87171",
 } as const;
 
 /**
@@ -74,9 +74,9 @@ export const market = {
  */
 export const accents = {
   blue: { ink: "#8AB8FF", tint: "#13203D" },
-  sky: { ink: "#7DD3FC", tint: "#0C2A3D" },
-  emerald: { ink: "#6EE7B7", tint: "#0F2F25" },
-  amber: { ink: "#FCD34D", tint: "#33270B" },
+  sky: { ink: "#67E8F9", tint: "#0B2A36" },
+  emerald: { ink: "#6EE7B7", tint: "#0D2F23" },
+  amber: { ink: "#F5C542", tint: "#33270B" },
   purple: { ink: "#C4B5FD", tint: "#271B4D" },
 } as const;
 export type AccentName = keyof typeof accents;

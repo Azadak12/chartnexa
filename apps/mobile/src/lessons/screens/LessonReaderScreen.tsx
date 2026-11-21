@@ -210,9 +210,9 @@ export function LessonReaderScreen() {
               padding: spacing.lg,
               borderRadius: radii.card,
               backgroundColor: colors.blueTint,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: colors.blue,
-              borderBottomWidth: 5,
+              borderBottomWidth: 1,
             }}
           >
             <Text variant="caption" tone="link" style={{ marginBottom: spacing.md }}>

@@ -8,7 +8,7 @@ export const spacing = {
   xxl: 32,
 } as const;
 
-export const radii = { control: 12, card: 16, sheet: 20, pill: 999 } as const;
+export const radii = { control: 12, card: 20, sheet: 24, pill: 999 } as const;
 
 /** Minimum tappable size in points (docs/04). */
 export const MIN_TOUCH_SIZE = 44;

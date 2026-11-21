@@ -44,6 +44,10 @@ export function Text({ variant = "body", tone = "body", style, ...rest }: TextPr
           fontFamily: fontFamilies[t.weight],
           fontSize: t.size,
           lineHeight: Math.round(t.size * t.lineHeight),
+          // Display headings are set slightly tight, as in the reference app.
+          ...(t.weight === "display" || t.weight === "displayHeavy"
+            ? { letterSpacing: -0.02 * t.size }
+            : null),
           color: toneColor[tone],
         },
         style,

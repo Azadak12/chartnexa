@@ -9,7 +9,7 @@ import { ProgressRing } from "../kit/ProgressRing";
 import { isAppError, messageFor } from "../api/errors";
 import { shouldRetry } from "../state/query-client";
 import { StateView } from "../state/StateView";
-import { colors, neutrals, radii, spacing, status } from "../theme";
+import { colors, neutrals, radii, raised, spacing, status } from "../theme";
 import { Text, useReducedMotion } from "../ui";
 import { progressApi } from "./progress-api";
 
@@ -267,32 +267,26 @@ export function LearningJourney({ courseId }: { courseId: string }) {
                 alignItems: "center",
                 gap: spacing.md,
                 padding: spacing.md,
-                borderRadius: radii.card,
-                backgroundColor: colors.blue,
+                ...raised,
+                backgroundColor: colors.blueTint,
               }}
             >
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="caption" tone="onBlue" style={{ opacity: 0.85 }}>
-                  {g.id === "ungrouped" ? "COURSE" : `MODULE ${gi + 1}`}
+              <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                <Text variant="caption" tone="link" style={{ fontWeight: "700", letterSpacing: 1 }}>
+                  {g.id === "ungrouped" ? "COURSE" : `UNIT ${gi + 1}`}
                 </Text>
-                <Text variant="bodyStrong" tone="onBlue">
-                  {g.title}
-                </Text>
-                <Text variant="caption" tone="onBlue">
+                <Text variant="subheading">{g.title}</Text>
+                <Text variant="caption" tone="muted">
                   {finished} of {g.items.length} completed
                 </Text>
               </View>
-              <View
-                style={{ backgroundColor: colors.surface, borderRadius: radii.pill, padding: 3 }}
-              >
-                <ProgressRing
-                  completed={finished}
-                  total={g.items.length}
-                  size={52}
-                  stroke={5}
-                  testID={`module-ring-${gi}`}
-                />
-              </View>
+              <ProgressRing
+                completed={finished}
+                total={g.items.length}
+                size={56}
+                stroke={6}
+                testID={`module-ring-${gi}`}
+              />
             </View>
             <View style={{ height }}>
               <Svg

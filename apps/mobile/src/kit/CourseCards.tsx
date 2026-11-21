@@ -13,8 +13,8 @@ import { PressableCard } from "./PressableCard";
 
 /** The raised, tappable edge shared by every course card. */
 const lip = {
-  borderWidth: 2,
-  borderBottomWidth: 5,
+  borderWidth: 1,
+  borderBottomWidth: 1,
   borderColor: neutrals.divider,
 } as const;
 

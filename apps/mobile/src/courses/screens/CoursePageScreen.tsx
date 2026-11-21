@@ -174,8 +174,8 @@ function CourseDetails({
           padding: spacing.md,
           borderRadius: radii.card,
           backgroundColor: colors.surface,
-          borderWidth: 2,
-          borderBottomWidth: 5,
+          borderWidth: 1,
+          borderBottomWidth: 1,
           borderColor: neutrals.divider,
         }}
       >
@@ -202,8 +202,8 @@ function CourseDetails({
             padding: spacing.lg,
             borderRadius: radii.card,
             backgroundColor: colors.blueTint,
-            borderWidth: 2,
-            borderBottomWidth: 5,
+            borderWidth: 1,
+            borderBottomWidth: 1,
             borderColor: colors.blue,
           }}
         >

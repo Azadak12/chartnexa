@@ -16,15 +16,15 @@ import {
 describe("brand colors", () => {
   it("match the reference-derived dark palette exactly", () => {
     expect(colors).toEqual({
-      page: "#07111F",
-      surface: "#101D32",
-      ink: "#F5F8FC",
-      blue: "#2878FF",
-      link: "#6EA8FF",
-      blueTint: "#12284D",
-      onBlue: "#07111F",
-      champagne: "#D8AD66",
-      champagneTint: "#2E2412",
+      page: "#070B14",
+      surface: "#0F1628",
+      ink: "#E8EEFB",
+      blue: "#3D8BFF",
+      link: "#6FA8FF",
+      blueTint: "#16284A",
+      onBlue: "#070B14",
+      champagne: "#F5C542",
+      champagneTint: "#33270B",
     });
   });
 
@@ -76,10 +76,10 @@ describe("contrast", () => {
 });
 
 describe("layout tokens", () => {
-  it("use a 4px grid, 12px controls, 16px cards and a 44pt touch target", () => {
+  it("use a 4px grid, 12px controls, 20px cards and a 44pt touch target", () => {
     for (const v of Object.values(spacing)) expect(v % 4).toBe(0);
     expect(radii.control).toBe(12);
-    expect(radii.card).toBe(16);
+    expect(radii.card).toBe(20);
     expect(MIN_TOUCH_SIZE).toBe(44);
   });
 

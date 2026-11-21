@@ -1,3 +1,5 @@
+> **Superseded in part, 2026-11-21.** The owner asked for the whole app to follow the trading-academy reference app (`~/trading-academy`, served at `localhost:3100/academy`). Colour values below were replaced by that app's palette (page `#070B14`, surface `#0F1628`, elevated `#141D33`, primary blue `#3D8BFF`, gold `#F5C542`, ink `#E8EEFB`), headings use Plus Jakarta Sans with Inter for body, cards are 20 px with a hairline border and soft shadow (no 3D lip), and the lesson path's module header is a "UNIT n" card with a progress ring. Token names are unchanged. `packages/design-tokens/src/colors.ts` is the source of truth; the table below is historical.
+
 # ChartNexa Cinematic Interactive Academy — Design System V1
 
 Owner brief of 2026-11-21. This is the permanent baseline for design work; changes need explicit approval. Product constraints are unchanged: no new backend features, no invented XP/rewards/achievements, simulated charts are never presented as live data, every role keeps its existing features and permissions, and navigation is never gated behind an immersive scene.

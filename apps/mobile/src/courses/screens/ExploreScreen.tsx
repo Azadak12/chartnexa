@@ -123,7 +123,7 @@ export function ExploreScreen() {
           padding: spacing.lg,
           borderRadius: radii.card,
           backgroundColor: colors.blue,
-          borderBottomWidth: 5,
+          borderBottomWidth: 1,
           borderBottomColor: status.bluePressed,
           gap: spacing.sm,
         }}

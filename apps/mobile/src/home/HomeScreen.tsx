@@ -86,9 +86,9 @@ export function HomeScreen() {
               padding: spacing.md,
               borderRadius: radii.card,
               backgroundColor: colors.surface,
-              borderWidth: 2,
+              borderWidth: 1,
               borderColor: neutrals.divider,
-              borderBottomWidth: 5,
+              borderBottomWidth: 1,
             }}
           >
             <ProgressRing
@@ -175,9 +175,9 @@ export function HomeScreen() {
                     padding: spacing.md,
                     borderRadius: radii.card,
                     backgroundColor: colors.blueTint,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: colors.blue,
-                    borderBottomWidth: 5,
+                    borderBottomWidth: 1,
                   }}
                 >
                   <View

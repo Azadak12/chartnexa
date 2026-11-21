@@ -10,13 +10,20 @@ describe("useAppFonts", () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
 
-  it("requests only the four weights the app uses", async () => {
+  it("requests only the six weights the app uses: four Inter and two Plus Jakarta Sans", async () => {
     mockUseFonts.mockReturnValue([false, null]);
     await renderHook(() => useAppFonts());
     expect(Object.keys(mockUseFonts.mock.calls[0]?.[0] as object).sort()).toEqual(
-      ["Inter_400Regular", "Inter_500Medium", "Inter_600SemiBold", "Inter_700Bold"].sort(),
+      [
+        "Inter_400Regular",
+        "Inter_500Medium",
+        "Inter_600SemiBold",
+        "Inter_700Bold",
+        "PlusJakartaSans_700Bold",
+        "PlusJakartaSans_800ExtraBold",
+      ].sort(),
     );
-    expect(Object.keys(INTER_WEIGHTS)).toHaveLength(4);
+    expect(Object.keys(INTER_WEIGHTS)).toHaveLength(6);
   });
 
   it("waits while Inter loads, then lets the app render", async () => {

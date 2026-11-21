@@ -6,6 +6,9 @@ export const fontFamilies = {
   medium: "Inter_500Medium",
   semibold: "Inter_600SemiBold",
   bold: "Inter_700Bold",
+  /** Headings: Plus Jakarta Sans, the reference app's display face. */
+  display: "PlusJakartaSans_700Bold",
+  displayHeavy: "PlusJakartaSans_800ExtraBold",
 } as const;
 
 export type TextVariant =
@@ -16,9 +19,9 @@ export const typeScale: Record<
   TextVariant,
   { size: number; lineHeight: number; weight: keyof typeof fontFamilies }
 > = {
-  title: { size: 28, lineHeight: 1.25, weight: "bold" },
-  heading: { size: 22, lineHeight: 1.3, weight: "semibold" },
-  subheading: { size: 18, lineHeight: 1.35, weight: "semibold" },
+  title: { size: 28, lineHeight: 1.25, weight: "displayHeavy" },
+  heading: { size: 22, lineHeight: 1.3, weight: "display" },
+  subheading: { size: 18, lineHeight: 1.35, weight: "display" },
   body: { size: 16, lineHeight: 1.5, weight: "regular" },
   bodyStrong: { size: 16, lineHeight: 1.5, weight: "medium" },
   caption: { size: 13, lineHeight: 1.45, weight: "regular" },
