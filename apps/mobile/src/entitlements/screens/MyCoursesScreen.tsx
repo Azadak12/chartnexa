@@ -13,6 +13,8 @@ import { Button, Chip, Screen, Skeleton, Text } from "../../ui";
 import { ResumeLearning } from "../../progress/ResumeLearning";
 import { CourseLearningAction } from "../../progress/CourseLearningAction";
 import { ProgressRing } from "../../kit/ProgressRing";
+import { CourseStrip } from "../../progress/CourseStrip";
+import { CourseHero } from "../../progress/CourseHero";
 import { myCoursesApi } from "../entitlement-api";
 
 type Filter = "all" | "in_progress" | "completed";
@@ -43,6 +45,8 @@ export function MyCoursesScreen() {
   const lessonsDone = all.reduce((n, c) => n + c.progress.completed, 0);
   const lessonsTotal = all.reduce((n, c) => n + c.progress.total, 0);
   const completedCourses = all.filter(isDone).length;
+  const [selectedId, setSelectedId] = useScreenMemoryState<string>("my-courses:selected", "");
+  const selected = all.find((c) => c.id === selectedId) ?? all[0];
 
   const header = (
     <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
@@ -74,6 +78,14 @@ export function MyCoursesScreen() {
               </Text>
             </View>
           </View>
+          <CourseStrip
+            courses={all}
+            selectedId={selected?.id}
+            onSelect={(c) => setSelectedId(c.id)}
+          />
+          {selected ? (
+            <CourseHero course={selected} onOpen={() => router.push(`/course/${selected.id}`)} />
+          ) : null}
           <Text variant="heading" accessibilityRole="header">
             Your courses
           </Text>

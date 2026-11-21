@@ -16,6 +16,7 @@ import { MarketCity } from "../city/MarketCity";
 import { ResumeLearning } from "../progress/ResumeLearning";
 import { myCoursesApi } from "../entitlements/entitlement-api";
 import { ProgressRing } from "../kit/ProgressRing";
+import { CourseStrip } from "../progress/CourseStrip";
 import { Reveal } from "../kit/Reveal";
 import { PressableCard } from "../kit/PressableCard";
 import { colors, neutrals, radii, spacing } from "../theme";
@@ -113,87 +114,7 @@ export function HomeScreen() {
               </View>
               <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
             </PressableCard>
-            <FlatList
-              horizontal
-              testID="course-strip"
-              data={owned}
-              keyExtractor={(c) => c.id}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: spacing.sm }}
-              renderItem={({ item, index }) => {
-                const done =
-                  item.progress.total > 0 && item.progress.completed >= item.progress.total;
-                const pct = item.progress.total
-                  ? Math.round((item.progress.completed / item.progress.total) * 100)
-                  : 0;
-                return (
-                  <PressableCard
-                    testID={`strip-${item.id}`}
-                    accessibilityLabel={`${item.title}, ${item.progress.completed} of ${item.progress.total} lessons done`}
-                    onPress={() => router.push(`/course/${item.id}`)}
-                    style={{
-                      width: 240,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: spacing.sm,
-                      padding: spacing.md,
-                      borderRadius: radii.card,
-                      backgroundColor: colors.blueTint,
-                      borderWidth: 1,
-                      borderColor: index === 0 ? colors.blue : neutrals.divider,
-                      borderBottomWidth: 1,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        backgroundColor: colors.blue,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Feather
-                        name={done ? "check" : "book-open"}
-                        size={22}
-                        color={colors.onBlue}
-                        accessible={false}
-                      />
-                    </View>
-                    <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-                      <Text
-                        variant="caption"
-                        tone="link"
-                        style={{ fontWeight: "700", letterSpacing: 1 }}
-                      >
-                        COURSE {index + 1}
-                      </Text>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <View
-                        accessible={false}
-                        style={{
-                          height: 6,
-                          borderRadius: 3,
-                          backgroundColor: neutrals.divider,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: `${pct}%`,
-                            height: 6,
-                            backgroundColor: colors.blue,
-                          }}
-                        />
-                      </View>
-                    </View>
-                  </PressableCard>
-                );
-              }}
-            />
+            <CourseStrip courses={owned} onSelect={(c) => router.push(`/course/${c.id}`)} />
           </View>
         </Reveal>
       ) : null}

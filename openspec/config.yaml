@@ -7,7 +7,7 @@ context: |
   Never claim "production-ready" or capacity ("millions of users") without test evidence.
   Payment implementation requires an approved app-store-compliant strategy; all purchase sources feed one backend entitlement ledger.
   Permissions are enforced server-side on every read, write and file request.
-  Brand: white #FFFFFF, black #111111, blue #2563EB; do not make the whole app dark.
+  Brand: the reference academy dark palette (page #070B14, surface #0F1628, blue #3D8BFF, gold #F5C542), chosen by the owner on 2026-11-21; supersedes the earlier white/black/blue kit.
   One OpenSpec change at a time; no secrets in the repo.
 
 rules:
