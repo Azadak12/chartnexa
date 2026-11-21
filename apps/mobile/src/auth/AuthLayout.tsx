@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { Image, View, useWindowDimensions } from "react-native";
+import { HERO_ART } from "../city/city-assets";
 import Svg, { G, Line, Path, Rect } from "react-native-svg";
 import { forTimeframe, simulatedSeries } from "../lab/chart-data";
 import { colors, market, radii, spacing } from "../theme";
@@ -66,12 +67,34 @@ export function AuthLayout({
   const heroW = Math.round(Math.min(190, Math.max(120, width * 0.42)));
   return (
     <Screen keyboard>
-      <Text variant="heading" accessibilityRole="header" testID="auth-brand">
-        ChartNexa{" "}
-        <Text variant="heading" tone="link">
-          Academy
+      <View
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        testID="auth-photo"
+        style={{ borderRadius: radii.card, overflow: "hidden", backgroundColor: market.navy }}
+      >
+        <Image
+          source={HERO_ART}
+          resizeMode="cover"
+          style={{ width: "100%", aspectRatio: width >= 768 ? 2.5 : 1.9 }}
+        />
+      </View>
+      <View style={{ gap: 2 }}>
+        <Text variant="heading" accessibilityRole="header" testID="auth-brand">
+          ChartNexa{" "}
+          <Text variant="heading" tone="link">
+            Academy
+          </Text>
         </Text>
-      </Text>
+        <Text
+          variant="caption"
+          accessible={false}
+          style={{ color: colors.champagne, letterSpacing: 1.6, fontWeight: "700" }}
+          testID="auth-tagline"
+        >
+          PERSONAL TRADING ACADEMY
+        </Text>
+      </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
         <View style={{ flex: 1, minWidth: 0, gap: spacing.sm }}>
           <Text
