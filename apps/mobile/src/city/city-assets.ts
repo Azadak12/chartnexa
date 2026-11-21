@@ -28,6 +28,8 @@ export interface Destination {
   key: string;
   label: string;
   spoken: string;
+  /** Feather icon shown on the tile control. */
+  icon: "award" | "book-open" | "activity" | "target";
   route: "/courses" | "/explore" | "/lab" | "/assignments";
   /** Tap area as fractions of the scene: left, top, width, height. */
   box: { x: number; y: number; w: number; h: number };
@@ -36,6 +38,7 @@ export interface Destination {
 export const DESTINATIONS: readonly Destination[] = [
   {
     key: "learn",
+    icon: "award",
     label: "Academy",
     spoken: "Learning Academy: My Learning",
     route: "/courses",
@@ -43,6 +46,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "explore",
+    icon: "book-open",
     label: "Library",
     spoken: "Course Library: Explore courses",
     route: "/explore",
@@ -50,6 +54,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "lab",
+    icon: "activity",
     label: "Lab",
     spoken: "Market Observatory: Learning Lab",
     route: "/lab",
@@ -57,6 +62,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "tasks",
+    icon: "target",
     label: "Missions",
     spoken: "Mission Center: Assignments",
     route: "/assignments",

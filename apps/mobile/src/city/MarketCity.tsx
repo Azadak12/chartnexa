@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Animated, Pressable, View } from "react-native";
@@ -187,17 +188,22 @@ function Hotspot({
       >
         <View
           style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
             backgroundColor: colors.page,
             borderRadius: radii.pill,
             paddingHorizontal: spacing.sm,
-            paddingVertical: 2,
+            paddingVertical: 3,
             borderWidth: 1,
             borderColor: colors.blue,
           }}
         >
-          <Text variant="caption" accessible={false} numberOfLines={1}>
+          <Feather name={d.icon} size={12} color={colors.link} accessible={false} />
+          <Text variant="caption" accessible={false} numberOfLines={1} style={{ flexShrink: 1 }}>
             {d.label}
           </Text>
+          <Feather name="chevron-right" size={12} color={colors.champagne} accessible={false} />
         </View>
       </View>
     </Pressable>

@@ -18,12 +18,23 @@ export function AppHeader({
   return (
     <View style={{ gap: spacing.xs }} testID="app-header">
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Text variant="subheading" accessibilityRole="header" style={{ color: colors.ink }}>
-          ChartNexa{" "}
-          <Text variant="subheading" style={{ color: colors.link }}>
-            Academy
+        <View style={{ flexShrink: 1, gap: 2 }}>
+          <Text variant="subheading" accessibilityRole="header" style={{ color: colors.ink }}>
+            ChartNexa{" "}
+            <Text variant="subheading" style={{ color: colors.link }}>
+              Academy
+            </Text>
           </Text>
-        </Text>
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            accessible={false}
+            style={{ color: colors.champagne, letterSpacing: 1.6, fontWeight: "700" }}
+            testID="header-tagline"
+          >
+            PERSONAL TRADING ACADEMY
+          </Text>
+        </View>
         {onBell ? (
           <Pressable
             accessibilityRole="button"
