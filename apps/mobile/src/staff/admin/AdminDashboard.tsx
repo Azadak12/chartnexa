@@ -11,6 +11,7 @@ import type { AccentName } from "@chartnexa/design-tokens";
 import { Screen, Skeleton, Text } from "../../ui";
 import { dashboardGroups, type DashboardTile, type Icon } from "../groups";
 import { useAcademyMetrics, type Metric } from "../metrics";
+import { HEADER_ART } from "../../kit/header-art";
 import { StudioHeader } from "../../kit/StudioHeader";
 
 /** An icon in a soft coloured square. The colour is never the only cue: words always sit beside it. */
@@ -256,6 +257,7 @@ export function AdminDashboard({ access }: { access: AccessResponse }) {
     <Screen onRefresh={() => m.refetchAll()}>
       <StudioHeader
         testID="admin-header"
+        art={HEADER_ART.admin}
         title="Admin Dashboard"
         subtitle="Manage your academy at a glance."
       />

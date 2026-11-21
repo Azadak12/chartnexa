@@ -7,6 +7,7 @@ import { accountApi } from "../../auth/account-api";
 import { canCreateCourses, canInviteInstructors, canManageCourses } from "../../courses/course-api";
 import { Grid } from "../../kit/Grid";
 import { Reveal } from "../../kit/Reveal";
+import { HEADER_ART } from "../../kit/header-art";
 import { StudioHeader } from "../../kit/StudioHeader";
 import { spacing } from "../../theme";
 import { Screen } from "../../ui";
@@ -73,6 +74,7 @@ export function ManagerDashboard({ access }: { access: AccessResponse }) {
       <Reveal index={0}>
         <StudioHeader
           testID="manager-header"
+          art={HEADER_ART.manager}
           title="Manager Dashboard"
           subtitle="Your academy operations at a glance."
           greeting={greetingLine(me.data?.displayName)}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Metro needs static require() for bundled images. */
 import type { ImageSourcePropType } from "react-native";
 
 /**
@@ -22,8 +23,6 @@ export const CITY_LAYERS: readonly CityLayerSlot[] = [
  * The Home hero picture: a cropped region of the approved concept render (lounge, wall sign, bull).
  * It is illustration, not a live view of anything; its screens show no real prices.
  */
-// Metro needs a static require() for bundled images.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 export const HERO_ART: ImageSourcePropType = require("../../assets/city/academy-hero.webp");
 /** Width / height of the hero picture. */
 export const HERO_ASPECT = 886 / 274;
@@ -40,6 +39,8 @@ export interface Destination {
   spoken: string;
   /** Feather icon shown on the tile control. */
   icon: "award" | "book-open" | "activity" | "target";
+  /** Cropped illustration for the tile control. */
+  art: ImageSourcePropType;
   route: "/courses" | "/explore" | "/lab" | "/assignments";
   /** Tap area as fractions of the scene: left, top, width, height. */
   box: { x: number; y: number; w: number; h: number };
@@ -48,6 +49,7 @@ export interface Destination {
 export const DESTINATIONS: readonly Destination[] = [
   {
     key: "learn",
+    art: require("../../assets/city/tile-learn.webp"),
     icon: "award",
     label: "Academy",
     spoken: "Learning Academy: My Learning",
@@ -56,6 +58,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "explore",
+    art: require("../../assets/city/tile-explore.webp"),
     icon: "book-open",
     label: "Library",
     spoken: "Course Library: Explore courses",
@@ -64,6 +67,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "lab",
+    art: require("../../assets/city/tile-lab.webp"),
     icon: "activity",
     label: "Lab",
     spoken: "Market Observatory: Learning Lab",
@@ -72,6 +76,7 @@ export const DESTINATIONS: readonly Destination[] = [
   },
   {
     key: "tasks",
+    art: require("../../assets/city/tile-tasks.webp"),
     icon: "target",
     label: "Missions",
     spoken: "Mission Center: Assignments",

@@ -219,7 +219,7 @@ function Hotspot({
 
 const TILE_ACCENT = { learn: "blue", explore: "amber", lab: "emerald", tasks: "sky" } as const;
 
-/** One destination as a control under the hero: icon, name and an arrow. */
+/** One destination as a control under the hero: its picture, then its name and an arrow. */
 function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) {
   const a = accents[TILE_ACCENT[d.key as keyof typeof TILE_ACCENT] ?? "blue"];
   return (
@@ -231,12 +231,7 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
       style={({ pressed }) => ({
         flex: 1,
         minWidth: 0,
-        minHeight: 84,
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 4,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: 4,
+        overflow: "hidden",
         borderRadius: radii.card,
         borderWidth: 1.5,
         borderColor: a.ink,
@@ -244,8 +239,24 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
         transform: [{ scale: pressed ? 0.97 : 1 }],
       })}
     >
-      <Feather name={d.icon} size={24} color={a.ink} accessible={false} />
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+      <Image
+        source={d.art}
+        accessible={false}
+        resizeMode="cover"
+        style={{ width: "100%", aspectRatio: 1.45 }}
+      />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+          minHeight: 32,
+          paddingHorizontal: 4,
+          paddingVertical: 4,
+          backgroundColor: a.tint,
+        }}
+      >
         <Text variant="caption" accessible={false} style={{ fontWeight: "700", flexShrink: 1 }}>
           {d.label}
         </Text>
@@ -258,28 +269,61 @@ function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) 
 /** The photographic entrance: the academy lounge, then the four places to go. */
 function HeroEntrance({ onOpen }: { onOpen: (d: Destination) => void }) {
   const { fontScale } = useWindowDimensions();
+  const [w, setW] = useState(320);
+  // Slow camera drift and a warm light that breathes; both rest with Reduced Motion.
+  const drift = useAmbientLoop();
+  const glow = useAmbientLoop(motion.ambient / 2, 0.5);
   // Large system text: two rows of two, so names never break mid-word.
   const perRow = fontScale >= 1.3 ? 2 : 4;
   const rows: Destination[][] = [];
   for (let i = 0; i < DESTINATIONS.length; i += perRow)
     rows.push(DESTINATIONS.slice(i, i + perRow));
+  const overscan = w * 0.06;
   return (
     <View style={{ gap: spacing.md }}>
       <View
+        onLayout={(e) => setW(e.nativeEvent.layout.width || w)}
         style={{
           borderRadius: radii.card,
           overflow: "hidden",
           borderWidth: 1,
           borderColor: market.grid,
+          aspectRatio: HERO_ASPECT,
         }}
       >
-        <Image
+        <Animated.Image
           source={HERO_ART}
           accessibilityRole="image"
           accessibilityLabel="The ChartNexa Academy lounge"
           resizeMode="cover"
-          style={{ width: "100%", aspectRatio: HERO_ASPECT }}
           testID="city-hero-art"
+          style={{
+            position: "absolute",
+            left: -overscan,
+            top: 0,
+            width: w + overscan * 2,
+            height: "100%",
+            transform: [
+              {
+                translateX: drift.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-overscan * 0.8, overscan * 0.8],
+                }),
+              },
+            ],
+          }}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: colors.champagne,
+            opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.09] }),
+          }}
         />
       </View>
       {rows.map((r, i) => (

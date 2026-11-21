@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { Image, View, useWindowDimensions, type ImageSourcePropType } from "react-native";
 import Svg, { Defs, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { colors, market, radii, spacing, status } from "../theme";
 import { Text } from "../ui";
@@ -76,12 +76,15 @@ export function StudioHeader({
   subtitle,
   greeting,
   children,
+  art,
   testID = "studio-header",
 }: {
   title: string;
   subtitle: string;
   greeting?: string | undefined;
   children?: ReactNode;
+  /** Optional picture behind the header, under a scrim that keeps the text readable. */
+  art?: ImageSourcePropType | undefined;
   testID?: string;
 }) {
   const { width, fontScale } = useWindowDimensions();
@@ -110,6 +113,33 @@ export function StudioHeader({
           <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradientId})`} />
         </Svg>
       </View>
+      {art && showMark ? (
+        <View
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
+          testID={`${testID}-mark`}
+          style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          <Image source={art} resizeMode="cover" style={{ width: "100%", height: "100%" }} />
+          <View
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}
+          >
+            <Svg width="100%" height="100%" preserveAspectRatio="none">
+              <Defs>
+                <LinearGradient id={`${gradientId}scrim`} x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0" stopColor={market.navy} stopOpacity={0.94} />
+                  <Stop offset="0.55" stopColor={market.navy} stopOpacity={0.72} />
+                  <Stop offset="1" stopColor={market.navy} stopOpacity={0.28} />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradientId}scrim)`} />
+            </Svg>
+          </View>
+        </View>
+      ) : null}
       <View style={{ gap: spacing.md, padding: spacing.lg }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
           <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
@@ -144,7 +174,7 @@ export function StudioHeader({
             </Text>
             <Text style={{ color: market.onNavyMuted }}>{subtitle}</Text>
           </View>
-          {showMark ? (
+          {showMark && !art ? (
             <View
               accessible={false}
               importantForAccessibility="no-hide-descendants"

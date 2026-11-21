@@ -10,6 +10,7 @@ import { CourseManageCard } from "../../kit/CourseManageCard";
 import { Grid } from "../../kit/Grid";
 import { Reveal } from "../../kit/Reveal";
 import { CourseCardSkeleton, StudioEmpty } from "../../kit/StudioEmpty";
+import { HEADER_ART } from "../../kit/header-art";
 import { StudioHeader } from "../../kit/StudioHeader";
 import { accents, spacing } from "../../theme";
 import { Screen, Text } from "../../ui";
@@ -47,6 +48,7 @@ export function InstructorDashboard({ access }: { access: AccessResponse }) {
       <Reveal index={0}>
         <StudioHeader
           testID="studio-header"
+          art={HEADER_ART.instructor}
           title="Instructor Studio"
           subtitle="Manage your courses and teaching content."
           greeting={greetingLine(me.data?.displayName)}
