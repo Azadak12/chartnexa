@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { View, useWindowDimensions } from "react-native";
 import Svg, { Defs, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
-import { market, radii, spacing, status } from "../theme";
+import { colors, market, radii, spacing, status } from "../theme";
 import { Text } from "../ui";
 import type { ReactNode } from "react";
 
@@ -113,9 +113,19 @@ export function StudioHeader({
       <View style={{ gap: spacing.md, padding: spacing.lg }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
           <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
-            <Text variant="caption" style={{ color: market.blueOnNavy, letterSpacing: 0.8 }}>
-              CHARTNEXA ACADEMY
-            </Text>
+            <View style={{ gap: 2 }}>
+              <Text variant="caption" style={{ color: market.blueOnNavy, letterSpacing: 0.8 }}>
+                CHARTNEXA ACADEMY
+              </Text>
+              <Text
+                variant="caption"
+                accessible={false}
+                style={{ color: colors.champagne, letterSpacing: 1.2 }}
+                testID={`${testID}-tagline`}
+              >
+                PERSONAL TRADING ACADEMY
+              </Text>
+            </View>
             {greeting ? (
               <Text
                 variant="caption"

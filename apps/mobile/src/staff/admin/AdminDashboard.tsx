@@ -97,6 +97,8 @@ export function StatTile({
         gap: spacing.sm,
         padding: spacing.md,
         ...raised,
+        // The accent edge ties each number to its icon; the label still carries the meaning.
+        borderBottomColor: accents[accent].ink,
       }}
       pressedStyle={{ backgroundColor: accents[accent].tint }}
     >
