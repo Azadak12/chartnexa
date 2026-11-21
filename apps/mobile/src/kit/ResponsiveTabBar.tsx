@@ -3,6 +3,7 @@ import type { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { useEffect, useRef } from "react";
 import { Animated, Pressable, View } from "react-native";
+import { tapFeedback } from "../feedback/haptics";
 import { colors, MIN_TOUCH_SIZE, neutrals } from "../theme";
 import { Text, useReducedMotion } from "../ui";
 
@@ -103,7 +104,10 @@ export function ResponsiveTabBar({
                 target: route.key,
                 canPreventDefault: true,
               });
-              if (!focused && !event.defaultPrevented) navigateToTab(route.key);
+              if (!focused && !event.defaultPrevented) {
+                tapFeedback();
+                navigateToTab(route.key);
+              }
             }}
             onLongPress={() => emitter.emit({ type: "tabLongPress", target: route.key })}
             style={{

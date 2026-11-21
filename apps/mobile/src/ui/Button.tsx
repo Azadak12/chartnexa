@@ -1,6 +1,9 @@
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { useRef } from "react";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, View } from "react-native";
+import { primaryFeedback, tapFeedback } from "../feedback/haptics";
 import { colors, MIN_TOUCH_SIZE, neutrals, radii, spacing, status } from "../theme";
 import { Text, type TextTone } from "./Text";
+import { useReducedMotion } from "./use-reduced-motion";
 
 export type ButtonVariant = "primary" | "secondary" | "tertiary";
 
@@ -29,32 +32,56 @@ export function Button({
 }: ButtonProps) {
   const inactive = disabled || loading;
   const tone: TextTone = inactive ? "muted" : variant === "primary" ? "onBlue" : "link";
+  const reduced = useReducedMotion();
+  // Squishes on press and springs back with a small bounce. Still with Reduced Motion.
+  const scale = useRef(new Animated.Value(1)).current;
+  const spring = (to: number, bounce: boolean) => {
+    if (reduced !== false || inactive) return;
+    Animated.spring(scale, {
+      toValue: to,
+      friction: bounce ? 4 : 9,
+      tension: bounce ? 170 : 400,
+      useNativeDriver: true,
+    }).start();
+  };
   return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: inactive, busy: loading }}
-      disabled={inactive}
-      onPress={inactive ? undefined : onPress}
-      style={({ pressed }) => [
-        styles.base,
-        variant === "primary" && styles.primary,
-        variant === "primary" && pressed && styles.primaryPressed,
-        variant === "secondary" && styles.secondary,
-        variant === "tertiary" && styles.tertiary,
-        pressed && variant !== "primary" && styles.softPressed,
-        inactive && styles.inactive,
-      ]}
-    >
-      <View style={styles.row}>
-        {loading ? <ActivityIndicator size="small" color={neutrals.muted} /> : null}
-        <Text variant="button" tone={tone} style={styles.label}>
-          {label}
-        </Text>
-      </View>
-    </Pressable>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        testID={testID}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? label}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: inactive, busy: loading }}
+        disabled={inactive}
+        onPress={
+          inactive
+            ? undefined
+            : () => {
+                if (variant === "primary") primaryFeedback();
+                else tapFeedback();
+                onPress();
+              }
+        }
+        onPressIn={() => spring(0.96, false)}
+        onPressOut={() => spring(1, true)}
+        style={({ pressed }) => [
+          styles.base,
+          variant === "primary" && styles.primary,
+          variant === "primary" && pressed && styles.primaryPressed,
+          variant === "secondary" && styles.secondary,
+          variant === "tertiary" && styles.tertiary,
+          pressed && variant !== "primary" && styles.softPressed,
+          inactive && styles.inactive,
+        ]}
+      >
+        <View style={styles.row}>
+          {loading ? <ActivityIndicator size="small" color={neutrals.muted} /> : null}
+          <Text variant="button" tone={tone} style={styles.label}>
+            {label}
+          </Text>
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from "react";
 import { Animated, Pressable, type StyleProp, type ViewStyle } from "react-native";
+import { tapFeedback } from "../feedback/haptics";
 import { useReducedMotion } from "../ui";
 
 /**
@@ -39,7 +40,10 @@ export function PressableCard({
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      onPress={onPress}
+      onPress={() => {
+        tapFeedback();
+        onPress();
+      }}
       onPressIn={() => to(0.98)}
       onPressOut={() => to(1)}
       testID={testID}

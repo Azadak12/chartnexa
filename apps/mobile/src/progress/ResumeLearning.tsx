@@ -36,8 +36,8 @@ export function ResumeLearning({ journey = false }: { journey?: boolean }) {
     return journey ? null : (
       <View style={styles.empty} testID="learning-discovery">
         <Feather name="compass" size={28} color={colors.blue} accessible={false} />
-        <Text variant="heading">Your next chapter starts here.</Text>
-        <Text tone="muted">Explore a topic, find your course, and learn at your own pace.</Text>
+        <Text variant="heading">Start your next course.</Text>
+        <Text tone="muted">Pick a topic, find a course, and learn at your own speed.</Text>
         <Button label="Explore courses" onPress={() => router.push("/explore")} />
       </View>
     );

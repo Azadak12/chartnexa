@@ -6,6 +6,7 @@ import { Animated, View } from "react-native";
 import type { ProgressResponse } from "@chartnexa/api-contracts";
 import { lessonApi } from "../lessons/lesson-api";
 import { colors, radii, spacing } from "../theme";
+import { successFeedback } from "../feedback/haptics";
 import { Burst } from "../kit/Burst";
 import { Button, Text, useReducedMotion } from "../ui";
 import { shouldRetry } from "../state/query-client";
@@ -36,6 +37,10 @@ export function LessonCompletionPanel({
         useNativeDriver: true,
       }).start();
   }, [reduced, pop]);
+  // One success tap when the lesson is confirmed complete.
+  useEffect(() => {
+    successFeedback();
+  }, []);
   const outline = useQuery({
     queryKey: ["lessons", courseId, true],
     queryFn: () => lessonApi.outline(courseId),
@@ -75,12 +80,12 @@ export function LessonCompletionPanel({
         />
       </Animated.View>
       <Text variant="heading" accessibilityRole="header">
-        {complete ? "Course complete. Well done!" : "One step further."}
+        {complete ? "Course complete. Well done!" : "Nice work!"}
       </Text>
       <Text tone="muted">
         {complete
-          ? "You've completed every lesson. Come back anytime to revisit what you've learned."
-          : "Lesson complete. Keep building on what you've learned."}
+          ? "You finished every lesson. You can come back and read any lesson again."
+          : "You finished this lesson. Keep going!"}
       </Text>
       <ProgressBar completed={progress.completed} total={progress.total} />
       {!complete && next ? (
