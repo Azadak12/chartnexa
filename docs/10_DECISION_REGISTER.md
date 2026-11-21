@@ -307,3 +307,7 @@ The owner asked for a realistic, cinematic Market City presentation across all r
 ## 2026-11-21 — Design System V1 palette adopted
 
 Owner approved "ChartNexa Cinematic Interactive Academy — Design System V1" as the permanent design baseline (`docs/design/design-system-v1.md`). Palette moved to Midnight `#07111F` / Deep Navy `#101D32` / Elevated `#192A42` / action blue `#2878FF` / champagne `#D8AD66` / Ice White `#F5F8FC`, with a lighter `link` blue for small text (action blue is 4.2:1 on Deep Navy). `colors.gold` is now `colors.champagne`. Light appearance, editorial display face, haptics, shared-element transitions and photoreal assets remain to do.
+
+## 2026-11-21 — Home hero uses a crop of the owner's concept render
+
+The Student Home hero is now `apps/mobile/assets/city/academy-hero.webp`, a cropped region of the owner-supplied Personal Trading Academy concept render, with the four destinations as controls beneath it. The picture is illustration only: its wall screens show decorative tickers that are not real prices, and the screen says so. Other roles and screens still lack photoreal art. Clean, text-free renders per screen (spec in `docs/design/market-city-assets.md`) are still wanted to replace this crop. Licence/ownership of the render is the owner's to confirm.

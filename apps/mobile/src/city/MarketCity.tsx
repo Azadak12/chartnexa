@@ -1,13 +1,20 @@
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Animated, Pressable, View } from "react-native";
+import { Animated, Image, Pressable, View, useWindowDimensions } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useLayout } from "../layout/responsive";
 import { motion, useAmbientLoop } from "../motion/motion";
-import { colors, market, radii, spacing } from "../theme";
+import { accents, colors, market, radii, spacing } from "../theme";
 import { Text, useReducedMotion } from "../ui";
-import { CITY_ART_COMPLETE, DESTINATIONS, SCENE_ASPECT, type Destination } from "./city-assets";
+import {
+  CITY_ART_COMPLETE,
+  DESTINATIONS,
+  HERO_ART,
+  HERO_ASPECT,
+  SCENE_ASPECT,
+  type Destination,
+} from "./city-assets";
 
 /** Deterministic lit/unlit pattern, so windows never flicker between renders. */
 const lit = (i: number, j: number) => (i * 7 + j * 13) % 5 !== 0;
@@ -210,6 +217,82 @@ function Hotspot({
   );
 }
 
+const TILE_ACCENT = { learn: "blue", explore: "amber", lab: "emerald", tasks: "sky" } as const;
+
+/** One destination as a control under the hero: icon, name and an arrow. */
+function DestinationTile({ d, onOpen }: { d: Destination; onOpen: () => void }) {
+  const a = accents[TILE_ACCENT[d.key as keyof typeof TILE_ACCENT] ?? "blue"];
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={d.spoken}
+      onPress={onOpen}
+      testID={`city-${d.key}`}
+      style={({ pressed }) => ({
+        flex: 1,
+        minWidth: 0,
+        minHeight: 84,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 4,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: 4,
+        borderRadius: radii.card,
+        borderWidth: 1.5,
+        borderColor: a.ink,
+        backgroundColor: pressed ? colors.surface : a.tint,
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+      })}
+    >
+      <Feather name={d.icon} size={24} color={a.ink} accessible={false} />
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+        <Text variant="caption" accessible={false} style={{ fontWeight: "700", flexShrink: 1 }}>
+          {d.label}
+        </Text>
+        <Feather name="chevron-right" size={12} color={a.ink} accessible={false} />
+      </View>
+    </Pressable>
+  );
+}
+
+/** The photographic entrance: the academy lounge, then the four places to go. */
+function HeroEntrance({ onOpen }: { onOpen: (d: Destination) => void }) {
+  const { fontScale } = useWindowDimensions();
+  // Large system text: two rows of two, so names never break mid-word.
+  const perRow = fontScale >= 1.3 ? 2 : 4;
+  const rows: Destination[][] = [];
+  for (let i = 0; i < DESTINATIONS.length; i += perRow)
+    rows.push(DESTINATIONS.slice(i, i + perRow));
+  return (
+    <View style={{ gap: spacing.md }}>
+      <View
+        style={{
+          borderRadius: radii.card,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderColor: market.grid,
+        }}
+      >
+        <Image
+          source={HERO_ART}
+          accessibilityRole="image"
+          accessibilityLabel="The ChartNexa Academy lounge"
+          resizeMode="cover"
+          style={{ width: "100%", aspectRatio: HERO_ASPECT }}
+          testID="city-hero-art"
+        />
+      </View>
+      {rows.map((r, i) => (
+        <View key={i} style={{ flexDirection: "row", gap: spacing.sm }}>
+          {r.map((d) => (
+            <DestinationTile key={d.key} d={d} onOpen={() => onOpen(d)} />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 /**
  * The Student Home entrance. Every tap area goes to a screen that already exists, and the tab bar
  * remains the reliable way around: this is presentation, never the only route.
@@ -223,6 +306,15 @@ export function MarketCity() {
   const height = width / SCENE_ASPECT;
   const drift = useAmbientLoop();
   const glow = useAmbientLoop(motion.ambient / 2, 0.5);
+  if (HERO_ART)
+    return (
+      <View testID="market-city" style={{ gap: spacing.sm }}>
+        <HeroEntrance onOpen={(d) => router.push(d.route)} />
+        <Text variant="caption" tone="muted" testID="city-art-notice">
+          Illustration only. The screens in the picture do not show real market prices.
+        </Text>
+      </View>
+    );
   return (
     <View testID="market-city" style={{ gap: spacing.sm }}>
       <View

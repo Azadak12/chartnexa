@@ -18,6 +18,16 @@ export const CITY_LAYERS: readonly CityLayerSlot[] = [
   { id: "foreground", source: null },
 ];
 
+/**
+ * The Home hero picture: a cropped region of the approved concept render (lounge, wall sign, bull).
+ * It is illustration, not a live view of anything; its screens show no real prices.
+ */
+// Metro needs a static require() for bundled images.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+export const HERO_ART: ImageSourcePropType = require("../../assets/city/academy-hero.webp");
+/** Width / height of the hero picture. */
+export const HERO_ASPECT = 886 / 274;
+
 /** True once every slot has real artwork. The provisional-art notice disappears then. */
 export const CITY_ART_COMPLETE = CITY_LAYERS.every((l) => l.source !== null);
 

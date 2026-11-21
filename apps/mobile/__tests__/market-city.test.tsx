@@ -30,7 +30,7 @@ describe("MarketCity", () => {
     }
     expect(mockPush).toHaveBeenCalledTimes(DESTINATIONS.length);
   });
-  it("says plainly that the scenery is provisional until real art is delivered", async () => {
+  it("labels the hero as illustration and keeps the layered art flagged incomplete", async () => {
     await render(<MarketCity />);
     expect(CITY_ART_COMPLETE).toBe(false);
     expect(screen.getByTestId("city-art-notice")).toBeTruthy();
