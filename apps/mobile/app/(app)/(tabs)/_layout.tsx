@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Redirect, Tabs, usePathname } from "expo-router";
 import { fetchAccess } from "../../../src/courses/course-api";
 import { ALL_TAB_NAMES, roleOf, tabsFor, type TabSpec } from "../../../src/staff/role-tabs";
+import { TopBar, TopBarPresent } from "../../../src/kit/TopBar";
 import { ResponsiveTabBar, type TabMeta } from "../../../src/kit/ResponsiveTabBar";
 
 /** Titles for hidden tabs, which still need a label if they are ever opened by a link. */
@@ -32,15 +33,17 @@ export default function TabsLayout() {
     }),
   );
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      // Android Back returns to the tab you came from, not always to the first tab.
-      backBehavior="history"
-      // Hidden tabs keep their route (a link or the current screen can still be on it) but have no
-      // item. href: null would drop the screen when the role loads after the first render.
-      tabBar={(props) => <ResponsiveTabBar {...props} meta={meta} />}
-    >
-      {ALL_TAB_NAMES.map((name) => tab(name, spec(name).title))}
-    </Tabs>
+    <TopBarPresent.Provider value>
+      <Tabs
+        screenOptions={{ headerShown: true, header: () => <TopBar /> }}
+        // Android Back returns to the tab you came from, not always to the first tab.
+        backBehavior="history"
+        // Hidden tabs keep their route (a link or the current screen can still be on it) but have no
+        // item. href: null would drop the screen when the role loads after the first render.
+        tabBar={(props) => <ResponsiveTabBar {...props} meta={meta} />}
+      >
+        {ALL_TAB_NAMES.map((name) => tab(name, spec(name).title))}
+      </Tabs>
+    </TopBarPresent.Provider>
   );
 }

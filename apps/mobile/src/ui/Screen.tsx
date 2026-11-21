@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { OfflineBanner } from "../state/OfflineBanner";
 import { useLayout } from "../layout/responsive";
+import { useTopBarPresent } from "../kit/TopBar";
 import { colors, spacing } from "../theme";
 
 export interface ScreenProps {
@@ -33,6 +34,7 @@ export function Screen({
 }: ScreenProps) {
   const [refreshing, setRefreshing] = useState(false);
   const layout = useLayout();
+  const hasTopBar = useTopBarPresent();
   const content = (
     <>
       <OfflineBanner />
@@ -81,7 +83,11 @@ export function Screen({
     body
   );
   return (
-    <SafeAreaView style={styles.root} edges={["top", "left", "right"]} testID="screen">
+    <SafeAreaView
+      style={styles.root}
+      edges={hasTopBar ? ["left", "right"] : ["top", "left", "right"]}
+      testID="screen"
+    >
       {keyboard ? (
         <KeyboardAvoidingView
           style={styles.root}

@@ -58,7 +58,10 @@ describe("profile menu", () => {
   it("groups rows under Account, Learning & Purchases and Security, with no staff tools for a student", async () => {
     await renderRouter(app, { initialUrl: "/profile" });
     expect(await screen.findByTestId("profile-avatar", { hidden: true })).toBeTruthy();
-    expect(screen.getByText("AL", { hidden: true })).toBeTruthy();
+    // Every tab screen has the persistent top bar.
+    expect(screen.getByTestId("top-bar")).toBeTruthy();
+    // The top bar shows the same initials, so more than one match is expected.
+    expect(screen.getAllByText("AL", { hidden: true }).length).toBeGreaterThan(0);
     for (const h of ["Account", "Learning & Purchases", "Security"]) {
       expect(screen.getByText(h)).toBeTruthy();
     }

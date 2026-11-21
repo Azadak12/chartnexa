@@ -70,6 +70,7 @@ export function HomeScreen() {
   return (
     <Screen>
       <AppHeader
+        bar={false}
         greeting={greetingFor(me.data?.displayName)}
         subtitle="Learn how markets work, one lesson at a time."
         unread={unread.data ?? 0}
