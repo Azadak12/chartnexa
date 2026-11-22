@@ -5,6 +5,8 @@ import { DatabaseModule } from "./database/database.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { AssignmentsModule } from "./modules/assignments/index.js";
 import { AnnouncementsModule } from "./modules/announcements/index.js";
+import { TipsModule } from "./modules/tips/index.js";
+import { LeaderboardModule } from "./modules/leaderboard/index.js";
 import { CategoriesModule } from "./modules/categories/index.js";
 import { CoursesModule } from "./modules/courses/index.js";
 import { EntitlementsModule } from "./modules/entitlements/index.js";
@@ -44,6 +46,8 @@ export class AppModule {
         PaymentsModule,
         LiveModule,
         AnnouncementsModule,
+        TipsModule,
+        LeaderboardModule,
         InvitationsModule,
         AssignmentsModule,
       ],

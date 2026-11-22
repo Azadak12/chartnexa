@@ -1,28 +1,93 @@
-# Screen and feature parity inventory (2026-11-21)
+# Progress tracker
 
-Legend: **Dark theme** = new palette via shared tokens (all screens). **Redesigned** = layout/interaction reworked. **Pending** = still the earlier layout in the new palette; not yet redesigned.
+Updated with each OpenSpec change. Three separate measures; none of them is a production-readiness claim.
 
-| Area | Routes / screens | Status |
+- **Feature implementation:** which roadmap changes have code merged.
+- **Verification:** what automated checks and CI prove for them, and what has never been checked (devices, load, restore).
+- **Production readiness:** **not ready.** Phase 9 evidence so far: an internal security review, a load test and a restore drill, all on a development container only. Still missing: an independent security review, device and accessibility QA, load tests on real hosting, production backups, store compliance, and every production provider (`docs/operations/production-dependencies.md`).
+
+## Roadmap changes (docs/09)
+
+Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Built** (merged, awaiting archive), **In progress**, **Not started**, **Blocked** (named external dependency or owner decision).
+
+| Phase | Change | Status | Notes |
+|---|---|---|---|
+| 0 | establish-architecture-baseline | Archived | |
+| 0 | define-payment-strategy | Blocked | Owner decision (ADR-0008, Q02, Q13); gates Phase 5 provider work |
+| 1 | bootstrap-monorepo-ci | Archived | |
+| 1 | api-foundation | Archived | |
+| 1 | mobile-shell-and-tokens | Archived | Also `mobile-auth` archived |
+| 1 | observability-baseline | Archived | CI run 76; Q30, Q31 (tracing SDK, error tracking service) pending |
+| 2 | auth-accounts-sessions | Archived | |
+| 2 | rbac-core-and-audit | Archived | |
+| 2 | instructor-permission-delegation | Archived | Fresh-clone check recorded 2026-11-18 |
+| 2 | staff-mfa | Archived | |
+| 3 | categories-and-course-crud + course-lifecycle | Partly built | `course-catalog-basics` and `course-categories` archived (CI run 77); publication rules pending decision (R14) |
+| 3 | curriculum-crud | Archived | `course-lessons-basic` and `course-modules` archived (CI run 78); lesson types arrive with video |
+| 3 | asset-upload-pipeline | Archived (CI runs 79, 80) | `lesson-resources`: checked uploads, scanning boundary, signed links, app screens; production storage and scanning blocked on Q32, Q33 |
+| 3 | video-processing-integration | Archived, test adapter only (CI run 81) | `lesson-video`: provider boundary, ranged playback, capped watch progress, 90% completion (R36); production provider blocked on Q09 |
+| 3 | entitlements-core | Archived | `admin_grant` source only |
+| 3 | staff-authoring-surface | Partly built | Course, lesson and student screens exist |
+| 4 | catalog-and-search | Archived | Part of `course-catalog-basics` |
+| 4 | course-detail-and-library | Archived | Course page and My Courses |
+| 4 | player-resources-progress | Archived (CI runs 80, 81) | Text reader, progress, files (`lesson-resources`) and video (`lesson-video`) |
+| 4 | continue-learning (student improvement) | Archived (CI run 86) | Home card with the next lesson of the most recently studied course |
+| 5 | payments-core-and-ledger | Archived, test mode only (CI run 82) | `payments-foundation`: orders, events, state machine, reversals, test checkout, purchases screen; real providers blocked on ADR-0008 |
+| 5 | stripe-web-checkout | Blocked | Payment strategy |
+| 5 | store-billing-ios / store-billing-android | Blocked | Payment strategy and store accounts |
+| 5 | reversals-reconciliation | Blocked | Payment strategy and refund policy (N01) |
+| 6 | live-sessions-schedule / join / cancel | Archived, manual-link adapter (CI run 83) | `live-sessions-schedule`: scheduling, join window, cancel with reason, staff and student screens (R38); hosted provider blocked on Q03 |
+| 7 | reviews-submit / reviews-list-edit | Archived | As `course-reviews-basic` |
+| 7 | reviews-moderation | Archived | CI run 75 |
+| 8 | audit-viewer, ops-lists (orders) | Archived (CI run 84) | `ops-audit-and-orders`: audit log and order status screens for Admins and Managers |
+| 8 | announcements | Archived, in-app only (pull request 27) | `announcements`: post, withdraw, feed, unread count (R39); email and push blocked on Q35 |
+| 8 | reports, reports-scoped-access | Not started | Report metrics need owner decisions |
+| Student | tips-and-leaderboard | Built locally, not pushed | `openspec/changes/tips-and-leaderboard`: Tip of the Day (stored tips, staff screen) and an opt-in completed-lessons leaderboard. Migration applied to the local dev database only; production migration needs owner approval (see decision register 2026-11-22) |
+| MVP | mvp-demo (thumbnails, instructor invitations, assignments, demo seed, role dashboard) | Built, in pull request | See `docs/demo/README.md` and `docs/demo/feature-status.md`; no physical device verification yet |
+| 9 | security-review | Internal review done; independent review needed | `docs/security/2026-11-19-security-review.md`: S1 (payment amount) and S2 (headers) fixed, S3 route inventory test added |
+| 9 | load-capacity | Tooling ready; development-container runs only | `docs/operations/load-testing.md`; no capacity claim possible without hosting |
+| 9 | backup-restore-drill | Scripts drilled locally | `docs/operations/backup-and-restore.md`; production backups need hosting |
+| 9 | a11y-device-qa, store-compliance, runbooks-and-staged-release | Not started | Need devices, store accounts and hosting |
+
+## Latest verified test results
+
+| Date | Scope | Result |
 |---|---|---|
-| Student Home | `home` | Redesigned: Market City entrance (provisional art), progress card, categories |
-| Student discovery | `explore`, `course/[id]` | Redesigned: cards, hero, ring (no photoreal covers yet) |
-| Student learning | `courses`, lesson reader, completion | Redesigned: winding path, bite steps, celebration; video lessons sit in a classroom stage (placeholder room, 3 camera views, desk buttons) |
-| Lab | `lab` | Redesigned header ("Market Observatory", simulated-data pill); chart and quiz internals unchanged. Interior artwork pending |
-| Assignments | `assignments`, `assignment/[id]` | List redesigned: mission cards (status rail, labelled pill). Detail and submit screens: dark theme only |
-| Live classes | section in course page, `NextLiveCard` | Redesigned row: date block, live pulse (Reduced-Motion safe). Auditorium artwork pending |
-| Profile/account | `profile/*` (purchases, sessions, two-step, change-password, announcements) | Dark theme only |
-| Checkout | `checkout/[orderId]` | Dark theme only |
-| Auth | sign-in, register, forgot/reset, verify, two-step, recovery codes, invitations | Dark theme only |
-| Instructor | `dashboard`, `staff-courses`, `staff-assignments`, `manage/*` (courses, lessons, assignments, live, students, categories) | Dark theme only. Pending studio redesign |
-| Manager | `dashboard`, `invitations`, reviews, staff-announcements, orders | Dark theme only. Pending operations-center redesign |
-| Admin | `dashboard`, `users`, `more`, permissions, instructors, audit, orders | Dark theme only. Pending command-center redesign |
-| Navigation | tab bar (all roles) | Animated icon; safe-area and 56pt targets kept |
-| Foundation | tokens, `layout/responsive.ts` (gutters, tablet width cap), `motion/motion.ts` (durations, ambient loop that pauses in background and with Reduced Motion) | Done; `Screen` now centres and caps content on tablets |
+| 2026-11-18 | Fresh clone of `main` at `ec6e7a0`: install, lint, format, typecheck, tests, builds, secrets, migration round trip | All pass: 416 API, 420 app, 34 contract |
+| 2026-11-18 | CI on `main`, run 75 (`ec6e7a0`) | Success |
+| 2026-11-18 | Local full checks after `course-categories` | All pass: 449 API, 427 app, 35 contract |
+| 2026-11-18 | CI on `main` runs 77, 78, 79 (categories, modules, files server) | Success |
+| 2026-11-19 | Local full checks after `lesson-resources` | All pass: 484 API, 446 app, 37 contract; audit gate passes (2 moderate advisories in Expo tooling) |
+| 2026-11-19 | CI on `main` runs 80 to 86 (files app, video, payments, live classes, operations screens, continue learning) | Success |
+| 2026-11-19 | Local full checks after `live-sessions-schedule` | All pass: 540 API, 486 app, 40 contract; lint, format, builds, secrets, migration round trip (typecheck re-run after fixing two test option types) |
+| 2026-11-19 | Checks after `ops-audit-and-orders` (app only): lint, format, typecheck, app tests, contract tests, app build, secrets | All pass: 493 app, 41 contract |
+| 2026-11-19 | Local full checks after `continue-learning` | All pass: 545 API, 495 app, 42 contract; lint, format, typecheck, builds, secrets, migration round trip |
+| 2026-11-19 | Pull requests 26 and 27 (continue-learning archive, announcements): CI checks api, mobile, check, audit | All success; merged |
+| 2026-11-19 | Local full checks after `security-review-fixes` | All pass: 559 API, 501 app, 43 contract; lint (after adding Node globals for `tools/`), format, typecheck, builds, secrets, migration round trip; `pnpm audit:deps` passes (2 moderate advisories in Expo tooling) |
+| 2026-11-20 | Local full checks after `mvp-demo` | All pass: 68 contract-package, 604 API, 544 app and 45 real-API contract tests; lint, format, typecheck, builds, secrets, migration round trip (24 migrations). Demo seed run twice against a scratch database (idempotent) and the API driven over HTTP as every role. No physical device. |
+| 2026-11-19 | Load runner on the development container (20 and 100 users, 30 s each) | 0 % errors; about 1,050 requests/s at saturation; sign-in p95 3.5 s with 100 at once (see load-testing.md) |
+| 2026-11-19 | Restore drill on local PostgreSQL | Pass: 18/18 migrations, row counts matched; tampered and unverified dumps refused |
 
-Shared across roles: `raised` card surface (`theme/surfaces.ts`) now used by `Card`, admin `StatTile`, `DashboardMetricCard`, mission and live cards; `StatusPill` is the single status shape; `StudioHeader` gradient fixed for the dark palette. Staff dashboards already used `StudioHeader`/`StatTile`, so they inherit this; their list/form screens (manage/*, staff assignments, reviews, users) were not individually reworked.
+| 2026-11-22 | Local checks after `tips-and-leaderboard` | Pass: 721 API (22 new), 922 app (19 new), 68 contract-package; eslint clean; migration round trip (up, down, up). Not run: real-API contract tests, device build, visual check |
 
-Staff pass (2026-11-21): every staff screen with a fixed title now opens with `StaffPageHeader` (area label, icon, header title): course/lesson/assignment/live forms and lists, students, grant access, categories, reviews, announcements, invitations, permissions directory, instructor search, orders, audit log. Staff list cards use the shared `raised` surface. Not changed: screens whose title is the record name (instructor/permission person, assignment manage), and the form field layouts themselves.
+## Never verified
 
-Behaviour, API calls, roles and routes were not changed.
+- Any real iOS or Android device, screen readers, large text on a device.
+- Load or capacity; no number of supported users can be stated.
+- Backup and restore.
+- An installable build (needs a working Expo access token; the one saved was rejected).
 
-Audit note (2026-11-22): the "Dark theme only" and "Pending" staff rows above are stale for headers: every staff screen already opens with a shared header (`StaffPageHeader` or `StudioHeader`), checked by search. Added since: a real-data "Courses by status" split on the Manager and Admin dashboards, and an Orders redesign (status rail, "Action needed" flag, status split). Splits draw only when the whole list is loaded. Still plain list layouts: audit log, students, permissions, reviews.
+## Outstanding owner decisions
+
+See also `docs/operations/production-dependencies.md`.
+
+
+Payment strategy (ADR-0008, Q02, Q13), video provider (Q09), live provider and live rules (Q03, R38), announcement channels and rules (Q35, R39), UX reference use (Q20 to Q22), error tracking and tracing (Q30, Q31), file storage and CDN (Q32), malware scanning (Q33), downloadable resources and Word preview (Q04), deployment arrangement for staff (mobile, web or both).
+
+## Current risks
+
+- Simultaneous sign-ins are CPU bound (argon2): 100 at once took about 3.5 s each on the development container. Size hosting or queue sign-ins before launch.
+
+- Payments are the largest unbuilt area and are blocked on policy.
+- Media delivery depends on providers not yet chosen; storage and scanning need accounts.
+- No load test: database locks on course rows (reviews, progress) are untested at scale.

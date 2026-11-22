@@ -84,6 +84,13 @@ export function dashboardGroups(a: AccessResponse): DashboardGroup[] {
           show: canPublishAnnouncements(a),
         },
         {
+          label: "Tips of the day",
+          hint: "Write the daily learning tips",
+          icon: "sun",
+          route: "/profile/staff-tips",
+          show: canPublishAnnouncements(a),
+        },
+        {
           label: "Review moderation",
           hint: "Reports and appeals",
           icon: "shield",

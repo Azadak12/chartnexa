@@ -33,6 +33,7 @@ const ROUTES = [
   "profile/instructors",
   "profile/permissions",
   "profile/staff-announcements",
+  "profile/staff-tips",
   "profile/reviews",
   "profile/orders",
   "profile/audit",
@@ -285,6 +286,7 @@ describe("quick actions and management entries", () => {
     ["Instructors", "/profile/invitations"],
     ["Permissions", "/profile/permissions"],
     ["Announcements", "/profile/staff-announcements"],
+    ["Tips of the day", "/profile/staff-tips"],
     ["Review moderation", "/profile/reviews"],
     ["Orders", "/profile/orders"],
     ["Audit log", "/profile/audit"],
@@ -305,7 +307,8 @@ describe("quick actions and management entries", () => {
       (n) =>
         typeof n.props["testID"] === "string" && (n.props["testID"] as string).startsWith("tile-"),
     );
-    expect(cards.length).toBe(9);
+    // Nine management entries plus "Tips of the day".
+    expect(cards.length).toBe(10);
     for (const n of all(
       (n) =>
         typeof n.props["testID"] === "string" && (n.props["testID"] as string).startsWith("tile-"),

@@ -17,6 +17,7 @@ import { CourseStrip } from "../progress/CourseStrip";
 import { CourseHero } from "../progress/CourseHero";
 import { useScreenMemoryState } from "../navigation/screen-memory";
 import { Reveal } from "../kit/Reveal";
+import { TipOfTheDayCard } from "../tips/TipOfTheDayCard";
 import { PressableCard } from "../kit/PressableCard";
 import { colors, neutrals, radii, spacing } from "../theme";
 import { Screen, Text } from "../ui";
@@ -132,6 +133,7 @@ export function HomeScreen() {
         />
       ) : null}
       <NextLiveCard />
+      <TipOfTheDayCard />
       <PressableCard
         testID="home-lab"
         accessibilityLabel="Learning Lab: practice reading charts"
@@ -164,6 +166,42 @@ export function HomeScreen() {
           <Text variant="bodyStrong">Learning Lab</Text>
           <Text variant="caption" tone="muted">
             Practice reading charts. Simulated, not live prices.
+          </Text>
+        </View>
+        <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />
+      </PressableCard>
+      <PressableCard
+        testID="home-leaderboard"
+        accessibilityLabel="Learners Leaderboard: see who is completing the most lessons"
+        onPress={() => router.push("/leaderboard")}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.md,
+          padding: spacing.md,
+          borderRadius: radii.card,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: neutrals.divider,
+          borderBottomWidth: 1,
+        }}
+      >
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            backgroundColor: colors.champagne,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Feather name="award" size={22} color={colors.onBlue} accessible={false} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text variant="bodyStrong">Learners Leaderboard</Text>
+          <Text variant="caption" tone="muted">
+            Ranked by lessons completed. Join if you like.
           </Text>
         </View>
         <Feather name="chevron-right" size={22} color={colors.blue} accessible={false} />

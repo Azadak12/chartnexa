@@ -1,0 +1,8 @@
+- [x] Migration, down script, Prisma schema, migration round trip
+- [x] Contracts: tips, leaderboard
+- [x] API: tips module (me and staff), leaderboard module, integration tests (permissions, privacy, ranking, ties, filters)
+- [x] Mobile: api clients, Tip of the Day card, Hall of Achievement screen, opt-in, staff tip management, navigation
+- [x] Mobile tests; typecheck, lint, format, full suites
+- [x] Docs: decision register, progress, screen inventory
+- [ ] Owner approval to run the migration on the hosted database, then deploy
+- [ ] Visual check on a device or simulator

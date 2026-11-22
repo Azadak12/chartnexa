@@ -42,6 +42,7 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 8 | audit-viewer, ops-lists (orders) | Archived (CI run 84) | `ops-audit-and-orders`: audit log and order status screens for Admins and Managers |
 | 8 | announcements | Archived, in-app only (pull request 27) | `announcements`: post, withdraw, feed, unread count (R39); email and push blocked on Q35 |
 | 8 | reports, reports-scoped-access | Not started | Report metrics need owner decisions |
+| Student | tips-and-leaderboard | Built locally, not pushed | `openspec/changes/tips-and-leaderboard`: Tip of the Day (stored tips, staff screen) and an opt-in completed-lessons leaderboard. Migration applied to the local dev database only; production migration needs owner approval (see decision register 2026-11-22) |
 | MVP | mvp-demo (thumbnails, instructor invitations, assignments, demo seed, role dashboard) | Built, in pull request | See `docs/demo/README.md` and `docs/demo/feature-status.md`; no physical device verification yet |
 | 9 | security-review | Internal review done; independent review needed | `docs/security/2026-11-19-security-review.md`: S1 (payment amount) and S2 (headers) fixed, S3 route inventory test added |
 | 9 | load-capacity | Tooling ready; development-container runs only | `docs/operations/load-testing.md`; no capacity claim possible without hosting |
@@ -66,6 +67,8 @@ Status values: **Archived** (built, verified, CI green, OpenSpec archived), **Bu
 | 2026-11-20 | Local full checks after `mvp-demo` | All pass: 68 contract-package, 604 API, 544 app and 45 real-API contract tests; lint, format, typecheck, builds, secrets, migration round trip (24 migrations). Demo seed run twice against a scratch database (idempotent) and the API driven over HTTP as every role. No physical device. |
 | 2026-11-19 | Load runner on the development container (20 and 100 users, 30 s each) | 0 % errors; about 1,050 requests/s at saturation; sign-in p95 3.5 s with 100 at once (see load-testing.md) |
 | 2026-11-19 | Restore drill on local PostgreSQL | Pass: 18/18 migrations, row counts matched; tampered and unverified dumps refused |
+
+| 2026-11-22 | Local checks after `tips-and-leaderboard` | Pass: 721 API (22 new), 922 app (19 new), 68 contract-package; eslint clean; migration round trip (up, down, up). Not run: real-API contract tests, device build, visual check |
 
 ## Never verified
 
